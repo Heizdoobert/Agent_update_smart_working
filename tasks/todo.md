@@ -56,14 +56,14 @@
 **Description:** Triển khai hoàn chỉnh bộ nhớ 3 tầng: Episodic Memory (lưu lịch sử hành động & công thức sửa lỗi), Semantic Memory (SQLite FTS5 + fallback pure-Python BM25 cho môi trường thiếu FTS5), và Working Scratchpad (quản lý ngữ cảnh tạm thời trong session).
 
 **Acceptance criteria:**
-- [ ] `EpisodicMemory` ghi nhận và truy xuất các execution traces, recovery recipes theo thẻ `task_id` / `category`.
-- [ ] `SemanticMemory` đánh chỉ mục văn bản, tìm kiếm FTS5 + BM25 ranking với giới hạn tải <3KB context.
-- [ ] Khi FTS5 không khả dụng, hệ thống tự động chuyển sang fallback In-Memory BM25 mà không ném ngoại lệ.
-- [ ] `WorkingScratchpad` hỗ trợ context manager cho session cô lập.
+- [x] `EpisodicMemory` ghi nhận và truy xuất các execution traces, recovery recipes theo thẻ `task_id` / `category`.
+- [x] `SemanticMemory` đánh chỉ mục văn bản, tìm kiếm FTS5 + BM25 ranking với giới hạn tải <3KB context.
+- [x] Khi FTS5 không khả dụng, hệ thống tự động chuyển sang fallback In-Memory BM25 mà không ném ngoại lệ.
+- [x] `WorkingScratchpad` hỗ trợ context manager cho session cô lập.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_memory.py`
-- [ ] Fallback check: Chạy test giả lập SQLite không có module FTS5 và xác nhận semantic search vẫn trả về kết quả chính xác.
+- [x] Tests pass: `pytest tests/test_memory.py`
+- [x] Fallback check: Chạy test giả lập SQLite không có module FTS5 và xác nhận semantic search vẫn trả về kết quả chính xác.
 
 **Dependencies:** Task 1, Task 2
 
@@ -79,9 +79,9 @@
 ---
 
 ## Checkpoint: Foundation & Memory Layer
-- [ ] Tất cả unit test cho Contracts, Truncator, Storage và 3-Tier Memory chạy qua (`pytest tests/test_contracts.py tests/test_storage.py tests/test_memory.py`).
-- [ ] Concurrency an toàn dưới nhiều thread/process ghi đồng thời.
-- [ ] Context payload được kiểm soát chặt chẽ dưới 3KB mà không rách ký tự.
+- [x] Tất cả unit test cho Contracts, Truncator, Storage và 3-Tier Memory chạy qua (`pytest tests/test_contracts.py tests/test_storage.py tests/test_memory.py`).
+- [x] Concurrency an toàn dưới nhiều thread/process ghi đồng thời.
+- [x] Context payload được kiểm soát chặt chẽ dưới 3KB mà không rách ký tự.
 
 ---
 
