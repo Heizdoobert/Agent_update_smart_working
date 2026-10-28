@@ -202,13 +202,13 @@
 **Description:** Xây dựng `SkillRegistry` tự động phát hiện, tải và quản lý các kỹ năng từ file markdown (`SKILL.md`), có cơ chế whitelist thư mục, kiểm tra schema frontmatter và trích xuất ngữ cảnh tinh gọn <3KB.
 
 **Acceptance criteria:**
-- [ ] Quét và nạp các dynamic skills từ thư mục cấu hình.
-- [ ] Kiểm tra tính toàn vẹn và bảo mật (whitelist thư mục, validate schema YAML frontmatter).
-- [ ] Trích xuất context tiêm vào prompt với payload được kiểm soát chặt chẽ <3KB.
+- [x] Quét và nạp các dynamic skills từ thư mục cấu hình.
+- [x] Kiểm tra tính toàn vẹn và bảo mật (whitelist thư mục, validate schema YAML frontmatter).
+- [x] Trích xuất context tiêm vào prompt với payload được kiểm soát chặt chẽ <3KB.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_skills.py`
-- [ ] Security check: Thử nạp skill từ đường dẫn không hợp lệ hoặc frontmatter sai cú pháp, đảm bảo bị từ chối an toàn.
+- [x] Tests pass: `pytest tests/test_skills.py`
+- [x] Security check: Thử nạp skill từ đường dẫn không hợp lệ hoặc frontmatter sai cú pháp, đảm bảo bị từ chối an toàn.
 
 **Dependencies:** Task 1
 
