@@ -255,13 +255,13 @@
 **Description:** Xây dựng giao diện dòng lệnh hợp nhất `agent-system` với các lệnh con: `plan`, `reflect`, `critic`, `memory`, `skill`, `distill`, `session`. Hỗ trợ pipeline UNIX (`stdin`/`stdout`) và tham số `--session <id>`.
 
 **Acceptance criteria:**
-- [ ] CLI hỗ trợ các subcommand: `plan`, `reflect`, `critic`, `memory`, `skill`, `distill`, `session`.
-- [ ] Hỗ trợ đọc input từ `stdin` và xuất JSON ra `stdout` để ghép pipeline bash (e.g. `cat input.json | agent-system critic`).
-- [ ] Hỗ trợ cờ `--session` để duy trì trạng thái qua nhiều câu lệnh CLI liên tiếp.
+- [x] CLI hỗ trợ các subcommand: `plan`, `reflect`, `critic`, `memory`, `skill`, `distill`, `session`.
+- [x] Hỗ trợ đọc input từ `stdin` và xuất JSON ra `stdout` để ghép pipeline bash (e.g. `cat input.json | agent-system critic`).
+- [x] Hỗ trợ cờ `--session` để duy trì trạng thái qua nhiều câu lệnh CLI liên tiếp.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_cli.py`
-- [ ] CLI manual verification: Chạy thử `agent-system --help` và các subcommand cơ bản trên terminal.
+- [x] Tests pass: `pytest tests/test_cli.py`
+- [x] CLI manual verification: Chạy thử `agent-system --help` và các subcommand cơ bản trên terminal.
 
 **Dependencies:** Tasks 1-9
 
