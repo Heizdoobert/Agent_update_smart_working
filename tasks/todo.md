@@ -90,13 +90,13 @@
 **Description:** Xây dựng cấu trúc đồ thị tư duy `ThoughtGraph` cho Tree/Graph of Thoughts (ToT/GoT) hỗ trợ đa nhánh, phát hiện và ngăn chặn vòng lặp vô tận (cycle detection), cùng các thao tác ghép nhánh/tỉa nhánh.
 
 **Acceptance criteria:**
-- [ ] `ThoughtGraph` quản lý các `ThoughtNode`, biểu diễn quan hệ cha-con và đa cha (multi-parent fusion).
-- [ ] Tự động phát hiện chu trình (cycle detection) và ném lỗi hoặc phạt điểm khi xuất hiện cạnh quay vòng $A \to B \to A$.
-- [ ] Hỗ trợ serialize/deserialize đồ thị ra JSON chuẩn.
+- [x] `ThoughtGraph` quản lý các `ThoughtNode`, biểu diễn quan hệ cha-con và đa cha (multi-parent fusion).
+- [x] Tự động phát hiện chu trình (cycle detection) và ném lỗi hoặc phạt điểm khi xuất hiện cạnh quay vòng $A \to B \to A$.
+- [x] Hỗ trợ serialize/deserialize đồ thị ra JSON chuẩn.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_thought_graph.py`
-- [ ] Cycle check: Kiểm tra đồ thị có vòng lặp bị chặn ngay lập tức.
+- [x] Tests pass: `pytest tests/test_thought_graph.py`
+- [x] Cycle check: Kiểm tra đồ thị có vòng lặp bị chặn ngay lập tức.
 
 **Dependencies:** Task 1
 
