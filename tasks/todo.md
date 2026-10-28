@@ -5,14 +5,14 @@
 **Description:** Thiết lập cấu trúc thư mục dự án chuẩn `agent_system`, file `pyproject.toml`, các dataclass cốt lõi (`ThoughtNode`, `Plan`, `ActionStep`, `CriticReport`, `DiagnosticItem`, `TraceRecord`) và module `StructuralTruncator` (cắt tỉa payload an toàn UTF-8 & JSON dưới giới hạn 3KB).
 
 **Acceptance criteria:**
-- [ ] Cấu trúc package `agent_system` và `tests/` được khởi tạo đúng chuẩn Python module.
-- [ ] Các hợp đồng kiểu dữ liệu (contracts) được định nghĩa đầy đủ với Python `dataclasses` và `typing`.
-- [ ] `StructuralTruncator` cắt tỉa chuỗi text, JSON, và traceback không làm rách byte UTF-8 và không làm vỡ cấu trúc JSON cú pháp.
+- [x] Cấu trúc package `agent_system` và `tests/` được khởi tạo đúng chuẩn Python module.
+- [x] Các hợp đồng kiểu dữ liệu (contracts) được định nghĩa đầy đủ với Python `dataclasses` và `typing`.
+- [x] `StructuralTruncator` cắt tỉa chuỗi text, JSON, và traceback không làm rách byte UTF-8 và không làm vỡ cấu trúc JSON cú pháp.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_contracts.py`
-- [ ] Build succeeds: `python3 -m py_compile agent_system/core/contracts.py agent_system/core/truncator.py`
-- [ ] Manual check: Truncate chuỗi UTF-8 tiếng Việt và JSON object vượt quá 3KB, kiểm tra parse lại JSON thành công.
+- [x] Tests pass: `pytest tests/test_contracts.py`
+- [x] Build succeeds: `python3 -m py_compile agent_system/core/contracts.py agent_system/core/truncator.py`
+- [x] Manual check: Truncate chuỗi UTF-8 tiếng Việt và JSON object vượt quá 3KB, kiểm tra parse lại JSON thành công.
 
 **Dependencies:** None
 

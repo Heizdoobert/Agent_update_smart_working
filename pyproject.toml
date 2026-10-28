@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-system"
+version = "0.1.0"
+description = "Domain-Agnostic Cognitive Agent Engine with ToT/MCTS Reasoning, Reflection, 3-Tier Memory, and Skill Management"
+authors = [{ name = "Agent System Core Team" }]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+agent-system = "agent_system.cli.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
