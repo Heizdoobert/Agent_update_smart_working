@@ -147,13 +147,13 @@
 **Description:** Xây dựng hệ thống thẩm định chuẩn `CriticProtocol` độc lập ngôn ngữ, cơ chế tính điểm (0-100), xuất `CriticReport` cấu trúc chi tiết, và hiện thực hóa adapter `PythonAstCritic` để kiểm tra tĩnh mã Python.
 
 **Acceptance criteria:**
-- [ ] `CriticProtocol` định nghĩa phương thức `validate(artifact, context) -> CriticReport`.
-- [ ] `CriticReport` trả về trạng thái `PASS` / `REJECT`, điểm số (0-100), và danh sách `DiagnosticItem` có mã lỗi, dòng, và đề xuất sửa.
-- [ ] `PythonAstCritic` kiểm tra các tiêu chuẩn tĩnh Python (cấm hardcode, kiểm tra import, contract invariants) mà không gây crash trên artifact không phải Python.
+- [x] `CriticProtocol` định nghĩa phương thức `validate(artifact, context) -> CriticReport`.
+- [x] `CriticReport` trả về trạng thái `PASS` / `REJECT`, điểm số (0-100), và danh sách `DiagnosticItem` có mã lỗi, dòng, và đề xuất sửa.
+- [x] `PythonAstCritic` kiểm tra các tiêu chuẩn tĩnh Python (cấm hardcode, kiểm tra import, contract invariants) mà không gây crash trên artifact không phải Python.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_critic.py`
-- [ ] Robustness check: Đưa chuỗi text, JSON hoặc YAML vào `PythonAstCritic` và kiểm tra xử lý graceful thay vì `SyntaxError`.
+- [x] Tests pass: `pytest tests/test_critic.py`
+- [x] Robustness check: Đưa chuỗi text, JSON hoặc YAML vào `PythonAstCritic` và kiểm tra xử lý graceful thay vì `SyntaxError`.
 
 **Dependencies:** Task 1
 
