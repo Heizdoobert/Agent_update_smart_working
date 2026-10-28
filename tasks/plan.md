@@ -14,51 +14,51 @@ Xây dựng **Agent Cognitive Framework** độc lập, domain-agnostic trong `A
 ## Task List
 
 ### Phase 1: Foundations & Core Contracts
-- [ ] Task 1: Project Scaffolding, Core Contracts & Structural Truncator
-- [ ] Task 2: Session Manager & Concurrency-Safe SQLite Store
-- [ ] Task 3: 3-Tier Memory System (Episodic, Semantic FTS5 + BM25 Fallback, Scratchpad)
+- [x] Task 1: Project Scaffolding, Core Contracts & Structural Truncator
+- [x] Task 2: Session Manager & Concurrency-Safe SQLite Store
+- [x] Task 3: 3-Tier Memory System (Episodic, Semantic FTS5 + BM25 Fallback, Scratchpad)
 
 ### Checkpoint: Foundation & Memory Layer
-- [ ] Core data contracts instantiate and validate cleanly
-- [ ] SQLite runs concurrently with WAL mode under stress tests
-- [ ] FTS5 queries and pure-Python BM25 fallback return identical ranked results
-- [ ] StructuralTruncator truncates JSON/text without UTF-8 or syntax corruption
+- [x] Core data contracts instantiate and validate cleanly
+- [x] SQLite runs concurrently with WAL mode under stress tests
+- [x] FTS5 queries and pure-Python BM25 fallback return identical ranked results
+- [x] StructuralTruncator truncates JSON/text without UTF-8 or syntax corruption
 
 ### Phase 2: Planning & Reasoning Engines
-- [ ] Task 4: Directed Acyclic Thought Graph (DAG) & Cycle Detection
-- [ ] Task 5: Deterministic $A^*$ Planner & Stochastic MCTS Planner
+- [x] Task 4: Directed Acyclic Thought Graph (DAG) & Cycle Detection
+- [x] Task 5: Deterministic $A^*$ Planner & Stochastic MCTS Planner
 
 ### Checkpoint: Reasoning & Planning Layer
-- [ ] ThoughtGraph detects and rejects cyclical thought paths
-- [ ] $A^*$ finds provably shortest path in deterministic graph
-- [ ] MCTS rollout produces optimal path under stochastic simulation
+- [x] ThoughtGraph detects and rejects cyclical thought paths
+- [x] $A^*$ finds provably shortest path in deterministic graph
+- [x] MCTS rollout produces optimal path under stochastic simulation
 
 ### Phase 3: Self-Reflection & Multi-Stage Critic
-- [ ] Task 6: Abstract Critic Protocol, Report Schema & PythonAstCritic Adapter
-- [ ] Task 7: In-Memory Self-Reflection Engine with Bounded Fix Loops
+- [x] Task 6: Abstract Critic Protocol, Report Schema & PythonAstCritic Adapter
+- [x] Task 7: In-Memory Self-Reflection Engine with Bounded Fix Loops
 
 ### Checkpoint: Reflection & Verification Layer
-- [ ] Critic evaluates artifacts and outputs structured diagnostic reports
-- [ ] PythonAstCritic detects AST violations without crashing on non-Python inputs
-- [ ] Self-reflection loop repairs violations within bounded $N \le 3$ iterations
+- [x] Critic evaluates artifacts and outputs structured diagnostic reports
+- [x] PythonAstCritic detects AST violations without crashing on non-Python inputs
+- [x] Self-reflection loop repairs violations within bounded $N \le 3$ iterations
 
 ### Phase 4: Dynamic Skills & Batch Prompt Distillation
-- [ ] Task 8: Dynamic Skill Registry with Safe Schema Validation & Whitelisting
-- [ ] Task 9: Batch Prompt Distillation Engine (Teacher-Student Optimizer)
+- [x] Task 8: Dynamic Skill Registry with Safe Schema Validation & Whitelisting
+- [x] Task 9: Batch Prompt Distillation Engine (Teacher-Student Optimizer)
 
 ### Checkpoint: Skills & Optimization Layer
-- [ ] SkillRegistry loads, validates, and injects skills <3KB safely
-- [ ] Malicious or unwhitelisted skill files are rejected with clear errors
-- [ ] Distiller evaluates prompt variants and produces compressed student prompt
+- [x] SkillRegistry loads, validates, and injects skills <3KB safely
+- [x] Malicious or unwhitelisted skill files are rejected with clear errors
+- [x] Distiller evaluates prompt variants and produces compressed student prompt
 
 ### Phase 5: CLI Suite, Integration & Verification
-- [ ] Task 10: Unified CLI Interface (`agent-system`) with UNIX Pipes & Session Support
-- [ ] Task 11: End-to-End Integration Tests, Benchmarks & Comprehensive Documentation
+- [x] Task 10: Unified CLI Interface (`agent-system`) with UNIX Pipes & Session Support
+- [x] Task 11: End-to-End Integration Tests, Benchmarks & Comprehensive Documentation
 
 ### Checkpoint: Complete System Production Ready
-- [ ] All CLI commands work via terminal and UNIX pipe redirection
-- [ ] 100% unit and integration tests pass with `pytest`
-- [ ] Documentation and quickstart examples verified end-to-end
+- [x] All CLI commands work via terminal and UNIX pipe redirection
+- [x] 100% unit and integration tests pass with `pytest`
+- [x] Documentation and quickstart examples verified end-to-end
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |

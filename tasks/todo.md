@@ -279,13 +279,13 @@
 **Description:** Viết kịch bản kiểm thử tích hợp toàn diện (E2E Integration Tests), đo lường benchmark hiệu năng (độ trễ và bộ nhớ), và hoàn thiện tài liệu hướng dẫn sử dụng (`README.md`, `CLAUDE.md`, tài liệu kiến trúc).
 
 **Acceptance criteria:**
-- [ ] Toàn bộ chu trình từ Planning -> Reflection -> Critic -> Memory -> Storage chạy mượt mà trong bài test E2E.
-- [ ] Đo lường độ trễ: Chu kỳ planning và critic nội bộ hoàn thành < 100ms.
-- [ ] File `README.md` và `CLAUDE.md` hướng dẫn đầy đủ cách cài đặt, sử dụng Python SDK và CLI commands.
+- [x] Toàn bộ chu trình từ Planning -> Reflection -> Critic -> Memory -> Storage chạy mượt mà trong bài test E2E.
+- [x] Đo lường độ trễ: Chu kỳ planning và critic nội bộ hoàn thành < 100ms.
+- [x] File `README.md` và `CLAUDE.md` hướng dẫn đầy đủ cách cài đặt, sử dụng Python SDK và CLI commands.
 
 **Verification:**
-- [ ] Full suite pass: `pytest tests/` (100% pass)
-- [ ] CLI check: `agent-system --version` và các luồng mẫu thực thi không lỗi.
+- [x] Full suite pass: `pytest tests/` (100% pass)
+- [x] CLI check: `agent-system --version` và các luồng mẫu thực thi không lỗi.
 
 **Dependencies:** Tasks 1-10
 
@@ -299,6 +299,6 @@
 ---
 
 ## Final Checkpoint: Complete System Production Ready
-- [ ] 100% test cases pass trên toàn bộ test suite.
-- [ ] Hệ thống hoạt động độc lập hoàn toàn, không có dependency nào của game Knit hay Airtest.
-- [ ] Sẵn sàng để các AI Agent khác gọi qua Python SDK hoặc CLI.
+- [x] 100% test cases pass trên toàn bộ test suite.
+- [x] Hệ thống hoạt động độc lập hoàn toàn, không có dependency nào của game Knit hay Airtest.
+- [x] Sẵn sàng để các AI Agent khác gọi qua Python SDK hoặc CLI.

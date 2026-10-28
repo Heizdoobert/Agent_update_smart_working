@@ -120,16 +120,23 @@ class ThoughtGraph:
                 to_remove.add(curr)
                 stack.extend(self._adj.get(curr, set()) - to_remove)
 
+        # Disconnect external edges
         for nid in to_remove:
-            # Clean up parent references
             for pid in self._rev_adj.get(nid, set()):
-                self._adj[pid].discard(nid)
-                if nid in self.nodes[pid].children_ids:
-                    self.nodes[pid].children_ids.remove(nid)
-            # Remove node
-            del self.nodes[nid]
-            del self._adj[nid]
-            del self._rev_adj[nid]
+                if pid not in to_remove and pid in self._adj:
+                    self._adj[pid].discard(nid)
+                    if nid in self.nodes[pid].children_ids:
+                        self.nodes[pid].children_ids.remove(nid)
+            for cid in self._adj.get(nid, set()):
+                if cid not in to_remove and cid in self._rev_adj:
+                    self._rev_adj[cid].discard(nid)
+                    if nid in self.nodes[cid].parent_ids:
+                        self.nodes[cid].parent_ids.remove(nid)
+
+        for nid in to_remove:
+            self.nodes.pop(nid, None)
+            self._adj.pop(nid, None)
+            self._rev_adj.pop(nid, None)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize graph to dictionary."""
