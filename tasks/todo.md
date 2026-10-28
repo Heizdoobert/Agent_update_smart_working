@@ -172,14 +172,14 @@
 **Description:** Xây dựng vòng lặp tự phản biện và vá lỗi trong bộ nhớ (`SelfReflector`). Đánh giá bản nháp qua Critic, tự động áp dụng các công thức sửa lỗi tất định (Fix Recipes), đảm bảo giới hạn vòng lặp $N \le 3$ và kiểm tra bảo toàn bất biến (invariant checking).
 
 **Acceptance criteria:**
-- [ ] `SelfReflector` chạy vòng lặp phản tỉnh: Generate -> Critic -> Reflect -> Patch -> Re-evaluate.
-- [ ] Tự động dừng sau tối đa 3 vòng lặp ($N \le 3$) để tránh lặp vô tận.
-- [ ] Phát hiện hiện tượng dao động (oscillation detection) khi sửa lỗi này sinh lỗi kia.
-- [ ] Trả về artifact đã sửa cùng lịch sử phản tỉnh chi tiết.
+- [x] `SelfReflector` chạy vòng lặp phản tỉnh: Generate -> Critic -> Reflect -> Patch -> Re-evaluate.
+- [x] Tự động dừng sau tối đa 3 vòng lặp ($N \le 3$) để tránh lặp vô tận.
+- [x] Phát hiện hiện tượng dao động (oscillation detection) khi sửa lỗi này sinh lỗi kia.
+- [x] Trả về artifact đã sửa cùng lịch sử phản tỉnh chi tiết.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_reflection.py`
-- [ ] Oscillation check: Kiểm tra cơ chế tự ngắt khi gặp luật xung đột nhau.
+- [x] Tests pass: `pytest tests/test_reflection.py`
+- [x] Oscillation check: Kiểm tra cơ chế tự ngắt khi gặp luật xung đột nhau.
 
 **Dependencies:** Task 6
 
@@ -192,8 +192,8 @@
 ---
 
 ## Checkpoint: Reflection & Verification Layer
-- [ ] Critic tổng quát hoạt động ổn định trên nhiều loại artifact.
-- [ ] Vòng lặp phản tỉnh tự động sửa được các lỗi cơ bản và dừng an toàn trong tối đa 3 chu kỳ.
+- [x] Critic tổng quát hoạt động ổn định trên nhiều loại artifact.
+- [x] Vòng lặp phản tỉnh tự động sửa được các lỗi cơ bản và dừng an toàn trong tối đa 3 chu kỳ.
 
 ---
 
