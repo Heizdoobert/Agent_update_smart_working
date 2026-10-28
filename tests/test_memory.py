@@ -114,3 +114,67 @@ def test_working_scratchpad():
     # Clear session
     pad.clear("task-A")
     assert pad.get("status", session_id="task-A") is None
+
+
+def test_pure_python_bm25_clean_postings_on_update():
+    from agent_system.core.contracts import MemoryItem
+
+    bm25 = PurePythonBM25()
+    doc = MemoryItem("doc1", "apple fruit red")
+    bm25.add_document(doc)
+
+    assert len(bm25.search("apple")) == 1
+
+    # Update document with completely new terms
+    updated_doc = MemoryItem("doc1", "banana yellow tropical")
+    bm25.add_document(updated_doc)
+
+    # Old term "apple" must no longer return doc1
+    assert len(bm25.search("apple")) == 0
+    # New term "banana" must return doc1
+    assert len(bm25.search("banana")) == 1
+
+
+def test_semantic_memory_fallback_syncs_from_db(temp_store):
+    primary = SemanticMemory(temp_store)
+    primary.index_document("doc-sync", "Quantum computing and qubit coherence", category="physics")
+
+    fallback_instance = SemanticMemory(temp_store)
+    fallback_instance.has_fts5 = False
+    assert fallback_instance.fallback_bm25.doc_count == 0
+
+    res = fallback_instance.search("quantum qubit", category="physics")
+    assert len(res) == 1
+    assert res[0].item_id == "doc-sync"
+    assert fallback_instance.fallback_bm25.doc_count >= 1
+
+
+def test_working_scratchpad_concurrent_sessions():
+    import threading
+    import time
+
+    pad = WorkingScratchpad()
+    session_b_completed = False
+
+    def session_a_worker():
+        with pad.session("session_A"):
+            time.sleep(0.15)
+
+    def session_b_worker():
+        nonlocal session_b_completed
+        time.sleep(0.02)
+        t0 = time.time()
+        pad.set("ready", True, session_id="session_B")
+        elapsed = time.time() - t0
+        assert elapsed < 0.1
+        session_b_completed = True
+
+    t1 = threading.Thread(target=session_a_worker)
+    t2 = threading.Thread(target=session_b_worker)
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+
+    assert session_b_completed is True
+    assert pad.get("ready", session_id="session_B") is True

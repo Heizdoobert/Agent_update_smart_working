@@ -65,7 +65,12 @@ def cmd_plan(args: argparse.Namespace) -> int:
 
     model = StateMachineTransitionModel(action_defs)
     goal_key = args.goal_key
-    goal_val = args.goal_value if args.goal_value is not None else True
+    goal_val: Any = True
+    if args.goal_value is not None:
+        try:
+            goal_val = json.loads(args.goal_value)
+        except (json.JSONDecodeError, TypeError):
+            goal_val = args.goal_value
     is_goal = lambda s: s.get(goal_key) == goal_val
 
     if args.method == "mcts":

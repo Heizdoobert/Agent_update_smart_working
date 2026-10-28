@@ -129,3 +129,41 @@ def test_truncator_json_validity():
     parsed = json.loads(truncated_str)
     assert isinstance(parsed, dict)
     assert "status" in parsed
+
+
+def test_state_node_hashing_and_set_dict_membership():
+    from agent_system.reasoning.transition import StateNode
+
+    node1 = StateNode(state_id="s1", attributes={"x": 10, "nested": {"a": "b"}}, is_terminal=False)
+    node2 = StateNode(state_id="s1", attributes={"nested": {"a": "b"}, "x": 10}, is_terminal=False)
+    node3 = StateNode(state_id="s2", attributes={"x": 20}, is_terminal=False)
+
+    assert node1 == node2
+    assert hash(node1) == hash(node2)
+    assert node1 != node3
+
+    # Set membership
+    node_set = {node1}
+    assert node2 in node_set
+    assert node3 not in node_set
+
+    # Dict key usage
+    node_dict = {node1: "result_s1"}
+    assert node_dict[node2] == "result_s1"
+
+
+def test_truncator_small_byte_limits_always_valid_json():
+    payload = json.dumps({"key": "val" * 50, "list": [1, 2, 3, 4, 5]})
+    for limit in [50, 20, 10, 2]:
+        truncated = StructuralTruncator.truncate_payload(payload, max_bytes=limit)
+        assert len(truncated.encode("utf-8")) <= limit
+        parsed = json.loads(truncated)
+        assert isinstance(parsed, (dict, list))
+
+
+def test_truncator_suffix_bytes_exceeds_max_bytes():
+    text = "hello world this is a test"
+    # Suffix length is 15 bytes; test when max_bytes is smaller than suffix
+    truncated = StructuralTruncator.truncate_text(text, max_bytes=5)
+    assert len(truncated.encode("utf-8")) <= 5
+    assert len(truncated) > 0

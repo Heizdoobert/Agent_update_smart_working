@@ -6,6 +6,18 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
+def _make_hashable(val: Any) -> Any:
+    if isinstance(val, dict):
+        return tuple(sorted((k, _make_hashable(v)) for k, v in val.items()))
+    if isinstance(val, (list, set, tuple)):
+        return tuple(_make_hashable(x) for x in val)
+    try:
+        hash(val)
+        return val
+    except TypeError:
+        return repr(val)
+
+
 @dataclass(frozen=True)
 class StateNode:
     """Immutable state representation for search algorithms."""
@@ -15,6 +27,21 @@ class StateNode:
 
     def get(self, key: str, default: Any = None) -> Any:
         return self.attributes.get(key, default)
+
+    def __hash__(self) -> int:
+        attr_items = tuple(
+            sorted((k, _make_hashable(v)) for k, v in self.attributes.items())
+        )
+        return hash((self.state_id, attr_items, self.is_terminal))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, StateNode):
+            return False
+        return (
+            self.state_id == other.state_id
+            and self.attributes == other.attributes
+            and self.is_terminal == other.is_terminal
+        )
 
 
 @dataclass
@@ -49,7 +76,7 @@ class ActionDefinition:
 class StateMachineTransitionModel:
     """Domain-agnostic transition model for discrete state-space planning."""
 
-    def __init__(self, actions: List[ActionDefinition]):
+    def __init__(self, actions: List[ActionDefinition]) -> None:
         self.actions = actions
 
     def get_available_actions(self, state: StateNode) -> List[ActionDefinition]:

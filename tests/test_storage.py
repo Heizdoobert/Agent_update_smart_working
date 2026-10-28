@@ -78,3 +78,17 @@ def test_concurrent_writes(temp_db):
     assert all(results)
     all_sessions = mgr.list_sessions()
     assert len(all_sessions) == num_threads * num_writes_per_thread
+
+
+def test_concurrent_store_init(temp_db):
+    num_threads = 6
+
+    def init_worker():
+        s = SQLiteStore(temp_db)
+        return s.db_path.exists()
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        futures = [executor.submit(init_worker) for _ in range(num_threads)]
+        results = [f.result() for f in futures]
+
+    assert all(results)

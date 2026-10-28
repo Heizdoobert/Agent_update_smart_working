@@ -114,3 +114,10 @@ def test_serialization_roundtrip():
     assert len(restored.nodes) == 2
     assert restored.nodes["n2"].score == 0.8
     assert len(restored.get_children("n1")) == 1
+
+
+def test_add_node_missing_parent_raises_key_error():
+    graph = ThoughtGraph()
+    child = ThoughtNode("child", "Child node", parent_ids=["non_existent_parent"])
+    with pytest.raises(KeyError, match="Parent node 'non_existent_parent' must be added before child 'child'"):
+        graph.add_node(child)

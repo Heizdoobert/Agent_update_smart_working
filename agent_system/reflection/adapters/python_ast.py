@@ -22,9 +22,9 @@ class PythonAstAuditor(ast.NodeVisitor):
         forbidden_modules: Optional[Set[str]] = None,
         forbidden_calls: Optional[Set[str]] = None,
         require_type_annotations: bool = False,
-    ):
+    ) -> None:
         self.forbidden_modules = forbidden_modules or {"pdb", "ipdb"}
-        self.forbidden_calls = forbidden_calls or {"eval", "exec"}
+        self.forbidden_calls = forbidden_calls or {"eval", "exec", "breakpoint"}
         self.require_type_annotations = require_type_annotations
         self.diagnostics: List[DiagnosticItem] = []
 
@@ -61,22 +61,53 @@ class PythonAstAuditor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
+        call_name: Optional[str] = None
         if isinstance(node.func, ast.Name):
-            if node.func.id in self.forbidden_calls:
-                self.diagnostics.append(
-                    DiagnosticItem(
-                        code="FORBIDDEN_CALL",
-                        message=f"Dangerous call to '{node.func.id}()' detected.",
-                        severity="ERROR",
-                        line=node.lineno,
-                        column=node.col_offset,
-                        fix_recipe=f"Replace '{node.func.id}()' with safe static alternatives.",
-                    )
+            if node.func.id in self.forbidden_calls or node.func.id == "breakpoint":
+                call_name = node.func.id
+        elif isinstance(node.func, ast.Attribute):
+            if (
+                isinstance(node.func.value, ast.Name)
+                and node.func.value.id in {"builtins", "__builtins__"}
+                and (
+                    node.func.attr in self.forbidden_calls
+                    or node.func.attr in {"eval", "exec", "breakpoint"}
                 )
+            ):
+                call_name = f"{node.func.value.id}.{node.func.attr}"
+            elif node.func.attr in self.forbidden_calls or node.func.attr in {"eval", "exec", "breakpoint"}:
+                call_name = node.func.attr
+        elif (
+            isinstance(node.func, ast.Call)
+            and isinstance(node.func.func, ast.Name)
+            and node.func.func.id == "getattr"
+        ):
+            if (
+                len(node.func.args) >= 2
+                and isinstance(node.func.args[1], ast.Constant)
+                and (
+                    node.func.args[1].value in self.forbidden_calls
+                    or node.func.args[1].value in {"eval", "exec", "breakpoint"}
+                )
+            ):
+                call_name = f"getattr(..., '{node.func.args[1].value}')"
+
+        if call_name:
+            self.diagnostics.append(
+                DiagnosticItem(
+                    code="FORBIDDEN_CALL",
+                    message=f"Dangerous call to '{call_name}()' detected.",
+                    severity="ERROR",
+                    line=node.lineno,
+                    column=node.col_offset,
+                    fix_recipe=f"Replace '{call_name}()' with safe static alternatives.",
+                )
+            )
         self.generic_visit(node)
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+    def visit_FunctionDef(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
         if self.require_type_annotations and node.returns is None:
+            func_type = "async def" if isinstance(node, ast.AsyncFunctionDef) else "def"
             self.diagnostics.append(
                 DiagnosticItem(
                     code="MISSING_RETURN_TYPE",
@@ -84,10 +115,12 @@ class PythonAstAuditor(ast.NodeVisitor):
                     severity="WARNING",
                     line=node.lineno,
                     column=node.col_offset,
-                    fix_recipe=f"Add return type annotation to def {node.name}(...) -> ...",
+                    fix_recipe=f"Add return type annotation to {func_type} {node.name}(...) -> ...",
                 )
             )
         self.generic_visit(node)
+
+    visit_AsyncFunctionDef = visit_FunctionDef
 
 
 class PythonAstCritic:
@@ -98,9 +131,9 @@ class PythonAstCritic:
         forbidden_modules: Optional[List[str]] = None,
         forbidden_calls: Optional[List[str]] = None,
         require_type_annotations: bool = False,
-    ):
+    ) -> None:
         self.forbidden_modules = set(forbidden_modules or ["pdb", "ipdb"])
-        self.forbidden_calls = set(forbidden_calls or ["eval", "exec"])
+        self.forbidden_calls = set(forbidden_calls or ["eval", "exec", "breakpoint"])
         self.require_type_annotations = require_type_annotations
 
     def validate(

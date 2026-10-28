@@ -86,3 +86,32 @@ def test_mcts_planner(workflow_environment):
     assert is_goal(state) is True
     # Fast rollout check (<100ms)
     assert elapsed_ms < 100.0
+
+
+def test_mcts_planner_already_at_goal(workflow_environment):
+    initial_state, model, _ = workflow_environment
+    goal_state = StateNode("goal_init", attributes={"report_generated": True})
+    planner = MCTSPlanner(model)
+    plan = planner.plan(goal_state, is_goal=lambda s: s.get("report_generated") is True)
+    assert plan is not None
+    assert len(plan.steps) == 0
+    assert plan.total_score == 100.0
+
+
+def test_mcts_planner_unreachable_goal(workflow_environment):
+    initial_state, model, _ = workflow_environment
+    planner = MCTSPlanner(model, max_rollout_depth=3)
+    plan = planner.plan(initial_state, is_goal=lambda s: s.get("impossible_flag") is True, simulations=10)
+    assert plan is None
+
+
+def test_mcts_planner_score_from_trajectory(workflow_environment):
+    initial_state, model, is_goal = workflow_environment
+    planner = MCTSPlanner(model, max_rollout_depth=10)
+    plan = planner.plan(initial_state, is_goal, simulations=50)
+    assert plan is not None
+    expected_cost = sum(
+        next(a.cost for a in model.actions if a.name == step.action_type)
+        for step in plan.steps
+    )
+    assert plan.total_score == round(max(0.0, 100.0 - expected_cost), 2)

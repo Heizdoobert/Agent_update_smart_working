@@ -110,3 +110,71 @@ def test_cli_plan(tmp_path, capsys):
     assert len(plan_out["steps"]) == 2
     assert plan_out["steps"][0]["action"] == "pickup_key"
     assert plan_out["steps"][1]["action"] == "unlock_door"
+
+
+def test_cli_plan_goal_value_primitives(tmp_path, capsys):
+    init_file = tmp_path / "init_num.json"
+    init_file.write_text(json.dumps({"stage": 0}), encoding="utf-8")
+
+    actions_file = tmp_path / "actions_num.json"
+    actions_file.write_text(
+        json.dumps(
+            [
+                {
+                    "name": "advance_stage",
+                    "cost": 1.0,
+                    "preconditions": {"stage": 0},
+                    "effects": {"stage": 5},
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    rc = main(
+        [
+            "plan",
+            "--initial",
+            str(init_file),
+            "--actions",
+            str(actions_file),
+            "--goal-key",
+            "stage",
+            "--goal-value",
+            "5",
+            "--method",
+            "astar",
+        ]
+    )
+    assert rc == 0
+    captured = capsys.readouterr()
+    plan_out = json.loads(captured.out)
+    assert len(plan_out["steps"]) == 1
+    assert plan_out["steps"][0]["action"] == "advance_stage"
+
+    init_bool = tmp_path / "init_bool.json"
+    init_bool.write_text(json.dumps({"done": False}), encoding="utf-8")
+    actions_bool = tmp_path / "actions_bool.json"
+    actions_bool.write_text(
+        json.dumps([{"name": "finish", "cost": 1.0, "preconditions": {"done": False}, "effects": {"done": True}}]),
+        encoding="utf-8",
+    )
+    rc_bool = main(
+        [
+            "plan",
+            "--initial",
+            str(init_bool),
+            "--actions",
+            str(actions_bool),
+            "--goal-key",
+            "done",
+            "--goal-value",
+            "true",
+            "--method",
+            "mcts",
+        ]
+    )
+    assert rc_bool == 0
+    captured_bool = capsys.readouterr()
+    plan_bool = json.loads(captured_bool.out)
+    assert len(plan_bool["steps"]) == 1

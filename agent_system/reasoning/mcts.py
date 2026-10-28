@@ -20,7 +20,7 @@ class MCTSNode:
         parent: Optional[MCTSNode] = None,
         action: Optional[ActionDefinition] = None,
         untried_actions: Optional[List[ActionDefinition]] = None,
-    ):
+    ) -> None:
         self.state = state
         self.parent = parent
         self.action = action
@@ -53,7 +53,7 @@ class MCTSPlanner:
         evaluation_fn: Optional[Callable[[StateNode], float]] = None,
         exploration_constant: float = 1.414,
         max_rollout_depth: int = 15,
-    ):
+    ) -> None:
         self.model = transition_model
         self.eval_fn = evaluation_fn or (lambda s: 0.0)
         self.c = exploration_constant
@@ -67,6 +67,17 @@ class MCTSPlanner:
         goal_id: str = "mcts_goal",
     ) -> Optional[Plan]:
         start_time = time.time()
+        if is_goal(initial_state):
+            elapsed = time.time() - start_time
+            return Plan(
+                plan_id=f"mcts_plan_{int(time.time()*1000)}",
+                goal_id=goal_id,
+                steps=[],
+                total_score=100.0,
+                rationale=f"Initial state already satisfies goal ({elapsed*1000:.1f}ms). Steps: 0",
+                metadata={"simulations": 0, "elapsed_ms": elapsed * 1000},
+            )
+
         initial_actions = self.model.get_available_actions(initial_state)
         root = MCTSNode(
             state=initial_state,
@@ -132,7 +143,7 @@ class MCTSPlanner:
             if is_goal(curr.state):
                 break
 
-        if not trajectory:
+        if not is_goal(curr.state):
             return None
 
         elapsed = time.time() - start_time
@@ -148,11 +159,14 @@ class MCTSPlanner:
             for idx, act in enumerate(trajectory)
         ]
 
+        total_cost = sum(act.cost for act in trajectory)
+        total_score = round(max(0.0, 100.0 - total_cost), 2)
+
         return Plan(
             plan_id=f"mcts_plan_{int(time.time()*1000)}",
             goal_id=goal_id,
             steps=steps,
-            total_score=round(max(0.0, min(100.0, root.q_value)), 2),
+            total_score=total_score,
             rationale=f"MCTS synthesized path in {simulations} simulations ({elapsed*1000:.1f}ms). Steps: {len(steps)}",
-            metadata={"simulations": simulations, "elapsed_ms": elapsed * 1000},
+            metadata={"simulations": simulations, "elapsed_ms": elapsed * 1000, "cost": total_cost},
         )

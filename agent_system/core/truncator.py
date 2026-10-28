@@ -28,7 +28,10 @@ class StructuralTruncator:
 
         suffix_bytes = suffix.encode("utf-8")
         if len(suffix_bytes) >= max_bytes:
-            return suffix[:max_bytes]
+            truncated = suffix_bytes[:max_bytes].decode("utf-8", errors="ignore")
+            while len(truncated.encode("utf-8")) > max_bytes and truncated:
+                truncated = truncated[:-1]
+            return truncated
 
         target_bytes = max_bytes - len(suffix_bytes)
         truncated_raw = encoded[:target_bytes].decode("utf-8", errors="ignore")
@@ -70,6 +73,8 @@ class StructuralTruncator:
                     trimmed_list.pop()
                 if len(json.dumps(trimmed_list + [indicator], ensure_ascii=False).encode("utf-8")) <= max_bytes:
                     trimmed_list.append(indicator)
+            if len(json.dumps(trimmed_list, ensure_ascii=False).encode("utf-8")) > max_bytes:
+                return []
             return trimmed_list
 
         if isinstance(data, dict):
@@ -104,7 +109,10 @@ class StructuralTruncator:
 
             # Final safety check: if still exceeding, degrade to minimal dict
             if len(json.dumps(trimmed_dict, ensure_ascii=False).encode("utf-8")) > max_bytes:
-                return {"_truncated": "payload exceeded byte budget"}
+                for cand in [{"_truncated": True}, {}]:
+                    if len(json.dumps(cand, ensure_ascii=False).encode("utf-8")) <= max_bytes:
+                        return cand
+                return {}
 
             return trimmed_dict
 
@@ -119,11 +127,33 @@ class StructuralTruncator:
 
         try:
             parsed = json.loads(raw)
+            is_json = True
+        except (json.JSONDecodeError, TypeError):
+            is_json = False
+            parsed = None
+
+        if is_json:
             truncated_obj = cls.truncate_json(parsed, max_bytes=max_bytes)
             res = json.dumps(truncated_obj, ensure_ascii=False)
             if len(res.encode("utf-8")) <= max_bytes:
                 return res
-        except (json.JSONDecodeError, TypeError):
-            pass
+
+            # Ensure valid minimal JSON fallback under tight byte budgets
+            if isinstance(parsed, dict):
+                fallbacks = ['{"_truncated":true}', '{}']
+            elif isinstance(parsed, list):
+                fallbacks = ['[{"_truncated":true}]', '[]']
+            elif isinstance(parsed, str):
+                fallbacks = ['""']
+            else:
+                fallbacks = ['null', '0', '{}']
+
+            for cand in fallbacks:
+                if len(cand.encode("utf-8")) <= max_bytes:
+                    return cand
+
+            if max_bytes >= 2:
+                return "{}" if isinstance(parsed, dict) else "[]"
+            return ""
 
         return cls.truncate_text(raw, max_bytes=max_bytes)

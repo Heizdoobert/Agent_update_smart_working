@@ -62,3 +62,18 @@ def test_reflection_oscillation_detection():
 
     assert res.success is False
     assert "Oscillation detected" in res.message
+
+
+def test_reflection_auto_patches_forbidden_eval_with_none():
+    critic = CriticEngine([PythonAstCritic()])
+    reflector = SelfReflector(critic)
+
+    code_with_eval = "def parse(x: str) -> None:\n    res = eval(x)\n"
+    res = reflector.reflect_and_patch(code_with_eval)
+
+    assert res.success is True
+    assert res.patched is True
+    assert "res = None" in res.final_artifact
+    assert "eval(" not in res.final_artifact
+    import ast
+    ast.parse(res.final_artifact)

@@ -15,7 +15,7 @@ T = TypeVar("T")
 class SQLiteStore:
     """Thread-safe and multi-process friendly SQLite store configured with WAL mode."""
 
-    def __init__(self, db_path: Optional[Union[str, Path]] = None):
+    def __init__(self, db_path: Optional[Union[str, Path]] = None) -> None:
         if db_path is None:
             default_dir = Path.home() / ".agent_system"
             default_dir.mkdir(parents=True, exist_ok=True)
@@ -76,7 +76,7 @@ class SQLiteStore:
 
     def _init_db(self) -> None:
         """Initialize database schema tables."""
-        with self.transaction() as cur:
+        def _init(cur: sqlite3.Cursor) -> None:
             # Sessions table
             cur.execute(
                 """
@@ -123,3 +123,5 @@ class SQLiteStore:
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS idx_memories_cat ON memories(category);"
             )
+
+        self.execute_with_retry(_init)

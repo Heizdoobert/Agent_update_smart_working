@@ -10,7 +10,7 @@ from agent_system.core.contracts import ThoughtNode
 class ThoughtGraph:
     """Manages Tree and Graph of Thoughts (ToT/GoT) enforcing DAG invariants."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.nodes: Dict[str, ThoughtNode] = {}
         self._adj: Dict[str, Set[str]] = {}  # parent -> set of children
         self._rev_adj: Dict[str, Set[str]] = {}  # child -> set of parents
@@ -19,14 +19,19 @@ class ThoughtGraph:
         """Add a thought node to the graph."""
         if node.node_id in self.nodes:
             raise ValueError(f"Node '{node.node_id}' already exists in graph.")
+        for pid in node.parent_ids:
+            if pid not in self.nodes:
+                raise KeyError(
+                    f"Parent node '{pid}' must be added before child '{node.node_id}'"
+                )
+
         self.nodes[node.node_id] = node
         self._adj[node.node_id] = set()
         self._rev_adj[node.node_id] = set()
 
         # Connect initial parents
         for pid in list(node.parent_ids):
-            if pid in self.nodes:
-                self.add_edge(pid, node.node_id)
+            self.add_edge(pid, node.node_id)
 
     def add_edge(self, parent_id: str, child_id: str) -> None:
         """Add directed edge parent -> child. Validates DAG cycle constraints."""

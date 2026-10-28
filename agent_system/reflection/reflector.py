@@ -30,7 +30,7 @@ class SelfReflector:
         critic: CriticEngine,
         custom_patcher: Optional[Callable[[str, List[DiagnosticItem]], str]] = None,
         max_iterations: int = 3,
-    ):
+    ) -> None:
         self.critic = critic
         self.custom_patcher = custom_patcher
         self.max_iterations = min(5, max(1, max_iterations))
@@ -130,11 +130,18 @@ class SelfReflector:
             elif diag.code == "FORBIDDEN_CALL" and diag.line is not None:
                 line_idx = diag.line - 1
                 if 0 <= line_idx < len(lines):
-                    lines[line_idx] = re.sub(
-                        r"\b(eval|exec)\((.*?)\)",
-                        r"# [Dangerous call removed] \2",
+                    patched = re.sub(
+                        r"\b(?:builtins\.|__builtins__\.)?(?:eval|exec|breakpoint)\s*\([^)]*\)",
+                        "None",
                         lines[line_idx],
                     )
+                    if patched == lines[line_idx]:
+                        patched = re.sub(
+                            r"getattr\s*\(\s*(?:builtins|__builtins__)\s*,\s*['\"](?:eval|exec|breakpoint)['\"]\s*\)\s*\([^)]*\)",
+                            "None",
+                            lines[line_idx],
+                        )
+                    lines[line_idx] = patched
 
             # Fix 3: Missing return type annotation in Python
             elif diag.code == "MISSING_RETURN_TYPE" and diag.line is not None:

@@ -18,7 +18,7 @@ from agent_system.storage.sqlite_store import SQLiteStore
 class PurePythonBM25:
     """Pure-Python in-memory inverted index with BM25 ranking when FTS5 is missing."""
 
-    def __init__(self, k1: float = 1.5, b: float = 0.75):
+    def __init__(self, k1: float = 1.5, b: float = 0.75) -> None:
         self.k1 = k1
         self.b = b
         self.docs: Dict[str, MemoryItem] = {}
@@ -31,6 +31,10 @@ class PurePythonBM25:
         return re.findall(r"\w+", text.lower(), re.UNICODE)
 
     def add_document(self, item: MemoryItem) -> None:
+        if item.item_id in self.docs:
+            for postings in self.inverted_index.values():
+                postings.pop(item.item_id, None)
+
         self.docs[item.item_id] = item
         tokens = self._tokenize(item.content)
         length = len(tokens)
@@ -90,7 +94,7 @@ class PurePythonBM25:
 class SemanticMemory:
     """Hybrid Semantic Memory: SQLite FTS5 primary with transparent Pure-Python BM25 fallback."""
 
-    def __init__(self, store: Optional[SQLiteStore] = None):
+    def __init__(self, store: Optional[SQLiteStore] = None) -> None:
         self.store = store or SQLiteStore()
         self.has_fts5 = self._check_and_init_fts5()
         self.fallback_bm25 = PurePythonBM25()
@@ -118,7 +122,7 @@ class SemanticMemory:
 
     def _load_fallback_from_db(self) -> None:
         """Sync persistent memories table into in-memory pure-python BM25 index."""
-        def _load(cur):
+        def _load(cur: sqlite3.Cursor) -> None:
             cur.execute("SELECT item_id, category, content, score, timestamp, metadata_json FROM memories;")
             rows = cur.fetchall()
             for r in rows:
@@ -156,7 +160,7 @@ class SemanticMemory:
         )
 
         # 1. Always persist to base memories table
-        def _persist(cur):
+        def _persist(cur: sqlite3.Cursor) -> None:
             cur.execute(
                 """
                 INSERT INTO memories (item_id, category, content, score, timestamp, metadata_json)
@@ -200,8 +204,12 @@ class SemanticMemory:
                 results = self._search_fts5(query, category=category, top_k=top_k)
             except sqlite3.OperationalError:
                 # FTS5 query syntax error or unexpected failure -> degrade to pure python
+                if self.fallback_bm25.doc_count == 0:
+                    self._load_fallback_from_db()
                 results = self.fallback_bm25.search(query, category=category, top_k=top_k)
         else:
+            if self.fallback_bm25.doc_count == 0:
+                self._load_fallback_from_db()
             results = self.fallback_bm25.search(query, category=category, top_k=top_k)
 
         # Apply StructuralTruncator to enforce context limit across results
@@ -216,7 +224,7 @@ class SemanticMemory:
             return []
         sanitized = " OR ".join(f'"{w}"' for w in words)
 
-        def _query_db(cur):
+        def _query_db(cur: sqlite3.Cursor) -> List[MemoryItem]:
             if category:
                 sql = """
                 SELECT f.item_id, f.category, f.content, bm25(semantic_fts) as rank, m.metadata_json, m.timestamp
