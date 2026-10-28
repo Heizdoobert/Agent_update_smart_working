@@ -32,13 +32,13 @@
 **Description:** Xây dựng tầng kết nối lưu trữ SQLite với cơ chế chống tranh chấp (`WAL mode`, `busy_timeout=5000`) và `SessionManager` để quản lý trạng thái phiên làm việc liên tiến trình (persistent session tokens).
 
 **Acceptance criteria:**
-- [ ] `SQLiteStore` tự động khởi tạo kết nối với cấu hình `PRAGMA journal_mode=WAL;` và `PRAGMA busy_timeout=5000;`.
-- [ ] Xử lý an toàn các giao dịch đồng thời (concurrency retry wrapper).
-- [ ] `SessionManager` cho phép tạo, tải, cập nhật và lưu trữ session context qua token ID.
+- [x] `SQLiteStore` tự động khởi tạo kết nối với cấu hình `PRAGMA journal_mode=WAL;` và `PRAGMA busy_timeout=5000;`.
+- [x] Xử lý an toàn các giao dịch đồng thời (concurrency retry wrapper).
+- [x] `SessionManager` cho phép tạo, tải, cập nhật và lưu trữ session context qua token ID.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_storage.py`
-- [ ] Concurrency check: Kiểm tra nhiều tiến trình/thread cùng ghi đồng thời vào database mà không gặp `database is locked`.
+- [x] Tests pass: `pytest tests/test_storage.py`
+- [x] Concurrency check: Kiểm tra nhiều tiến trình/thread cùng ghi đồng thời vào database mà không gặp `database is locked`.
 
 **Dependencies:** Task 1
 

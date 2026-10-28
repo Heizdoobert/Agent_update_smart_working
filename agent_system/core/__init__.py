@@ -15,6 +15,7 @@ from .contracts import (
     CriticProtocol,
     TransitionModel,
 )
+from .session import Session, SessionManager
 from .truncator import StructuralTruncator
 
 __all__ = [
@@ -31,5 +32,7 @@ __all__ = [
     "ActionSpace",
     "CriticProtocol",
     "TransitionModel",
+    "Session",
+    "SessionManager",
     "StructuralTruncator",
 ]
