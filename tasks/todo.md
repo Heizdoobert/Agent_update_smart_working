@@ -113,14 +113,14 @@
 **Description:** Triển khai 2 bộ lập kế hoạch nhận thức: $A^*$ Search cho không gian trạng thái tất định (tối ưu hóa heuristic toán học) và MCTS Planner cho không gian xác suất/rollout với công thức UCT.
 
 **Acceptance criteria:**
-- [ ] Giao diện `ActionSpace` và `TransitionModel` chuẩn cho cả chế độ offline và mở rộng.
-- [ ] `AStarPlanner` tìm đường đi ngắn nhất, chi phí tối ưu trên đồ thị trạng thái tất định.
-- [ ] `MCTSPlanner` thực hiện Selection, Expansion, Simulation (Rollout), và Backpropagation dựa trên điểm số UCT.
-- [ ] Cho phép định nghĩa hàm heuristic tùy chỉnh (path length, risk penalty, prerequisite readiness).
+- [x] Giao diện `ActionSpace` và `TransitionModel` chuẩn cho cả chế độ offline và mở rộng.
+- [x] `AStarPlanner` tìm đường đi ngắn nhất, chi phí tối ưu trên đồ thị trạng thái tất định.
+- [x] `MCTSPlanner` thực hiện Selection, Expansion, Simulation (Rollout), và Backpropagation dựa trên điểm số UCT.
+- [x] Cho phép định nghĩa hàm heuristic tùy chỉnh (path length, risk penalty, prerequisite readiness).
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_planners.py`
-- [ ] Performance check: Cả hai planner hoàn thành dưới 100ms trên đồ thị thử nghiệm chuẩn.
+- [x] Tests pass: `pytest tests/test_planners.py`
+- [x] Performance check: Cả hai planner hoàn thành dưới 100ms trên đồ thị thử nghiệm chuẩn.
 
 **Dependencies:** Task 1, Task 4
 
@@ -136,9 +136,9 @@
 ---
 
 ## Checkpoint: Reasoning & Planning Layer
-- [ ] $A^*$ và MCTS đều chạy thành công trên các kịch bản test đơn vị.
-- [ ] Đồ thị tư duy DAG bảo toàn tính không chu trình.
-- [ ] Thời gian giải bài toán heuristic đạt mức sub-second (<100ms).
+- [x] $A^*$ và MCTS đều chạy thành công trên các kịch bản test đơn vị.
+- [x] Đồ thị tư duy DAG bảo toàn tính không chu trình.
+- [x] Thời gian giải bài toán heuristic đạt mức sub-second (<100ms).
 
 ---
 
