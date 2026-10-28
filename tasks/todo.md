@@ -226,12 +226,12 @@
 **Description:** Xây dựng module ngoại tuyến `agent_system.distillation` để tối ưu hóa prompt qua phương pháp Teacher-to-Student, chưng cất kinh nghiệm từ các vết thực thi (traces) thành student prompt tinh gọn.
 
 **Acceptance criteria:**
-- [ ] Thu thập và cấu trúc hóa các execution traces thành dataset huấn luyện / benchmark.
-- [ ] Hỗ trợ đánh giá điểm số của các biến thể prompt trên tập test case.
-- [ ] Tách biệt hoàn toàn khỏi runtime sub-second engine, có CLI riêng cho tác vụ batch.
+- [x] Thu thập và cấu trúc hóa các execution traces thành dataset huấn luyện / benchmark.
+- [x] Hỗ trợ đánh giá điểm số của các biến thể prompt trên tập test case.
+- [x] Tách biệt hoàn toàn khỏi runtime sub-second engine, có CLI riêng cho tác vụ batch.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_distiller.py`
+- [x] Tests pass: `pytest tests/test_distiller.py`
 
 **Dependencies:** Task 1, Task 3
 
@@ -245,8 +245,8 @@
 ---
 
 ## Checkpoint: Skills & Optimization Layer
-- [ ] Quản lý skill động an toàn, chống prompt injection cục bộ.
-- [ ] Engine tối ưu prompt chạy độc lập ở chế độ batch không ảnh hưởng runtime.
+- [x] Quản lý skill động an toàn, chống prompt injection cục bộ.
+- [x] Engine tối ưu prompt chạy độc lập ở chế độ batch không ảnh hưởng runtime.
 
 ---
 
