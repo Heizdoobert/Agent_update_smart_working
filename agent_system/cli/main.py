@@ -401,6 +401,30 @@ def cmd_mcp(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_install(args: argparse.Namespace) -> int:
+    """Install Universal System Instructions and MCP configurations into AI clients."""
+    from agent_system.sdk.installer import install_agent_environment, UNIVERSAL_SYSTEM_INSTRUCTION
+
+    if args.print_instruction:
+        sys.stdout.write(UNIVERSAL_SYSTEM_INSTRUCTION)
+        return 0
+
+    results = install_agent_environment(target=args.target, dry_run=args.dry_run)
+    if args.json:
+        sys.stdout.write(json.dumps(results, indent=2, ensure_ascii=False) + "\n")
+    else:
+        status_prefix = "[DRY-RUN] " if args.dry_run else ""
+        sys.stdout.write(f"{status_prefix}Agent Environment Installation Summary:\n")
+        sys.stdout.write("\n1. Model Context Protocol (MCP) Servers:\n")
+        for item in results["mcp_installed"]:
+            sys.stdout.write(f"  - {item['client']}: {item['path']} ({item['status']})\n")
+        sys.stdout.write("\n2. Global System Instructions & Rules:\n")
+        for item in results["rules_installed"]:
+            sys.stdout.write(f"  - {item['path']} [{item['bytes']} bytes] ({item['status']})\n")
+        sys.stdout.write("\nInstallation complete. Restart your AI client (Claude Desktop / Cursor) to activate.\n")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agent-system",
@@ -408,6 +432,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"agent-system {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # 0.0 Install
+    p_install = subparsers.add_parser("install", help="Install System Instructions and MCP server into AI clients (Claude Desktop, Cursor, etc.)")
+    p_install.add_argument("--target", choices=["all", "claude", "cursor", "windsurf", "mcp", "rules"], default="all", help="Target client or component (default: all)")
+    p_install.add_argument("--dry-run", action="store_true", help="Preview changes without modifying config files")
+    p_install.add_argument("--print-instruction", action="store_true", help="Print the Universal System Instruction markdown to stdout")
+    p_install.add_argument("--json", action="store_true", help="Output installation summary as JSON")
+    p_install.set_defaults(func=cmd_install)
 
     # 0. Init
     p_init = subparsers.add_parser("init", help="Bootstrap project SDK configuration interactively or via auto-scan")

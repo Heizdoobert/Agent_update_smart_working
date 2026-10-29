@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Automated Client Installer (`agent_system.sdk.installer`)**: Added `agent-system install [--target {all,claude,cursor,windsurf,mcp,rules}] [--dry-run]` to automatically configure MCP server entries and inject Universal System Instructions across AI agent clients.
+- **Inline JSON & Pipeline Flexibility**: Enhanced CLI `_read_input` to parse inline JSON strings directly in `--initial` and `--actions` without intermediate temporary files.
 - **Multi-Format Critic Routing**: Auto-detection and routing for Markdown prompt rules (`MarkdownRulesCritic`) and plugin manifests (`PluginManifestCritic`) across CLI `agent-system critic` and MCP tool `agent_critic`.
 - **Hierarchical Project Map (`docs/PROJECT_MAP.md`)**: Structured Level 2/3 summary index for selective context loading and subagent isolation.
 
