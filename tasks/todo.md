@@ -360,13 +360,13 @@
 **Description:** Xây dựng `OnboardingWizard` tại `agent_system/sdk/wizard.py` để phỏng vấn tương tác 4 câu hỏi định hình dự án, validate tên định danh hợp lệ (`str.isidentifier()`), bắt an toàn `KeyboardInterrupt`/`EOFError`, và sinh trọn gói cấu trúc `.agent/rules.md`, `agent_plugin.json`, cùng `plugin.py`.
 
 **Acceptance criteria:**
-- [ ] Hỏi 4 câu hỏi thiết lập: (1) Project Name, (2) Prompt Rules summary, (3) Custom Actions, (4) Critic requirements.
-- [ ] Xác thực tính hợp lệ của identifier (tên biến, tên action Python); từ chối các ký tự đặc biệt nguy hiểm.
-- [ ] Bắt ngoại lệ khi người dùng hủy (Ctrl+C / Ctrl+D) và dọn dẹp sạch các file rác đang ghi dở.
+- [x] Hỏi 4 câu hỏi thiết lập: (1) Project Name, (2) Prompt Rules summary, (3) Custom Actions, (4) Critic requirements.
+- [x] Xác thực tính hợp lệ của identifier (tên biến, tên action Python); từ chối các ký tự đặc biệt nguy hiểm.
+- [x] Bắt ngoại lệ khi người dùng hủy (Ctrl+C / Ctrl+D) và dọn dẹp sạch các file rác đang ghi dở.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_sdk_wizard.py`
-- [ ] Simulation check: Giả lập stdin trong test case, kiểm tra các file sinh ra có cú pháp Python và JSON hoàn toàn hợp lệ.
+- [x] Tests pass: `pytest tests/test_sdk_wizard.py`
+- [x] Simulation check: Giả lập stdin trong test case, kiểm tra các file sinh ra có cú pháp Python và JSON hoàn toàn hợp lệ.
 
 **Dependencies:** Task 12, Task 13
 

@@ -63,7 +63,7 @@ Xây dựng **Agent Cognitive Framework** độc lập, domain-agnostic trong `A
 ### Phase 6: Pluggable SDK & Interactive Onboarding Wizard (`agent_system.sdk`)
 - [x] Task 12: Markdown Fence Preservation in StructuralTruncator & SDK Contracts
 - [x] Task 13: Instance-Based PluginRegistry with Safe Dynamic Loader & Whitelisting
-- [ ] Task 14: Interactive Onboarding Wizard with Safe I/O & Rollback
+- [x] Task 14: Interactive Onboarding Wizard with Safe I/O & Rollback
 - [ ] Task 15: CLI Integration (`init` subcommand, interactive bootstrap & optional `--actions` fallback)
 - [ ] Task 16: End-to-End SDK Integration Tests & Documentation
 
