@@ -17,6 +17,7 @@ class PluginManifest:
     name: str
     version: str = "0.1.0"
     description: str = ""
+    priority: int = 100
     entrypoint: Optional[str] = None  # e.g. "plugin:MyProjectPlugin"
     rules_path: Optional[str] = None  # e.g. ".agent/rules.md"
     actions: List[str] = field(default_factory=list)
@@ -34,6 +35,7 @@ class PluginManifest:
             "name",
             "version",
             "description",
+            "priority",
             "entrypoint",
             "rules_path",
             "actions",

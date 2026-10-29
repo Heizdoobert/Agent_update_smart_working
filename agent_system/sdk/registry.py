@@ -180,11 +180,52 @@ class PluginRegistry:
         return self._active_plugins.get(name)
 
     def get_all_actions(self) -> List[ActionDefinition]:
-        """Aggregate domain actions across all active plugins."""
-        actions: List[ActionDefinition] = []
-        for plugin in self._active_plugins.values():
-            actions.extend(plugin.get_actions())
-        return actions
+        """Aggregate and deduplicate domain actions across all active plugins.
+
+        Plugins with higher manifest priority take precedence on name collisions.
+        """
+        sorted_plugins = sorted(
+            self._active_plugins.values(),
+            key=lambda p: p.manifest.priority,
+            reverse=True,
+        )
+        action_map: Dict[str, ActionDefinition] = {}
+        for plugin in sorted_plugins:
+            for act in plugin.get_actions():
+                if act.name not in action_map:
+                    action_map[act.name] = act
+        return list(action_map.values())
+
+    def discover_and_load_all(
+        self, directory: Optional[Union[str, Path]] = None
+    ) -> List[BasePlugin]:
+        """Discover and load all plugins in a root directory and its immediate subdirectories."""
+        target = Path(directory or Path.cwd()).resolve()
+        if not self._is_path_whitelisted(target):
+            raise PermissionError(
+                f"Security violation: path '{target}' is outside whitelisted directories: {self.allowed_roots}"
+            )
+
+        loaded: List[BasePlugin] = []
+
+        # Check target directory itself
+        self_manifest = self.discover_manifest(target)
+        if self_manifest:
+            p = self.load_plugin(target)
+            if p:
+                loaded.append(p)
+
+        # Check immediate subdirectories
+        if target.is_dir():
+            for item in sorted(target.iterdir()):
+                if item.is_dir() and not item.name.startswith("."):
+                    sub_manifest = self.discover_manifest(item)
+                    if sub_manifest:
+                        p = self.load_plugin(item)
+                        if p:
+                            loaded.append(p)
+
+        return loaded
 
     def get_all_critics(self) -> List[CriticProtocol]:
         """Aggregate domain critics across all active plugins."""
