@@ -55,10 +55,7 @@ class ActionDefinition:
 
     def is_applicable(self, state: StateNode) -> bool:
         """Check if action preconditions are met by current state attributes."""
-        for k, v in self.preconditions.items():
-            if state.get(k) != v:
-                return False
-        return True
+        return all(state.get(k) == v for k, v in self.preconditions.items())
 
     def apply(self, state: StateNode) -> StateNode:
         """Apply action effects to produce new state."""

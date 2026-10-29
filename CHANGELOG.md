@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Optimized
 - **Rules Context Compression**: Re-engineered project rules (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`) down to 2824 bytes (strictly under 3KB limit), achieving 100/100 pass score on `MarkdownRulesCritic` with zero diagnostics.
+- **Code Simplification & Refactoring**:
+  - Unified plugin hook dispatching in `PluginRegistry` via `_dispatch_pipe`, eliminating repetitive try-except loops across event triggers.
+  - Extracted `_build_rule_critic_report` in `config_rules.py`, removing duplicate status and suggestion construction between `MarkdownRulesCritic` and `PluginManifestCritic`.
+  - Simplified JSON byte calculations in `StructuralTruncator` with dedicated `_json_bytes` helper.
+  - Replaced lambda assignments with named functions in `cli/main.py` and `astar.py` (PEP 8 compliance).
+  - Streamlined `ActionDefinition.is_applicable` using generator expression with `all()`.
+  - Removed unused template imports from `OnboardingWizard` scaffolding.
 
 ## [0.2.0] - 2026-10-29
 

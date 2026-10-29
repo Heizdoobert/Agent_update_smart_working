@@ -10,6 +10,10 @@ from agent_system.core.contracts import ActionStep, Plan
 from agent_system.reasoning.transition import ActionDefinition, StateMachineTransitionModel, StateNode
 
 
+def _zero_heuristic(_: StateNode) -> float:
+    return 0.0
+
+
 class AStarPlanner:
     """A* heuristic search planner guaranteeing mathematically optimal shortest-cost plans."""
 
@@ -20,7 +24,7 @@ class AStarPlanner:
         max_expansions: int = 2000,
     ):
         self.model = transition_model
-        self.heuristic = heuristic_fn or (lambda s: 0.0)
+        self.heuristic = heuristic_fn or _zero_heuristic
         self.max_expansions = max_expansions
 
     def plan(

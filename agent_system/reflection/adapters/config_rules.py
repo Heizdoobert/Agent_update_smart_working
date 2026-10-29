@@ -15,6 +15,43 @@ from agent_system.core.contracts import (
 )
 
 
+def _build_rule_critic_report(
+    critic_name: str,
+    score: float,
+    diagnostics: List[DiagnosticItem],
+    raw_artifact: str,
+    pass_threshold: float = 60.0,
+) -> CriticReport:
+    """Build standardized CriticReport determining status and suggestions from diagnostics."""
+    score = max(0.0, score)
+    has_error = any(d.severity == "ERROR" for d in diagnostics)
+    has_warning = any(d.severity == "WARNING" for d in diagnostics)
+
+    if has_error or score < pass_threshold:
+        status = CriticStatus.REJECT
+    elif has_warning:
+        status = CriticStatus.WARNING
+    else:
+        status = CriticStatus.PASS
+
+    suggestions = [
+        f"[{d.code}] {d.message} -> Fix: {d.fix_recipe}"
+        for d in diagnostics
+        if d.fix_recipe
+    ]
+
+    return CriticReport(
+        verdict=CriticVerdict(
+            status=status,
+            score=score,
+            summary=f"{critic_name} evaluation: {status.value} (Score: {score:.1f}/100)",
+        ),
+        diagnostics=diagnostics,
+        suggestions=suggestions,
+        raw_artifact=raw_artifact,
+    )
+
+
 class MarkdownRulesCritic:
     """Validates structural and budget invariants of Markdown prompt rules."""
 
@@ -70,32 +107,8 @@ class MarkdownRulesCritic:
             )
             score -= 15.0
 
-        score = max(0.0, score)
-        has_error = any(d.severity == "ERROR" for d in diagnostics)
-        has_warning = any(d.severity == "WARNING" for d in diagnostics)
-
-        if has_error or score < 60.0:
-            status = CriticStatus.REJECT
-        elif has_warning:
-            status = CriticStatus.WARNING
-        else:
-            status = CriticStatus.PASS
-
-        suggestions = [
-            f"[{d.code}] {d.message} -> Fix: {d.fix_recipe}"
-            for d in diagnostics
-            if d.fix_recipe
-        ]
-
-        return CriticReport(
-            verdict=CriticVerdict(
-                status=status,
-                score=score,
-                summary=f"MarkdownRulesCritic evaluation: {status.value} (Score: {score:.1f}/100)",
-            ),
-            diagnostics=diagnostics,
-            suggestions=suggestions,
-            raw_artifact=text,
+        return _build_rule_critic_report(
+            "MarkdownRulesCritic", score, diagnostics, text, pass_threshold=60.0
         )
 
 
@@ -206,30 +219,6 @@ class PluginManifestCritic:
                 )
                 score -= 10.0
 
-        score = max(0.0, score)
-        has_error = any(d.severity == "ERROR" for d in diagnostics)
-        has_warning = any(d.severity == "WARNING" for d in diagnostics)
-
-        if has_error or score < 80.0:
-            status = CriticStatus.REJECT
-        elif has_warning:
-            status = CriticStatus.WARNING
-        else:
-            status = CriticStatus.PASS
-
-        suggestions = [
-            f"[{d.code}] {d.message} -> Fix: {d.fix_recipe}"
-            for d in diagnostics
-            if d.fix_recipe
-        ]
-
-        return CriticReport(
-            verdict=CriticVerdict(
-                status=status,
-                score=score,
-                summary=f"PluginManifestCritic evaluation: {status.value} (Score: {score:.1f}/100)",
-            ),
-            diagnostics=diagnostics,
-            suggestions=suggestions,
-            raw_artifact=str(data),
+        return _build_rule_critic_report(
+            "PluginManifestCritic", score, diagnostics, str(data), pass_threshold=80.0
         )

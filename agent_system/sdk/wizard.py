@@ -186,7 +186,7 @@ class OnboardingWizard:
                 f"from typing import List\n"
                 f"from agent_system.core.contracts import CriticProtocol\n"
                 f"from agent_system.reasoning.transition import ActionDefinition\n"
-                f"from agent_system.sdk.contracts import BasePlugin, PluginManifest, ProjectContext\n\n\n"
+                f"from agent_system.sdk.contracts import BasePlugin\n\n\n"
                 f"class {class_name}(BasePlugin):\n"
                 f"    def on_load(self) -> None:\n"
                 f'        """Hook called when plugin loads."""\n'

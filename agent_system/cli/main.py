@@ -90,7 +90,9 @@ def cmd_plan(args: argparse.Namespace) -> int:
             goal_val = json.loads(args.goal_value)
         except (json.JSONDecodeError, TypeError):
             goal_val = args.goal_value
-    is_goal = lambda s: s.get(goal_key) == goal_val
+
+    def is_goal(state: StateNode) -> bool:
+        return state.get(goal_key) == goal_val
 
     if args.method == "mcts":
         planner = MCTSPlanner(model, max_rollout_depth=args.max_depth)

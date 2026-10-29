@@ -6,9 +6,9 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from agent_system.core.contracts import CriticProtocol
+from agent_system.core.contracts import CriticProtocol, CriticReport
 from agent_system.core.truncator import StructuralTruncator
 from agent_system.reasoning.transition import ActionDefinition
 from agent_system.sdk.contracts import BasePlugin, PluginManifest, ProjectContext
@@ -240,40 +240,45 @@ class PluginRegistry:
         combined = "\n\n".join(rules)
         return StructuralTruncator.truncate_text(combined, max_bytes=max_bytes)
 
-    def trigger_before_plan(self, initial_state: Any, goal: Any) -> None:
-        """Notify all active plugins before planning begins."""
+    def _dispatch_pipe(
+        self,
+        hook_name: str,
+        initial_val: Any,
+        invoker: Callable[[BasePlugin, Any], Any],
+    ) -> Any:
+        """Safely pipe a value through active plugins with exception containment."""
+        current = initial_val
         for plugin in self._active_plugins.values():
             try:
-                plugin.on_before_plan(initial_state, goal)
+                res = invoker(plugin, current)
+                if res is not None:
+                    current = res
             except Exception as e:
                 sys.stderr.write(
-                    f"Warning: Exception in plugin '{plugin.manifest.name}' on_before_plan: {e}\n"
+                    f"Warning: Exception in plugin '{plugin.manifest.name}' {hook_name}: {e}\n"
                 )
+        return current
+
+    def trigger_before_plan(self, initial_state: Any, goal: Any) -> None:
+        """Notify all active plugins before planning begins."""
+        self._dispatch_pipe(
+            "on_before_plan",
+            None,
+            lambda p, _: p.on_before_plan(initial_state, goal),
+        )
 
     def trigger_after_plan(self, plan: Optional[Any]) -> Optional[Any]:
         """Pipe generated plan through active plugins for observation or decoration."""
-        current_plan = plan
-        for plugin in self._active_plugins.values():
-            try:
-                res = plugin.on_after_plan(current_plan)
-                if res is not None:
-                    current_plan = res
-            except Exception as e:
-                sys.stderr.write(
-                    f"Warning: Exception in plugin '{plugin.manifest.name}' on_after_plan: {e}\n"
-                )
-        return current_plan
+        return self._dispatch_pipe(
+            "on_after_plan",
+            plan,
+            lambda p, cur: p.on_after_plan(cur),
+        )
 
     def trigger_critic_report(self, report: CriticReport) -> CriticReport:
         """Pipe critic report through active plugins for inspection or augmentation."""
-        current_report = report
-        for plugin in self._active_plugins.values():
-            try:
-                res = plugin.on_critic_report(current_report)
-                if res is not None:
-                    current_report = res
-            except Exception as e:
-                sys.stderr.write(
-                    f"Warning: Exception in plugin '{plugin.manifest.name}' on_critic_report: {e}\n"
-                )
-        return current_report
+        return self._dispatch_pipe(
+            "on_critic_report",
+            report,
+            lambda p, cur: p.on_critic_report(cur),
+        )

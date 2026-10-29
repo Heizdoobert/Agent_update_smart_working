@@ -6,6 +6,11 @@ import json
 from typing import Any, Dict, List, Union
 
 
+def _json_bytes(obj: Any) -> int:
+    """Compute UTF-8 byte length of a JSON-serialized object."""
+    return len(json.dumps(obj, ensure_ascii=False).encode("utf-8"))
+
+
 class StructuralTruncator:
     """Safe truncator ensuring UTF-8 integrity and JSON validity within byte limits."""
 
@@ -73,25 +78,23 @@ class StructuralTruncator:
         max_bytes: int = DEFAULT_MAX_BYTES,
     ) -> Union[Dict[str, Any], List[Any], Any]:
         """Truncate JSON data structurally so the output remains valid, parseable JSON within max_bytes."""
-        raw_encoded = json.dumps(data, ensure_ascii=False).encode("utf-8")
-        if len(raw_encoded) <= max_bytes:
+        if _json_bytes(data) <= max_bytes:
             return data
 
         if isinstance(data, list):
             trimmed_list: List[Any] = []
             for item in data:
                 candidate = trimmed_list + [item, {"_truncated": f"{len(data) - len(trimmed_list)} omitted"}]
-                if len(json.dumps(candidate, ensure_ascii=False).encode("utf-8")) > max_bytes:
+                if _json_bytes(candidate) > max_bytes:
                     break
                 trimmed_list.append(item)
             if len(trimmed_list) < len(data):
                 indicator = {"_truncated": f"{len(data) - len(trimmed_list)} omitted"}
-                # Check if indicator fits
-                while trimmed_list and len(json.dumps(trimmed_list + [indicator], ensure_ascii=False).encode("utf-8")) > max_bytes:
+                while trimmed_list and _json_bytes(trimmed_list + [indicator]) > max_bytes:
                     trimmed_list.pop()
-                if len(json.dumps(trimmed_list + [indicator], ensure_ascii=False).encode("utf-8")) <= max_bytes:
+                if _json_bytes(trimmed_list + [indicator]) <= max_bytes:
                     trimmed_list.append(indicator)
-            if len(json.dumps(trimmed_list, ensure_ascii=False).encode("utf-8")) > max_bytes:
+            if _json_bytes(trimmed_list) > max_bytes:
                 return []
             return trimmed_list
 
@@ -102,14 +105,13 @@ class StructuralTruncator:
                 v = data[k]
                 candidate = dict(trimmed_dict)
                 candidate[k] = v
-                if len(json.dumps(candidate, ensure_ascii=False).encode("utf-8")) > max_bytes:
+                if _json_bytes(candidate) > max_bytes:
                     if isinstance(v, (dict, list)):
-                        curr_len = len(json.dumps(trimmed_dict, ensure_ascii=False).encode("utf-8"))
-                        budget = max_bytes - curr_len - 32
+                        budget = max_bytes - _json_bytes(trimmed_dict) - 32
                         if budget > 64:
                             sub = cls.truncate_json(v, max_bytes=budget)
                             candidate[k] = sub
-                            if len(json.dumps(candidate, ensure_ascii=False).encode("utf-8")) <= max_bytes:
+                            if _json_bytes(candidate) <= max_bytes:
                                 trimmed_dict[k] = sub
                                 continue
                     break
@@ -119,16 +121,16 @@ class StructuralTruncator:
             if omitted > 0:
                 trimmed_dict["_omitted"] = f"{omitted} keys"
                 # If adding indicator exceeds budget, pop items until it fits
-                while len(json.dumps(trimmed_dict, ensure_ascii=False).encode("utf-8")) > max_bytes and len(trimmed_dict) > 1:
+                while _json_bytes(trimmed_dict) > max_bytes and len(trimmed_dict) > 1:
                     keys_to_remove = [k for k in trimmed_dict if k != "_omitted"]
                     if not keys_to_remove:
                         break
                     del trimmed_dict[keys_to_remove[-1]]
 
             # Final safety check: if still exceeding, degrade to minimal dict
-            if len(json.dumps(trimmed_dict, ensure_ascii=False).encode("utf-8")) > max_bytes:
+            if _json_bytes(trimmed_dict) > max_bytes:
                 for cand in [{"_truncated": True}, {}]:
-                    if len(json.dumps(cand, ensure_ascii=False).encode("utf-8")) <= max_bytes:
+                    if _json_bytes(cand) <= max_bytes:
                         return cand
                 return {}
 
