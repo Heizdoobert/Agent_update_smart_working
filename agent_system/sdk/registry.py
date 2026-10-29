@@ -197,3 +197,41 @@ class PluginRegistry:
         """Combine project rules from all active plugins."""
         rules = [p.get_rules() for p in self._active_plugins.values() if p.get_rules()]
         return "\n\n".join(rules)
+
+    def trigger_before_plan(self, initial_state: Any, goal: Any) -> None:
+        """Notify all active plugins before planning begins."""
+        for plugin in self._active_plugins.values():
+            try:
+                plugin.on_before_plan(initial_state, goal)
+            except Exception as e:
+                sys.stderr.write(
+                    f"Warning: Exception in plugin '{plugin.manifest.name}' on_before_plan: {e}\n"
+                )
+
+    def trigger_after_plan(self, plan: Optional[Any]) -> Optional[Any]:
+        """Pipe generated plan through active plugins for observation or decoration."""
+        current_plan = plan
+        for plugin in self._active_plugins.values():
+            try:
+                res = plugin.on_after_plan(current_plan)
+                if res is not None:
+                    current_plan = res
+            except Exception as e:
+                sys.stderr.write(
+                    f"Warning: Exception in plugin '{plugin.manifest.name}' on_after_plan: {e}\n"
+                )
+        return current_plan
+
+    def trigger_critic_report(self, report: CriticReport) -> CriticReport:
+        """Pipe critic report through active plugins for inspection or augmentation."""
+        current_report = report
+        for plugin in self._active_plugins.values():
+            try:
+                res = plugin.on_critic_report(current_report)
+                if res is not None:
+                    current_report = res
+            except Exception as e:
+                sys.stderr.write(
+                    f"Warning: Exception in plugin '{plugin.manifest.name}' on_critic_report: {e}\n"
+                )
+        return current_report

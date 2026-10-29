@@ -76,6 +76,24 @@ class BasePlugin:
         """Lifecycle hook called when plugin is deactivated."""
         pass
 
+    def on_before_plan(self, initial_state: Any, goal: Any) -> None:
+        """Lifecycle hook called before planner begins state exploration."""
+        pass
+
+    def on_after_plan(self, plan: Optional[Any]) -> Optional[Any]:
+        """Lifecycle hook called after planner returns a plan.
+
+        Can observe, validate, or decorate the generated plan.
+        """
+        return plan
+
+    def on_critic_report(self, report: CriticReport) -> CriticReport:
+        """Lifecycle hook called after critic evaluations are aggregated.
+
+        Can inspect or augment diagnostic suggestions.
+        """
+        return report
+
     def get_actions(self) -> List[ActionDefinition]:
         """Return domain-specific actions to register with reasoning/planning."""
         return []
