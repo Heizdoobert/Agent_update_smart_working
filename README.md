@@ -60,6 +60,11 @@ Hệ thống được thiết kế độc lập 100% (domain-agnostic), thuần 
    - Tối ưu hóa prompt theo phương pháp Teacher-to-Student từ các execution traces.
    - Hoạt động tách biệt ở chế độ batch, không gây chậm trễ runtime.
 
+6. **Kiến trúc Pluggable SDK & Onboarding Wizard (`agent_system.sdk`):**
+   - Hỗ trợ bất kỳ dự án ngoài nào cắm/rút (`plug-in` / `plug-out`) các domain Actions, Critics và tập luật prompt riêng (`.agent/rules.md`).
+   - Tự động kiểm soát ngân sách ngữ cảnh (<3KB) bằng `StructuralTruncator` với cơ chế bảo vệ cấu trúc markdown code fence.
+   - Onboarding Wizard (`agent-system init`) tương tác hỏi 4 câu hỏi để tự động sinh file cấu hình và code mẫu cho repo mới.
+
 ---
 
 ## 🚀 Cài đặt & Khởi động nhanh
@@ -117,24 +122,30 @@ print("Found doc:", results[0].content)
 Hỗ trợ đầy đủ tương thích với UNIX pipeline (`stdin` / `stdout`) và quản lý session liên lệnh:
 
 ```bash
+# 0. Khởi tạo cấu hình SDK cho dự án mới (Onboarding Wizard tương tác)
+agent-system init
+
 # 1. Kiểm tra phiên bản và trợ giúp
 agent-system --help
 agent-system --version
 
-# 2. Thẩm định mã nguồn (Critic) qua stdin hoặc file
+# 2. Lập kế hoạch hành động (tự động nhận diện Action từ plugin của dự án)
+agent-system plan --initial init.json --goal-key is_ready
+
+# 3. Thẩm định mã nguồn (Critic) qua stdin hoặc file
 cat draft.py | agent-system critic --file -
 
-# 3. Tự phản tỉnh và sửa mã lỗi
+# 4. Tự phản tỉnh và sửa mã lỗi
 agent-system reflect --file draft.py --output-code > clean.py
 
-# 4. Quản lý phiên làm việc liên tiến trình
+# 5. Quản lý phiên làm việc liên tiến trình
 agent-system session set --id task_01 --key status --value "in_progress"
 agent-system session get --id task_01
 
-# 5. Tìm kiếm bộ nhớ ngữ nghĩa
+# 6. Tìm kiếm bộ nhớ ngữ nghĩa
 agent-system memory search --query "quy trình phục hồi lỗi" --top-k 3
 
-# 6. Nạp ngữ cảnh kỹ năng động dưới 3KB
+# 7. Nạp ngữ cảnh kỹ năng động dưới 3KB
 agent-system skill inject --names "code-auditor" --max-bytes 3072
 ```
 
@@ -146,4 +157,4 @@ agent-system skill inject --names "code-auditor" --max-bytes 3072
 PYTHONPATH=. python3 -m pytest tests/ -v
 ```
 
-100% test cases (41/41 unit & integration tests) vượt qua với thời gian thực thi dưới 0.3 giây.
+100% test cases (72/72 unit & integration tests) vượt qua với thời gian thực thi ~0.4 giây.

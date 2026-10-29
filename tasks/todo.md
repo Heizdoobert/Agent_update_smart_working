@@ -407,13 +407,13 @@
 **Description:** Xây dựng kịch bản kiểm thử E2E hoàn chỉnh từ lúc khởi tạo dự án -> nạp plugin -> tiêm rules dự án (<3KB) -> lập kế hoạch với custom action -> kiểm định với custom critic -> tháo plugin (plug-out), đồng thời cập nhật tài liệu hướng dẫn (`README.md`, `GEMINI.md`).
 
 **Acceptance criteria:**
-- [ ] Kịch bản E2E kiểm tra toàn bộ vòng đời Plug-in và Plug-out thành công 100%.
-- [ ] Tài liệu `README.md` và `GEMINI.md` bổ sung hướng dẫn chi tiết cách viết plugin và sử dụng lệnh `agent-system init`.
-- [ ] 100% test cases (toàn bộ các test cũ + test mới) vượt qua.
+- [x] Kịch bản E2E kiểm tra toàn bộ vòng đời Plug-in và Plug-out thành công 100%.
+- [x] Tài liệu `README.md` và `GEMINI.md` bổ sung hướng dẫn chi tiết cách viết plugin và sử dụng lệnh `agent-system init`.
+- [x] 100% test cases (toàn bộ các test cũ + test mới) vượt qua.
 
 **Verification:**
-- [ ] Full suite pass: `PYTHONPATH=. pytest tests/ -v` (toàn bộ 100% tests pass).
-- [ ] Static Critic Audit: Toàn bộ code mới đạt điểm 100/100 qua `CriticEngine`.
+- [x] Full suite pass: `PYTHONPATH=. pytest tests/ -v` (toàn bộ 100% tests pass).
+- [x] Static Critic Audit: Toàn bộ code mới đạt điểm 100/100 qua `CriticEngine`.
 
 **Dependencies:** Tasks 12-15
 
@@ -427,6 +427,6 @@
 ---
 
 ## Final Checkpoint: Pluggable SDK & Wizard Verified
-- [ ] Toàn bộ 5 task mới hoàn thành trọn vẹn với đầy đủ unit test.
-- [ ] Không có bất kỳ vi phạm AST, kiểu dữ liệu hay rò rỉ trạng thái toàn cục.
-- [ ] Toàn bộ test suite pass 100%.
+- [x] Toàn bộ 5 task mới hoàn thành trọn vẹn với đầy đủ unit test.
+- [x] Không có bất kỳ vi phạm AST, kiểu dữ liệu hay rò rỉ trạng thái toàn cục.
+- [x] Toàn bộ test suite pass 100%.

@@ -65,13 +65,13 @@ Xây dựng **Agent Cognitive Framework** độc lập, domain-agnostic trong `A
 - [x] Task 13: Instance-Based PluginRegistry with Safe Dynamic Loader & Whitelisting
 - [x] Task 14: Interactive Onboarding Wizard with Safe I/O & Rollback
 - [x] Task 15: CLI Integration (`init` subcommand, interactive bootstrap & optional `--actions` fallback)
-- [ ] Task 16: End-to-End SDK Integration Tests & Documentation
+- [x] Task 16: End-to-End SDK Integration Tests & Documentation
 
 ### Checkpoint: SDK Pluggable Architecture Verified
-- [ ] Third-party project can plug-in domain actions/critics and plug-out seamlessly
-- [ ] Interactive wizard safely scaffolds unconfigured projects without blocking automated CLI pipes
-- [ ] Markdown rules are safely bounded (<3KB) without breaking code blocks
-- [ ] 100% of existing and new test suites pass cleanly
+- [x] Third-party project can plug-in domain actions/critics and plug-out seamlessly
+- [x] Interactive wizard safely scaffolds unconfigured projects without blocking automated CLI pipes
+- [x] Markdown rules are safely bounded (<3KB) without breaking code blocks
+- [x] 100% of existing and new test suites pass cleanly
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
