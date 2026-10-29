@@ -21,7 +21,7 @@ def test_cli_version(capsys):
         main(["--version"])
     assert excinfo.value.code == 0
     captured = capsys.readouterr()
-    assert "agent-system 0.1.0" in captured.out
+    assert "agent-system 0.2.0" in captured.out
 
 
 def test_cli_package_invocation_no_runtime_warnings():
@@ -34,7 +34,7 @@ def test_cli_package_invocation_no_runtime_warnings():
             text=True,
         )
         assert proc.returncode == 0
-        assert "agent-system 0.1.0" in proc.stdout
+        assert "agent-system 0.2.0" in proc.stdout
         assert "RuntimeWarning" not in proc.stderr
         assert proc.stderr.strip() == ""
 
