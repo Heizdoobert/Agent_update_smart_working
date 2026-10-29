@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-10-29
+
+### Added
+- **Antigravity (AGY CLI) Installer Integration**: Added `agent-system install --target agy` (or `--target antigravity`) to automatically configure `~/.gemini/config/mcp_config.json` and inject universal rules into `~/.gemini/config/rules/AGENTS.md`.
+
 ## [0.4.1] - 2026-10-29
 
 ### Added

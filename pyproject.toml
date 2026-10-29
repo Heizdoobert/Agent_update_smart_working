@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-system"
-version = "0.4.1"
+version = "0.4.2"
 description = "Domain-Agnostic Cognitive Agent Engine with ToT/MCTS Reasoning, Reflection, 3-Tier Memory, and Skill Management"
 authors = [{ name = "Agent System Core Team" }]
 readme = "README.md"
