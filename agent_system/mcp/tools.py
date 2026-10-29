@@ -176,6 +176,14 @@ class CognitiveToolsDispatcher:
 
     def __init__(self, root_path: str | Path = ".") -> None:
         self.root_path = Path(root_path).resolve()
+        self._store: Optional[SQLiteStore] = None
+
+    @property
+    def store(self) -> SQLiteStore:
+        """Lazily initialize shared concurrency-safe SQLite store."""
+        if self._store is None:
+            self._store = SQLiteStore()
+        return self._store
 
     def get_tool_definitions(self) -> List[Dict[str, Any]]:
         """Return MCP compliant tools specification list."""
@@ -289,8 +297,7 @@ class CognitiveToolsDispatcher:
         category = args.get("category")
         top_k = args.get("top_k", 3)
 
-        store = SQLiteStore()
-        memory = SemanticMemory(store=store)
+        memory = SemanticMemory(store=self.store)
         results = memory.search(query, category=category, top_k=top_k)
 
         items = [
@@ -302,15 +309,13 @@ class CognitiveToolsDispatcher:
     def _tool_agent_memory_recipe_record(self, args: Dict[str, Any]) -> str:
         key = args.get("key", "")
         recipe = args.get("recipe", "")
-        store = SQLiteStore()
-        memory = EpisodicMemory(store=store)
+        memory = EpisodicMemory(store=self.store)
         memory.record_recovery_recipe(key, recipe)
         return f"Successfully recorded recovery recipe for key '{key}'."
 
     def _tool_agent_memory_recipe_get(self, args: Dict[str, Any]) -> str:
         key = args.get("key", "")
-        store = SQLiteStore()
-        memory = EpisodicMemory(store=store)
+        memory = EpisodicMemory(store=self.store)
         recipe = memory.get_recovery_recipe(key)
         return recipe if recipe else f"No recipe found for key '{key}'."
 

@@ -13,6 +13,16 @@ from agent_system.mcp.tools import CognitiveToolsDispatcher
 PROTOCOL_VERSION = "2024-11-05"
 
 
+def _json_result(req_id: Any, result: Any) -> str:
+    """Format standard JSON-RPC 2.0 success response string."""
+    return json.dumps({"jsonrpc": "2.0", "id": req_id, "result": result})
+
+
+def _json_error(req_id: Any, code: int, message: str) -> str:
+    """Format standard JSON-RPC 2.0 error response string."""
+    return json.dumps({"jsonrpc": "2.0", "id": req_id, "error": {"code": code, "message": message}})
+
+
 class MCPServer:
     """Compliant Model Context Protocol stdio server implemented with pure standard library."""
 
@@ -37,22 +47,10 @@ class MCPServer:
         try:
             req: Dict[str, Any] = json.loads(message_str)
         except (json.JSONDecodeError, ValueError) as err:
-            return json.dumps(
-                {
-                    "jsonrpc": "2.0",
-                    "id": None,
-                    "error": {"code": -32700, "message": f"Parse error: {str(err)}"},
-                }
-            )
+            return _json_error(None, -32700, f"Parse error: {str(err)}")
 
         if not isinstance(req, dict):
-            return json.dumps(
-                {
-                    "jsonrpc": "2.0",
-                    "id": None,
-                    "error": {"code": -32600, "message": "Invalid Request: expected JSON object"},
-                }
-            )
+            return _json_error(None, -32600, "Invalid Request: expected JSON object")
 
         req_id = req.get("id")
         method = req.get("method", "")
@@ -60,83 +58,52 @@ class MCPServer:
 
         # Handle notifications (requests without 'id')
         if req_id is None:
-            # Client notifications require no response
             if method == "notifications/initialized":
                 self._log("Client completed MCP initialization.")
             return None
 
         # Standard JSON-RPC 2.0 / MCP Methods
         if method == "initialize":
-            return json.dumps(
+            return _json_result(
+                req_id,
                 {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "result": {
-                        "protocolVersion": PROTOCOL_VERSION,
-                        "capabilities": {"tools": {}},
-                        "serverInfo": {
-                            "name": "agent-system",
-                            "version": __version__,
-                        },
+                    "protocolVersion": PROTOCOL_VERSION,
+                    "capabilities": {"tools": {}},
+                    "serverInfo": {
+                        "name": "agent-system",
+                        "version": __version__,
                     },
-                }
+                },
             )
 
         elif method == "ping":
-            return json.dumps({"jsonrpc": "2.0", "id": req_id, "result": {}})
+            return _json_result(req_id, {})
 
         elif method == "tools/list":
-            return json.dumps(
-                {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "result": {"tools": self.tools.get_tool_definitions()},
-                }
-            )
+            return _json_result(req_id, {"tools": self.tools.get_tool_definitions()})
 
         elif method == "tools/call":
             tool_name = params.get("name", "")
             arguments = params.get("arguments", {})
             try:
                 content_text = self.tools.dispatch(tool_name, arguments)
-                return json.dumps(
-                    {
-                        "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {
-                            "content": [{"type": "text", "text": content_text}],
-                            "isError": False,
-                        },
-                    }
+                return _json_result(
+                    req_id,
+                    {"content": [{"type": "text", "text": content_text}], "isError": False},
                 )
             except Exception as exc:
-                return json.dumps(
+                return _json_result(
+                    req_id,
                     {
-                        "jsonrpc": "2.0",
-                        "id": req_id,
-                        "result": {
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": f"Error executing tool '{tool_name}': {str(exc)}",
-                                }
-                            ],
-                            "isError": True,
-                        },
-                    }
+                        "content": [
+                            {"type": "text", "text": f"Error executing tool '{tool_name}': {str(exc)}"}
+                        ],
+                        "isError": True,
+                    },
                 )
 
         else:
-            return json.dumps(
-                {
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "error": {
-                        "code": -32601,
-                        "message": f"Method not found: '{method}'",
-                    },
-                }
-            )
+            return _json_error(req_id, -32601, f"Method not found: '{method}'")
 
     def run_stdio(self) -> None:
         """Main stdio loop reading JSON-RPC lines from stdin and writing to stdout."""
