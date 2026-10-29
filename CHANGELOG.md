@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Brownfield Codebase Scanner (`agent_system.sdk.scanner`)**:
+  - `CodebaseScanner` and `ProjectManifest` contracts extracting tech stack, test frameworks, build commands, and coding conventions from Python, Node/TS, Rust, Go, and Makefile manifests.
+  - Bounded markdown documentation parser with heading extraction and safe I/O (up to 50KB per doc).
+- **Dual-Tier Knowledge Ingestion Engine (`agent_system.sdk.ingestion`)**:
+  - `KnowledgeIngester` synthesizing Tier 1 rules (`.agent/rules.md` and companion `AGENTS.md`) strictly bounded to $\le 3072$ bytes via `StructuralTruncator` and scoring 100/100 on `MarkdownRulesCritic`.
+  - Tier 2 Semantic Memory ingestion chunking documentation by H2 headings (`## `) into SQLite Store for deep on-demand retrieval.
+- **CLI Commands for Brownfield Onboarding (`agent_system.cli.main`)**:
+  - Added `agent-system scan [--root PATH] [--json]` for machine-readable JSON payloads (consumed by AI Agent CLIs) or human-readable project summaries.
+  - Added `agent-system init --auto [--root PATH] [--json]` for non-interactive first-time onboarding of brownfield codebases.
 - **ADR-005**: Documented Context Hierarchy and Active Budget Governance (<3KB) in `docs/decisions/0005-context-engineering-hierarchy-and-budget-governance.md`.
 - **Context Budget Multi-Plugin Guard**: Added `max_bytes=3072` constraint and automatic `StructuralTruncator` trimming to `PluginRegistry.get_project_rules()`.
 

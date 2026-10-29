@@ -513,13 +513,13 @@
 **Description:** Chạy kiểm thử tích hợp toàn diện trên một mock brownfield repository mô phỏng dự án thực tế; thẩm định toàn bộ code mới qua `CriticEngine` (100/100 điểm, không vi phạm AST hay phong cách code); cập nhật tài liệu `README.md`, `CLAUDE.md`, `CHANGELOG.md` và `docs/decisions/`.
 
 **Acceptance criteria:**
-- [ ] 100% test cases (cũ + mới, $\ge 90$ tests) vượt qua thành công trên `pytest`.
-- [ ] Đạt điểm 100/100 trên toàn bộ file code mới qua `CriticEngine`.
-- [ ] Tài liệu `CHANGELOG.md` và `README.md` cập nhật hướng dẫn sử dụng lệnh `scan` và `init --auto`.
+- [x] 100% test cases (cũ + mới, $\ge 90$ tests) vượt qua thành công trên `pytest`.
+- [x] Đạt điểm 100/100 trên toàn bộ file code mới qua `CriticEngine`.
+- [x] Tài liệu `CHANGELOG.md` và `README.md` cập nhật hướng dẫn sử dụng lệnh `scan` và `init --auto`.
 
 **Verification:**
-- [ ] Full suite pass: `PYTHONPATH=. python3 -m pytest tests/ -v`
-- [ ] Critic pass: `python3 -m agent_system.cli.main critic --file agent_system/sdk/scanner.py`
+- [x] Full suite pass: `PYTHONPATH=. python3 -m pytest tests/ -v`
+- [x] Critic pass: `python3 -m agent_system.cli.main critic --file agent_system/sdk/scanner.py`
 
 **Dependencies:** Tasks 17-19
 
@@ -533,9 +533,9 @@
 ---
 
 ## Checkpoint: Brownfield Codebase Scanner & Ingestion Verified
-- [ ] CodebaseScanner trích xuất chính xác manifest, test commands, rules từ nhiều stack.
-- [ ] Tier 1 `.agent/rules.md` đạt $\le 3072$ bytes và 100/100 MarkdownRulesCritic.
-- [ ] Tier 2 Semantic Memory nạp thành công các doc chunks theo đề mục H2.
-- [ ] Lệnh `agent-system scan --json` phản hồi dưới 200ms.
-- [ ] 100% test suite pass toàn diện.
+- [x] CodebaseScanner trích xuất chính xác manifest, test commands, rules từ nhiều stack.
+- [x] Tier 1 `.agent/rules.md` đạt $\le 3072$ bytes và 100/100 MarkdownRulesCritic.
+- [x] Tier 2 Semantic Memory nạp thành công các doc chunks theo đề mục H2.
+- [x] Lệnh `agent-system scan --json` phản hồi dưới 200ms.
+- [x] 100% test suite pass toàn diện.
 

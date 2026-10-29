@@ -125,6 +125,13 @@ Hỗ trợ đầy đủ tương thích với UNIX pipeline (`stdin` / `stdout`) 
 # 0. Khởi tạo cấu hình SDK cho dự án mới (Onboarding Wizard tương tác)
 agent-system init
 
+# 0.1 Quét mã nguồn dự án cũ (Brownfield Discovery: JSON cho AI Agent hoặc tóm tắt)
+agent-system scan --root . --json
+agent-system scan --root .
+
+# 0.2 Tự động onboarding dự án cũ không cần prompt (Dual-tier Ingestion)
+agent-system init --auto --root . --json
+
 # 1. Kiểm tra phiên bản và trợ giúp
 agent-system --help
 agent-system --version
@@ -157,4 +164,4 @@ agent-system skill inject --names "code-auditor" --max-bytes 3072
 PYTHONPATH=. python3 -m pytest tests/ -v
 ```
 
-100% test cases (81/81 unit & integration tests) vượt qua với thời gian thực thi ~0.6 giây.
+100% test cases (96/96 unit & integration tests) vượt qua với thời gian thực thi ~0.9 giây.

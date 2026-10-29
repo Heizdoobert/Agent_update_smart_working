@@ -110,6 +110,9 @@ class CodebaseScanner:
             has_py = True
             manifest_files.append("pyproject.toml")
             content = self._safe_read_text(pyproject)
+            name_match = re.search(r'name\s*=\s*["\']([^"\']+)["\']', content)
+            if name_match and not manifest.extra_metadata.get("project_name"):
+                manifest.extra_metadata["project_name"] = name_match.group(1)
             if "pytest" in content:
                 manifest.test_framework = "pytest"
                 manifest.build_commands.setdefault("test", "pytest")
@@ -162,6 +165,8 @@ class CodebaseScanner:
             try:
                 content = self._safe_read_text(pkg_json_path)
                 data = json.loads(content)
+                if "name" in data and not manifest.extra_metadata.get("project_name"):
+                    manifest.extra_metadata["project_name"] = str(data["name"])
                 scripts = data.get("scripts", {})
                 if "test" in scripts:
                     manifest.build_commands["test"] = scripts["test"]

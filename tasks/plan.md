@@ -77,15 +77,15 @@ Xây dựng **Agent Cognitive Framework** độc lập, domain-agnostic trong `A
 - [x] Task 17: Core Codebase Scanner & Project Manifest Contract (`agent_system/sdk/scanner.py`)
 - [x] Task 18: Dual-Tier Knowledge Ingestion Engine (`agent_system/sdk/ingestion.py`)
 - [x] Task 19: CLI Commands (`scan` & `init --auto`) in `agent_system/cli/main.py`
-- [ ] Task 20: Integration Tests, End-to-End Verification & Documentation Update
+- [x] Task 20: Integration Tests, End-to-End Verification & Documentation Update
 
 ### Checkpoint: Brownfield Codebase Scanner & Ingestion Verified
-- [ ] CodebaseScanner extracts manifest, test commands, rules from Python, Node/TS, Rust, Go, Makefile
-- [ ] Tier 1 `.agent/rules.md` is strictly bounded to $\le 3072$ bytes and passes MarkdownRulesCritic
-- [ ] Tier 2 Semantic Memory indexes documentation sections chunked by H2 headings
-- [ ] `agent-system scan --json` outputs structured metadata in $<200$ms
-- [ ] `agent-system init --auto` runs non-interactively without prompt blocking
-- [ ] 100% of entire test suite (83+ existing and new tests) passes
+- [x] CodebaseScanner extracts manifest, test commands, rules from Python, Node/TS, Rust, Go, Makefile
+- [x] Tier 1 `.agent/rules.md` is strictly bounded to $\le 3072$ bytes and passes MarkdownRulesCritic
+- [x] Tier 2 Semantic Memory indexes documentation sections chunked by H2 headings
+- [x] `agent-system scan --json` outputs structured metadata in $<200$ms
+- [x] `agent-system init --auto` runs non-interactively without prompt blocking
+- [x] 100% of entire test suite (96/96 tests) passes
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |

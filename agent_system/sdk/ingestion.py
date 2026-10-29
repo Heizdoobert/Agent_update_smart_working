@@ -78,7 +78,8 @@ class KnowledgeIngester:
         # Create agent_plugin.json if absent
         plugin_path = self.root_path / "agent_plugin.json"
         if not plugin_path.exists():
-            pkg_name = Path(manifest.root_path).name.lower().replace("-", "_").replace(" ", "_")
+            raw_name = manifest.extra_metadata.get("project_name") or Path(manifest.root_path).name
+            pkg_name = str(raw_name).lower().replace("-", "_").replace(" ", "_")
             if not pkg_name or not pkg_name.isidentifier():
                 pkg_name = "project_plugin"
             manifest_data = {
