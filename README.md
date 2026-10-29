@@ -157,4 +157,4 @@ agent-system skill inject --names "code-auditor" --max-bytes 3072
 PYTHONPATH=. python3 -m pytest tests/ -v
 ```
 
-100% test cases (72/72 unit & integration tests) vượt qua với thời gian thực thi ~0.4 giây.
+100% test cases (81/81 unit & integration tests) vượt qua với thời gian thực thi ~0.6 giây.
