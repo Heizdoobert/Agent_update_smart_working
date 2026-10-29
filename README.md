@@ -154,7 +154,37 @@ agent-system memory search --query "quy trình phục hồi lỗi" --top-k 3
 
 # 7. Nạp ngữ cảnh kỹ năng động dưới 3KB
 agent-system skill inject --names "code-auditor" --max-bytes 3072
+# 8. Khởi chạy Model Context Protocol (MCP) Server thuần Python cho Claude / Cursor
+agent-system mcp --root .
 ```
+
+---
+
+## 🔌 Tích hợp MCP Server (Claude Desktop, Cursor, Antigravity, Windsurf)
+
+`agent-system` hỗ trợ chuẩn giao thức **Model Context Protocol (MCP)** qua `stdio` mà **không cần cài thêm bất kỳ gói pip bên ngoài nào**:
+
+### Cấu hình trong Claude Desktop (`claude_desktop_config.json`) hoặc Cursor (`.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "agent-system": {
+      "command": "python3",
+      "args": ["-m", "agent_system.cli.main", "mcp", "--root", "/path/to/your/project"]
+    }
+  }
+}
+```
+
+### Danh sách 8 công cụ MCP được cung cấp sẵn:
+- `agent_plan`: Lập kế hoạch hành động tối ưu với thuật toán A* Search hoặc MCTS.
+- `agent_critic`: Thẩm định tĩnh mã nguồn theo luật cú pháp và kiến trúc.
+- `agent_reflect`: Tự động phản tỉnh và vá lỗi vi phạm trong RAM trước khi ghi file.
+- `agent_memory_search`: Tìm kiếm tri thức trong Semantic Memory (BM25 / FTS5).
+- `agent_memory_recipe_record`: Ghi nhận công thức khắc phục lỗi vào Episodic Memory.
+- `agent_memory_recipe_get`: Tra cứu công thức khắc phục lỗi.
+- `agent_scan`: Tự động quét mã nguồn nhận diện ngôn ngữ, test runner và coding conventions.
+- `agent_init_auto`: Tự động bootstrap và nạp tri thức brownfield cho dự án.
 
 ---
 
@@ -164,4 +194,4 @@ agent-system skill inject --names "code-auditor" --max-bytes 3072
 PYTHONPATH=. python3 -m pytest tests/ -v
 ```
 
-100% test cases (96/96 unit & integration tests) vượt qua với thời gian thực thi ~0.9 giây.
+100% test cases (102/102 unit & integration tests) vượt qua với thời gian thực thi ~1.0 giây.

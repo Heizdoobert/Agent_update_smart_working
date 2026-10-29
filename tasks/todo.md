@@ -539,3 +539,106 @@
 - [x] Lệnh `agent-system scan --json` phản hồi dưới 200ms.
 - [x] 100% test suite pass toàn diện.
 
+---
+
+# Phase 8: Zero-Dependency Model Context Protocol (MCP) Server
+
+## Task 21: JSON-RPC 2.0 Stdio Protocol Engine
+
+**Description:** Xây dựng module `agent_system/mcp/server.py` với lớp `MCPServer`. Triển khai vòng lặp đọc/ghi JSON-RPC 2.0 qua `sys.stdin`/`sys.stdout`, hỗ trợ các phương thức chuẩn `initialize`, `notifications/initialized`, `ping`. Chuyển toàn bộ stderr/logs để giữ sạch luồng stdio.
+
+**Acceptance criteria:**
+- [x] Phản hồi đúng chuẩn JSON-RPC 2.0 cho `initialize` với version `"2024-11-05"` và server info.
+- [x] Xử lý mượt mà `ping` và các notification không yêu cầu response.
+- [x] Trả về mã lỗi JSON-RPC chuẩn (`-32700`, `-32601`, `-32602`) khi request sai định dạng.
+
+**Verification:**
+- [x] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_mcp_server.py -k test_mcp_handshake -v`
+- [x] Build succeeds: `python3 -m py_compile agent_system/mcp/server.py`
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `agent_system/mcp/__init__.py`
+- `agent_system/mcp/server.py`
+- `tests/test_mcp_server.py`
+
+**Estimated scope:** Small (3 files)
+
+---
+
+## Task 22: Cognitive Tools Dispatcher & Schema Declarations
+
+**Description:** Xây dựng module `agent_system/mcp/tools.py` định nghĩa schema JSON Schema cho 8 công cụ: `agent_plan`, `agent_critic`, `agent_reflect`, `agent_memory_search`, `agent_memory_recipe_record`, `agent_memory_recipe_get`, `agent_scan`, `agent_init_auto`. Thực thi trực tiếp qua các engine in-memory.
+
+**Acceptance criteria:**
+- [x] `tools/list` trả về danh sách 8 công cụ với inputSchema chuẩn.
+- [x] `tools/call` thực thi chính xác từng công cụ và trả về định dạng `{"content": [{"type": "text", "text": "..."}]}`.
+- [x] Tự động bọc lỗi an toàn thành `isError: true` khi tham số không hợp lệ.
+
+**Verification:**
+- [x] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_mcp_server.py -k test_mcp_tools -v`
+- [x] Build succeeds: `python3 -m py_compile agent_system/mcp/tools.py`
+
+**Dependencies:** Task 21
+
+**Files likely touched:**
+- `agent_system/mcp/tools.py`
+- `agent_system/mcp/server.py`
+- `tests/test_mcp_server.py`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+## Task 23: CLI Subcommand `mcp` & Stdio Pipe Integration Tests
+
+**Description:** Tích hợp subcommand `mcp` vào `agent_system/cli/main.py`. Tạo bài test tích hợp `tests/test_mcp_e2e.py` dùng `subprocess.Popen` giao tiếp song công (bidirectional stdio) để kiểm tra tương thích thực tế như một MCP Client.
+
+**Acceptance criteria:**
+- [x] Lệnh `agent-system mcp` khởi động server và lắng nghe qua stdin.
+- [x] Test E2E mô phỏng handshake client-server thành công trọn vẹn qua tiến trình subprocess.
+
+**Verification:**
+- [x] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_mcp_e2e.py -v`
+- [x] Build succeeds: `python3 -m py_compile agent_system/cli/main.py`
+
+**Dependencies:** Tasks 21, 22
+
+**Files likely touched:**
+- `agent_system/cli/main.py`
+- `tests/test_mcp_e2e.py`
+
+**Estimated scope:** Small (2 files)
+
+---
+
+## Task 24: Critic Audit, Documentation & Release Verification
+
+**Description:** Thẩm định 100/100 điểm qua `CriticEngine` cho toàn bộ code mới; cập nhật `README.md`, `CLAUDE.md`, `CHANGELOG.md` với hướng dẫn cấu hình MCP cho Claude Desktop / Cursor. Đảm bảo toàn bộ test suite pass 100%.
+
+**Acceptance criteria:**
+- [x] 100% test cases ($\ge 100$ tests) pass trên `pytest`.
+- [x] Đạt điểm 100/100 trên toàn bộ file code mới qua `CriticEngine`.
+- [x] `README.md` có hướng dẫn cấu hình JSON cho Claude Desktop và Cursor.
+
+**Verification:**
+- [x] Full suite pass: `PYTHONPATH=. python3 -m pytest tests/ -v`
+- [x] Critic pass: `python3 -m agent_system.cli.main critic --file agent_system/mcp/server.py`
+
+**Dependencies:** Tasks 21-23
+
+**Files likely touched:**
+- `README.md`
+- `CHANGELOG.md`
+
+**Estimated scope:** Small (2 files)
+
+---
+
+## Checkpoint: MCP Server Protocol Verified
+- [x] Toàn bộ 4 task MCP hoàn thành trọn vẹn.
+- [x] Tương thích 100% chuẩn MCP 2024-11-05.
+- [x] Zero runtime dependencies ngoài standard library.
+- [x] 100% test suite pass toàn diện.
+

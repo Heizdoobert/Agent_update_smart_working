@@ -23,6 +23,7 @@ from agent_system.sdk.registry import PluginRegistry
 from agent_system.sdk.wizard import OnboardingWizard
 from agent_system.sdk.scanner import CodebaseScanner
 from agent_system.sdk.ingestion import KnowledgeIngester
+from agent_system.mcp.server import MCPServer
 
 
 def _read_input(file_arg: Optional[str] = None) -> str:
@@ -354,6 +355,13 @@ def cmd_init(args: argparse.Namespace) -> int:
     return 0 if success else 1
 
 
+def cmd_mcp(args: argparse.Namespace) -> int:
+    """Start Model Context Protocol (MCP) JSON-RPC 2.0 stdio server."""
+    server = MCPServer(root_path=args.root or ".")
+    server.run_stdio()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agent-system",
@@ -375,6 +383,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_scan.add_argument("--root", default=".", help="Root directory to scan")
     p_scan.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     p_scan.set_defaults(func=cmd_scan)
+
+    # 0.2 MCP Server
+    p_mcp = subparsers.add_parser("mcp", help="Run Model Context Protocol (MCP) JSON-RPC 2.0 stdio server")
+    p_mcp.add_argument("--root", default=".", help="Root directory for tools context")
+    p_mcp.set_defaults(func=cmd_mcp)
 
     # 1. Plan
     p_plan = subparsers.add_parser("plan", help="Synthesize action plan via A* or MCTS")

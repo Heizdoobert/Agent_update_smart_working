@@ -87,6 +87,18 @@ Xây dựng **Agent Cognitive Framework** độc lập, domain-agnostic trong `A
 - [x] `agent-system init --auto` runs non-interactively without prompt blocking
 - [x] 100% of entire test suite (96/96 tests) passes
 
+### Phase 8: Zero-Dependency Model Context Protocol (MCP) Server (`agent_system.mcp`)
+- [x] Task 21: JSON-RPC 2.0 Stdio Protocol Engine (`agent_system/mcp/server.py`)
+- [x] Task 22: Cognitive Tools Dispatcher & Schema Declarations (`agent_system/mcp/tools.py`)
+- [x] Task 23: CLI Subcommand `mcp` & Stdio Pipe Integration Tests (`tests/test_mcp_server.py`, `tests/test_mcp_e2e.py`)
+- [x] Task 24: Critic Audit, End-to-End Verification & Documentation Update
+
+### Checkpoint: MCP Server Protocol Verified
+- [x] JSON-RPC 2.0 handshake (`initialize`, `ping`, `tools/list`) compliant with MCP 2024-11-05
+- [x] All 8 cognitive tools callable over stdio with $<5$ms latency
+- [x] Stdio pipe is completely clean (diagnostics routed strictly to stderr)
+- [x] 100% of all existing and new test suites pass
+
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
 |------|--------|------------|
