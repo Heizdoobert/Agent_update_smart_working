@@ -464,14 +464,14 @@
 **Description:** Xây dựng module `agent_system.sdk.ingestion` với lớp `KnowledgeIngester`. Nhận vào `ProjectManifest`, tổng hợp Tầng 1: file luật `.agent/rules.md` (kèm symlink `AGENTS.md`) và `agent_plugin.json`, đảm bảo trần ngân sách ngữ cảnh $\le 3072$ bytes qua `StructuralTruncator` và vượt qua `MarkdownRulesCritic`. Tổng hợp Tầng 2: chia nhỏ các file tài liệu theo đề mục H2 (`## `) và nạp vào `SemanticMemory` (SQLite Store) với metadata nguồn gốc.
 
 **Acceptance criteria:**
-- [ ] File `.agent/rules.md` sinh ra có dung lượng $\le 3072$ bytes và đạt điểm tối đa trên `MarkdownRulesCritic`.
-- [ ] Toàn bộ các chunk tài liệu được index vào `SemanticMemory` và tìm kiếm được qua `search()`.
-- [ ] Quá trình nạp đảm bảo tính idempotent (không nhân bản trùng lặp nếu chạy lại).
+- [x] File `.agent/rules.md` sinh ra có dung lượng $\le 3072$ bytes và đạt điểm tối đa trên `MarkdownRulesCritic`.
+- [x] Toàn bộ các chunk tài liệu được index vào `SemanticMemory` và tìm kiếm được qua `search()`.
+- [x] Quá trình nạp đảm bảo tính idempotent (không nhân bản trùng lặp nếu chạy lại).
 
 **Verification:**
-- [ ] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_sdk_ingestion.py -v`
-- [ ] Build succeeds: `python3 -m py_compile agent_system/sdk/ingestion.py`
-- [ ] Manual check: Kiểm tra dung lượng `.agent/rules.md` sinh ra và query thử từ khóa trong `SemanticMemory`.
+- [x] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_sdk_ingestion.py -v`
+- [x] Build succeeds: `python3 -m py_compile agent_system/sdk/ingestion.py`
+- [x] Manual check: Kiểm tra dung lượng `.agent/rules.md` sinh ra và query thử từ khóa trong `SemanticMemory`.
 
 **Dependencies:** Task 17
 

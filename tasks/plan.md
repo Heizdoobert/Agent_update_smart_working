@@ -75,7 +75,7 @@ Xây dựng **Agent Cognitive Framework** độc lập, domain-agnostic trong `A
 
 ### Phase 7: Brownfield Codebase Scanner & Dual-Tier Knowledge Ingestion (`agent_system.sdk.scanner` & `ingestion`)
 - [x] Task 17: Core Codebase Scanner & Project Manifest Contract (`agent_system/sdk/scanner.py`)
-- [ ] Task 18: Dual-Tier Knowledge Ingestion Engine (`agent_system/sdk/ingestion.py`)
+- [x] Task 18: Dual-Tier Knowledge Ingestion Engine (`agent_system/sdk/ingestion.py`)
 - [ ] Task 19: CLI Commands (`scan` & `init --auto`) in `agent_system/cli/main.py`
 - [ ] Task 20: Integration Tests, End-to-End Verification & Documentation Update
 
