@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-29
+
 ### Added
 - **Brownfield Codebase Scanner (`agent_system.sdk.scanner`)**:
   - `CodebaseScanner` and `ProjectManifest` contracts extracting tech stack, test frameworks, build commands, and coding conventions from Python, Node/TS, Rust, Go, and Makefile manifests.
