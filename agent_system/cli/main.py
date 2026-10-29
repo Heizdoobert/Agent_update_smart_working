@@ -302,7 +302,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
     scanner = CodebaseScanner(root_path=root_path)
     manifest = scanner.scan()
 
-    if getattr(args, "json", False):
+    if args.json:
         sys.stdout.write(json.dumps(manifest.to_dict(), indent=2) + "\n")
         return 0
 
@@ -327,12 +327,12 @@ def cmd_scan(args: argparse.Namespace) -> int:
 def cmd_init(args: argparse.Namespace) -> int:
     """Bootstrap project SDK configuration interactively or via auto-scan."""
     root_dir = args.root or args.target_dir or "."
-    if getattr(args, "auto", False):
+    if args.auto:
         scanner = CodebaseScanner(root_path=root_dir)
         manifest = scanner.scan()
         ingester = KnowledgeIngester(root_path=root_dir)
         result = ingester.ingest(manifest)
-        if getattr(args, "json", False):
+        if args.json:
             payload = {
                 "status": "SUCCESS",
                 "rules_path": str(result.rules_path),

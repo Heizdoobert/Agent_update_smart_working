@@ -5,7 +5,6 @@ manifest details, and documentation conventions from existing repositories.
 """
 from dataclasses import dataclass, field
 import json
-import os
 from pathlib import Path
 import re
 from typing import Any, Dict, List, Optional, Set
@@ -72,7 +71,7 @@ class CodebaseScanner:
         self._detect_generic_build(manifest, manifest_files)
 
         # Finalize tech stack & primary language if not already decided
-        manifest.tech_stack = sorted(list(stack_set))
+        manifest.tech_stack = sorted(stack_set)
         if manifest.primary_language == "Unknown" and manifest.tech_stack:
             for lang in ["Python", "TypeScript", "JavaScript", "Rust", "Go"]:
                 if lang in manifest.tech_stack:

@@ -5,7 +5,6 @@ and indexes Tier 2 documentation into Semantic Memory (SQLite Store).
 """
 from dataclasses import dataclass
 import json
-import os
 from pathlib import Path
 import re
 from typing import List, Optional
@@ -52,16 +51,7 @@ class KnowledgeIngester:
         rules_path = agent_dir / "rules.md"
         rules_content = self._synthesize_rules(manifest)
         truncated_rules = StructuralTruncator.truncate_text(rules_content, max_bytes=self.max_rules_bytes)
-
-        # Double check byte limit
         rules_bytes = truncated_rules.encode("utf-8")
-        if len(rules_bytes) > self.max_rules_bytes:
-            truncated_rules = StructuralTruncator.truncate_text(
-                truncated_rules[: self.max_rules_bytes - 100],
-                max_bytes=self.max_rules_bytes,
-            )
-            rules_bytes = truncated_rules.encode("utf-8")
-
         rules_path.write_text(truncated_rules, encoding="utf-8")
 
         # Create symlink or companion AGENTS.md in repo root
@@ -178,7 +168,7 @@ class KnowledgeIngester:
                 continue
 
             # Split by markdown headings: ## or #
-            sections = self._chunk_markdown(content, rel_doc)
+            sections = self._chunk_markdown(content)
             for idx, (heading, chunk_body) in enumerate(sections):
                 item_id = f"doc:{rel_doc}:{idx}"
                 full_text = f"[{rel_doc} > {heading}]\n{chunk_body}"
@@ -193,27 +183,24 @@ class KnowledgeIngester:
 
         return chunks_count
 
-    def _chunk_markdown(self, content: str, filename: str) -> List[tuple[str, str]]:
+    def _chunk_markdown(self, content: str) -> List[tuple[str, str]]:
         """Split markdown text by H2 (##) or H1 (#) headings."""
-        lines = content.splitlines()
         chunks: List[tuple[str, str]] = []
         current_heading = "Overview"
         current_lines: List[str] = []
 
-        for line in lines:
+        def _flush() -> None:
+            text = "\n".join(current_lines).strip()
+            if text:
+                chunks.append((current_heading, text))
+            current_lines.clear()
+
+        for line in content.splitlines():
             if re.match(r"^#{1,2}\s+", line):
-                if current_lines:
-                    chunk_text = "\n".join(current_lines).strip()
-                    if chunk_text:
-                        chunks.append((current_heading, chunk_text))
-                    current_lines = []
+                _flush()
                 current_heading = re.sub(r"^#{1,2}\s+", "", line).strip()
             else:
                 current_lines.append(line)
 
-        if current_lines:
-            chunk_text = "\n".join(current_lines).strip()
-            if chunk_text:
-                chunks.append((current_heading, chunk_text))
-
+        _flush()
         return chunks
