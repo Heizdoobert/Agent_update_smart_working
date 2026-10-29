@@ -435,7 +435,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # 0.0 Install
     p_install = subparsers.add_parser("install", help="Install System Instructions and MCP server into AI clients (Claude Desktop, Cursor, etc.)")
-    p_install.add_argument("--target", choices=["all", "claude", "cursor", "windsurf", "mcp", "rules"], default="all", help="Target client or component (default: all)")
+    p_install.add_argument(
+        "--target",
+        choices=["all", "agy", "antigravity", "claude", "cursor", "windsurf", "mcp", "rules"],
+        default="all",
+        help="Target client or component (default: all)",
+    )
     p_install.add_argument("--dry-run", action="store_true", help="Preview changes without modifying config files")
     p_install.add_argument("--print-instruction", action="store_true", help="Print the Universal System Instruction markdown to stdout")
     p_install.add_argument("--json", action="store_true", help="Output installation summary as JSON")

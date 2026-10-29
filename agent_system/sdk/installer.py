@@ -58,6 +58,11 @@ def get_cursor_config_path() -> Path:
     return Path.home() / ".cursor" / "mcp.json"
 
 
+def get_antigravity_config_path() -> Path:
+    """Resolve default path for Antigravity (AGY CLI / Gemini) MCP configuration file."""
+    return Path.home() / ".gemini" / "config" / "mcp_config.json"
+
+
 def get_windsurf_config_path() -> Path:
     """Resolve default path for Windsurf MCP configuration file."""
     return Path.home() / ".codeium" / "windsurf" / "mcp_config.json"
@@ -105,6 +110,15 @@ def install_agent_environment(
         "dry_run": dry_run,
     }
 
+    # 0. MCP Configuration for Antigravity (AGY CLI)
+    if target in ("all", "agy", "antigravity", "mcp"):
+        agy_path = get_antigravity_config_path()
+        results["mcp_installed"].append(
+            {"client": "Antigravity (AGY CLI)", "path": str(agy_path), "status": "PENDING" if dry_run else "SUCCESS"}
+        )
+        if not dry_run:
+            inject_mcp_config(agy_path)
+
     # 1. MCP Configuration for Claude Desktop
     if target in ("all", "claude", "mcp"):
         claude_path = get_claude_desktop_config_path()
@@ -134,8 +148,9 @@ def install_agent_environment(
             inject_mcp_config(windsurf_path)
 
     # 4. Global System Instructions / Rules
-    if target in ("all", "rules"):
+    if target in ("all", "rules", "agy", "antigravity"):
         rules_targets = [
+            Path.home() / ".gemini" / "config" / "rules" / "AGENTS.md",
             Path.home() / ".claude" / "CLAUDE.md",
             Path.home() / ".cursorrules",
             Path.home() / ".agent" / "rules.md",
