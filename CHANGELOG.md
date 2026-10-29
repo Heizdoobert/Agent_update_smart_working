@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+- **ADR-005**: Documented Context Hierarchy and Active Budget Governance (<3KB) in `docs/decisions/0005-context-engineering-hierarchy-and-budget-governance.md`.
+- **Context Budget Multi-Plugin Guard**: Added `max_bytes=3072` constraint and automatic `StructuralTruncator` trimming to `PluginRegistry.get_project_rules()`.
+
+### Optimized
+- **Rules Context Compression**: Re-engineered project rules (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`) down to 2824 bytes (strictly under 3KB limit), achieving 100/100 pass score on `MarkdownRulesCritic` with zero diagnostics.
+
 ## [0.2.0] - 2026-10-29
 
 ### Added

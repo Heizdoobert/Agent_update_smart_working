@@ -234,10 +234,11 @@ class PluginRegistry:
             critics.extend(plugin.get_critics())
         return critics
 
-    def get_project_rules(self) -> str:
-        """Combine project rules from all active plugins."""
+    def get_project_rules(self, max_bytes: int = 3072) -> str:
+        """Combine project rules from all active plugins bounded by context budget."""
         rules = [p.get_rules() for p in self._active_plugins.values() if p.get_rules()]
-        return "\n\n".join(rules)
+        combined = "\n\n".join(rules)
+        return StructuralTruncator.truncate_text(combined, max_bytes=max_bytes)
 
     def trigger_before_plan(self, initial_state: Any, goal: Any) -> None:
         """Notify all active plugins before planning begins."""

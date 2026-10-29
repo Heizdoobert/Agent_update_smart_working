@@ -72,3 +72,29 @@ def test_discover_and_load_multiple_plugins_in_directory(tmp_path):
     assert len(loaded) == 2
     assert "plugin_a" in [p.manifest.name for p in loaded]
     assert "plugin_b" in [p.manifest.name for p in loaded]
+
+
+def test_multi_plugin_rules_context_budget_truncation():
+    from agent_system.sdk.contracts import ProjectContext
+    
+    registry = PluginRegistry()
+    
+    # Plugin 1 provides 2000 bytes of rules
+    p1 = BasePlugin(
+        manifest=PluginManifest(name="p1"),
+        context=ProjectContext(project_root="/tmp", rules_content="A" * 2000),
+    )
+    # Plugin 2 provides 2000 bytes of rules
+    p2 = BasePlugin(
+        manifest=PluginManifest(name="p2"),
+        context=ProjectContext(project_root="/tmp", rules_content="B" * 2000),
+    )
+    
+    registry._active_plugins["p1"] = p1
+    registry._active_plugins["p2"] = p2
+    
+    combined_rules = registry.get_project_rules()
+    assert len(combined_rules.encode("utf-8")) <= 3072
+    assert "...[TRUNCATED]" in combined_rules
+    assert combined_rules.startswith("A" * 100)
+
