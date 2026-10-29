@@ -88,8 +88,20 @@ class MCTSPlanner:
             # 1. Selection
             node = root
             while not node.untried_actions and node.children:
-                # Pick child with highest UCT
-                node = max(node.children, key=lambda c: c.uct_score(self.c))
+                # Precompute exploration factor once to avoid repeated math.log calls across children
+                parent_log = math.log(max(1, node.visits))
+                exp_coeff = self.c * math.sqrt(parent_log)
+                best_node = None
+                best_score = float("-inf")
+                for c in node.children:
+                    if c.visits == 0:
+                        best_node = c
+                        break
+                    score = (c.total_value / c.visits) + (exp_coeff / math.sqrt(c.visits))
+                    if score > best_score:
+                        best_score = score
+                        best_node = c
+                node = best_node or node.children[0]
 
             # 2. Expansion
             if node.untried_actions and not is_goal(node.state):

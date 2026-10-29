@@ -23,6 +23,7 @@ class PurePythonBM25:
         self.b = b
         self.docs: Dict[str, MemoryItem] = {}
         self.doc_lengths: Dict[str, int] = {}
+        self.total_doc_len: int = 0
         self.avg_doc_len: float = 0.0
         self.inverted_index: Dict[str, Dict[str, int]] = defaultdict(dict)  # term -> {doc_id: freq}
         self.doc_count: int = 0
@@ -32,20 +33,26 @@ class PurePythonBM25:
 
     def add_document(self, item: MemoryItem) -> None:
         if item.item_id in self.docs:
-            for postings in self.inverted_index.values():
-                postings.pop(item.item_id, None)
+            old_item = self.docs[item.item_id]
+            old_len = self.doc_lengths.get(item.item_id, 0)
+            self.total_doc_len -= old_len
+            # Targeted term cleanup instead of scanning entire vocabulary
+            for term in set(self._tokenize(old_item.content)):
+                if term in self.inverted_index:
+                    self.inverted_index[term].pop(item.item_id, None)
 
         self.docs[item.item_id] = item
         tokens = self._tokenize(item.content)
         length = len(tokens)
         self.doc_lengths[item.item_id] = length
+        self.total_doc_len += length
 
         counts = Counter(tokens)
         for term, freq in counts.items():
             self.inverted_index[term][item.item_id] = freq
 
         self.doc_count = len(self.docs)
-        self.avg_doc_len = sum(self.doc_lengths.values()) / max(1, self.doc_count)
+        self.avg_doc_len = self.total_doc_len / max(1, self.doc_count)
 
     def search(
         self, query: str, category: Optional[str] = None, top_k: int = 3
