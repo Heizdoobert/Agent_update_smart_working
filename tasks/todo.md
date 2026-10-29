@@ -337,13 +337,13 @@
 **Description:** Hiện thực hóa `PluginRegistry` theo mô hình instance độc lập (tránh đột biến singleton toàn cục), tự động phát hiện `agent_plugin.json`, nạp động class kế thừa `BasePlugin` bằng `importlib.util.spec_from_file_location` với kiểm tra an toàn thư mục (chống ACE & Module Shadowing).
 
 **Acceptance criteria:**
-- [ ] `PluginRegistry` chỉ nạp các file plugin nằm bên trong Project Root đã được xác thực, không chèn CWD vào `sys.path`.
-- [ ] Không chia sẻ trạng thái mutable toàn cục giữa các instance registry khác nhau.
-- [ ] Xử lý an toàn khi file manifest hoặc code plugin bị lỗi cú pháp: ghi log cảnh báo và fallback về chế độ thuần Core (Plug-out an toàn).
+- [x] `PluginRegistry` chỉ nạp các file plugin nằm bên trong Project Root đã được xác thực, không chèn CWD vào `sys.path`.
+- [x] Không chia sẻ trạng thái mutable toàn cục giữa các instance registry khác nhau.
+- [x] Xử lý an toàn khi file manifest hoặc code plugin bị lỗi cú pháp: ghi log cảnh báo và fallback về chế độ thuần Core (Plug-out an toàn).
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_sdk_registry.py`
-- [ ] Security check: Thử nạp plugin trỏ ra ngoài project root, kiểm tra bị từ chối với ngoại lệ `PermissionError`.
+- [x] Tests pass: `pytest tests/test_sdk_registry.py`
+- [x] Security check: Thử nạp plugin trỏ ra ngoài project root, kiểm tra bị từ chối với ngoại lệ `PermissionError`.
 
 **Dependencies:** Task 12
 

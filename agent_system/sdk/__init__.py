@@ -7,9 +7,11 @@ from agent_system.sdk.contracts import (
     PluginManifest,
     ProjectContext,
 )
+from agent_system.sdk.registry import PluginRegistry
 
 __all__ = [
     "BasePlugin",
     "PluginManifest",
     "ProjectContext",
+    "PluginRegistry",
 ]
