@@ -430,3 +430,112 @@
 - [x] Toàn bộ 5 task mới hoàn thành trọn vẹn với đầy đủ unit test.
 - [x] Không có bất kỳ vi phạm AST, kiểu dữ liệu hay rò rỉ trạng thái toàn cục.
 - [x] Toàn bộ test suite pass 100%.
+
+---
+
+# Phase 7: Brownfield Codebase Scanner & Dual-Tier Knowledge Ingestion
+
+## Task 17: Core Codebase Scanner & Project Manifest Contract
+
+**Description:** Xây dựng module `agent_system.sdk.scanner` với dataclass `ProjectManifest` và lớp `CodebaseScanner`. Quét cấu trúc file manifests và configs (`package.json`, `pyproject.toml`, `setup.py`, `Cargo.toml`, `go.mod`, `Makefile`), tài liệu (`README.md`, `CONTRIBUTING.md`, `docs/**/*.md`), nhận diện ngôn ngữ, test framework, build commands, và trích xuất quy chuẩn coding conventions. Xử lý an toàn ngoại lệ (giới hạn đọc tối đa 50KB mỗi file, chống crash do file lỗi hoặc không có quyền truy cập).
+
+**Acceptance criteria:**
+- [x] `CodebaseScanner` phát hiện chính xác stack Python, Node/TS, Rust, Go, Makefile.
+- [x] Phân tích và trích xuất các heading `# ` / `## ` và bullet rules từ tài liệu markdown.
+- [x] Xử lý mượt mà khi repo rỗng hoặc file bị hỏng UTF-8.
+
+**Verification:**
+- [x] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_sdk_scanner.py -v`
+- [x] Build succeeds: `python3 -m py_compile agent_system/sdk/scanner.py`
+- [x] Manual check: Chạy scanner trên chính thư mục `Agent_system`, kiểm tra output `manifest.to_dict()` chứa đầy đủ thông tin Python, pytest, và các file docs.
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `agent_system/sdk/scanner.py`
+- `tests/test_sdk_scanner.py`
+
+**Estimated scope:** Small (2 files)
+
+---
+
+## Task 18: Dual-Tier Knowledge Ingestion Engine
+
+**Description:** Xây dựng module `agent_system.sdk.ingestion` với lớp `KnowledgeIngester`. Nhận vào `ProjectManifest`, tổng hợp Tầng 1: file luật `.agent/rules.md` (kèm symlink `AGENTS.md`) và `agent_plugin.json`, đảm bảo trần ngân sách ngữ cảnh $\le 3072$ bytes qua `StructuralTruncator` và vượt qua `MarkdownRulesCritic`. Tổng hợp Tầng 2: chia nhỏ các file tài liệu theo đề mục H2 (`## `) và nạp vào `SemanticMemory` (SQLite Store) với metadata nguồn gốc.
+
+**Acceptance criteria:**
+- [ ] File `.agent/rules.md` sinh ra có dung lượng $\le 3072$ bytes và đạt điểm tối đa trên `MarkdownRulesCritic`.
+- [ ] Toàn bộ các chunk tài liệu được index vào `SemanticMemory` và tìm kiếm được qua `search()`.
+- [ ] Quá trình nạp đảm bảo tính idempotent (không nhân bản trùng lặp nếu chạy lại).
+
+**Verification:**
+- [ ] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_sdk_ingestion.py -v`
+- [ ] Build succeeds: `python3 -m py_compile agent_system/sdk/ingestion.py`
+- [ ] Manual check: Kiểm tra dung lượng `.agent/rules.md` sinh ra và query thử từ khóa trong `SemanticMemory`.
+
+**Dependencies:** Task 17
+
+**Files likely touched:**
+- `agent_system/sdk/ingestion.py`
+- `tests/test_sdk_ingestion.py`
+
+**Estimated scope:** Small (2 files)
+
+---
+
+## Task 19: CLI Commands (`scan` & `init --auto`) in `agent_system/cli/main.py`
+
+**Description:** Bổ sung lệnh CLI `scan` với tùy chọn `--root PATH` và `--json` (xuất JSON chuẩn hóa cho AI Agent CLI đọc trong phiên ngầm). Bổ sung tùy chọn `--auto` cho lệnh `agent-system init` để chạy quy trình phân tích và nạp tri thức 2 tầng tự động không tương tác (non-interactive mode), hỗ trợ cờ `--root` và `--rules-path`.
+
+**Acceptance criteria:**
+- [ ] `python3 -m agent_system.cli.main scan --json` xuất ra JSON hợp lệ chứa cấu trúc của `ProjectManifest`.
+- [ ] `python3 -m agent_system.cli.main init --auto` hoàn thành việc scaffold và nạp memory tự động không yêu cầu nhập tay terminal prompt.
+- [ ] Tương thích hoàn toàn với UNIX pipe và xử lý mã thoát (exit code 0 / 1) chuẩn xác.
+
+**Verification:**
+- [ ] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_cli_scan.py -v`
+- [ ] Build succeeds: `python3 -m py_compile agent_system/cli/main.py`
+- [ ] Manual check: `python3 -m agent_system.cli.main scan --json | python3 -m json.tool`
+
+**Dependencies:** Tasks 17, 18
+
+**Files likely touched:**
+- `agent_system/cli/main.py`
+- `agent_system/sdk/wizard.py`
+- `tests/test_cli_scan.py`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+## Task 20: Integration Verification, Critic Audit & Documentation Update
+
+**Description:** Chạy kiểm thử tích hợp toàn diện trên một mock brownfield repository mô phỏng dự án thực tế; thẩm định toàn bộ code mới qua `CriticEngine` (100/100 điểm, không vi phạm AST hay phong cách code); cập nhật tài liệu `README.md`, `CLAUDE.md`, `CHANGELOG.md` và `docs/decisions/`.
+
+**Acceptance criteria:**
+- [ ] 100% test cases (cũ + mới, $\ge 90$ tests) vượt qua thành công trên `pytest`.
+- [ ] Đạt điểm 100/100 trên toàn bộ file code mới qua `CriticEngine`.
+- [ ] Tài liệu `CHANGELOG.md` và `README.md` cập nhật hướng dẫn sử dụng lệnh `scan` và `init --auto`.
+
+**Verification:**
+- [ ] Full suite pass: `PYTHONPATH=. python3 -m pytest tests/ -v`
+- [ ] Critic pass: `python3 -m agent_system.cli.main critic --file agent_system/sdk/scanner.py`
+
+**Dependencies:** Tasks 17-19
+
+**Files likely touched:**
+- `tests/test_sdk_brownfield_e2e.py`
+- `CHANGELOG.md`
+- `README.md`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+## Checkpoint: Brownfield Codebase Scanner & Ingestion Verified
+- [ ] CodebaseScanner trích xuất chính xác manifest, test commands, rules từ nhiều stack.
+- [ ] Tier 1 `.agent/rules.md` đạt $\le 3072$ bytes và 100/100 MarkdownRulesCritic.
+- [ ] Tier 2 Semantic Memory nạp thành công các doc chunks theo đề mục H2.
+- [ ] Lệnh `agent-system scan --json` phản hồi dưới 200ms.
+- [ ] 100% test suite pass toàn diện.
+
