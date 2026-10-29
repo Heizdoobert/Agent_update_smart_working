@@ -39,8 +39,9 @@ Welcome to the **Agent System (`agent_system`)** repository. All AI agents worki
 | [`agent_system.reflection`](file:///mnt/second_drive/Agent_system/agent_system/reflection/) | Multi-stage Critic Engine and in-memory self-reflection auto-patcher | `CriticEngine`, `SchemaCritic`, `PythonAstCritic`, `SelfReflector` |
 | [`agent_system.memory`](file:///mnt/second_drive/Agent_system/agent_system/memory/) | 3-Tier memory: Episodic (traces), Semantic (FTS5 + BM25), Scratchpad | `EpisodicMemory`, `SemanticMemory`, `WorkingScratchpad` |
 | [`agent_system.skills`](file:///mnt/second_drive/Agent_system/agent_system/skills/) | Dynamic skill discovery, path whitelisting, and schema validation | `SkillRegistry`, `SkillDefinition` |
+| [`agent_system.sdk`](file:///mnt/second_drive/Agent_system/agent_system/sdk/) | Pluggable SDK, project prompt rules injection, and interactive onboarding wizard | `BasePlugin`, `PluginManifest`, `PluginRegistry`, `OnboardingWizard` |
 | [`agent_system.distillation`](file:///mnt/second_drive/Agent_system/agent_system/distillation/) | Offline Teacher-Student batch prompt optimization | `DistillationEngine`, `PromptCandidate` |
-| [`agent_system.cli`](file:///mnt/second_drive/Agent_system/agent_system/cli/) | Unified command-line interface with UNIX pipe support | `agent_system.cli.main` (`plan`, `critic`, `reflect`, `memory`, `skill`, `session`) |
+| [`agent_system.cli`](file:///mnt/second_drive/Agent_system/agent_system/cli/) | Unified command-line interface with UNIX pipe support | `agent_system.cli.main` (`init`, `plan`, `critic`, `reflect`, `memory`, `skill`, `session`) |
 
 ---
 
@@ -50,8 +51,11 @@ Welcome to the **Agent System (`agent_system`)** repository. All AI agents worki
 # Run unit tests
 PYTHONPATH=. python3 -m pytest tests/ -v
 
-# Run CLI planning
-python3 -m agent_system.cli.main plan --initial state.json --actions actions.json --goal-key is_ready
+# Interactive project onboarding wizard (Priority 1)
+agent-system init
+
+# Run CLI planning (with optional plugin actions fallback)
+python3 -m agent_system.cli.main plan --initial state.json --goal-key is_ready
 
 # Run CLI code audit / critic
 cat script.py | python3 -m agent_system.cli.main critic --file -
