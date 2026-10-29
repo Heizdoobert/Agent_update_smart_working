@@ -488,14 +488,14 @@
 **Description:** Bổ sung lệnh CLI `scan` với tùy chọn `--root PATH` và `--json` (xuất JSON chuẩn hóa cho AI Agent CLI đọc trong phiên ngầm). Bổ sung tùy chọn `--auto` cho lệnh `agent-system init` để chạy quy trình phân tích và nạp tri thức 2 tầng tự động không tương tác (non-interactive mode), hỗ trợ cờ `--root` và `--rules-path`.
 
 **Acceptance criteria:**
-- [ ] `python3 -m agent_system.cli.main scan --json` xuất ra JSON hợp lệ chứa cấu trúc của `ProjectManifest`.
-- [ ] `python3 -m agent_system.cli.main init --auto` hoàn thành việc scaffold và nạp memory tự động không yêu cầu nhập tay terminal prompt.
-- [ ] Tương thích hoàn toàn với UNIX pipe và xử lý mã thoát (exit code 0 / 1) chuẩn xác.
+- [x] `python3 -m agent_system.cli.main scan --json` xuất ra JSON hợp lệ chứa cấu trúc của `ProjectManifest`.
+- [x] `python3 -m agent_system.cli.main init --auto` hoàn thành việc scaffold và nạp memory tự động không yêu cầu nhập tay terminal prompt.
+- [x] Tương thích hoàn toàn với UNIX pipe và xử lý mã thoát (exit code 0 / 1) chuẩn xác.
 
 **Verification:**
-- [ ] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_cli_scan.py -v`
-- [ ] Build succeeds: `python3 -m py_compile agent_system/cli/main.py`
-- [ ] Manual check: `python3 -m agent_system.cli.main scan --json | python3 -m json.tool`
+- [x] Tests pass: `PYTHONPATH=. python3 -m pytest tests/test_cli_scan.py -v`
+- [x] Build succeeds: `python3 -m py_compile agent_system/cli/main.py`
+- [x] Manual check: `python3 -m agent_system.cli.main scan --json | python3 -m json.tool`
 
 **Dependencies:** Tasks 17, 18
 

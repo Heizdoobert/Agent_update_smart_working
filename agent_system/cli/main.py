@@ -21,6 +21,8 @@ from agent_system.reflection.reflector import SelfReflector
 from agent_system.skills.registry import SkillRegistry
 from agent_system.sdk.registry import PluginRegistry
 from agent_system.sdk.wizard import OnboardingWizard
+from agent_system.sdk.scanner import CodebaseScanner
+from agent_system.sdk.ingestion import KnowledgeIngester
 
 
 def _read_input(file_arg: Optional[str] = None) -> str:
@@ -294,9 +296,60 @@ def cmd_session(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_scan(args: argparse.Namespace) -> int:
+    """Scan codebase and output structured manifest."""
+    root_path = Path(args.root or ".").resolve()
+    scanner = CodebaseScanner(root_path=root_path)
+    manifest = scanner.scan()
+
+    if getattr(args, "json", False):
+        sys.stdout.write(json.dumps(manifest.to_dict(), indent=2) + "\n")
+        return 0
+
+    lines = [
+        "=== Project Scan Summary ===",
+        f"Root Path:        {manifest.root_path}",
+        f"Primary Language: {manifest.primary_language}",
+        f"Tech Stack:       {', '.join(manifest.tech_stack) if manifest.tech_stack else 'None'}",
+        f"Test Framework:   {manifest.test_framework or 'Not detected'}",
+        f"Manifest Files:   {', '.join(manifest.extra_metadata.get('manifest_files', [])) or 'None'}",
+        f"Docs Found:       {len(manifest.documentation_files)} files ({', '.join(manifest.documentation_files[:5])})",
+        f"Rules Extracted:  {len(manifest.detected_rules)} conventions",
+    ]
+    if manifest.build_commands:
+        lines.append("Build Commands:")
+        for k, v in manifest.build_commands.items():
+            lines.append(f"  - {k}: {v}")
+    sys.stdout.write("\n".join(lines) + "\n")
+    return 0
+
+
 def cmd_init(args: argparse.Namespace) -> int:
-    """Run interactive onboarding wizard to bootstrap project SDK configuration."""
-    wizard = OnboardingWizard(target_dir=args.target_dir)
+    """Bootstrap project SDK configuration interactively or via auto-scan."""
+    root_dir = args.root or args.target_dir or "."
+    if getattr(args, "auto", False):
+        scanner = CodebaseScanner(root_path=root_dir)
+        manifest = scanner.scan()
+        ingester = KnowledgeIngester(root_path=root_dir)
+        result = ingester.ingest(manifest)
+        if getattr(args, "json", False):
+            payload = {
+                "status": "SUCCESS",
+                "rules_path": str(result.rules_path),
+                "rules_bytes": result.rules_bytes,
+                "chunks_indexed": result.chunks_indexed,
+                "manifest": manifest.to_dict(),
+            }
+            sys.stdout.write(json.dumps(payload, indent=2) + "\n")
+        else:
+            sys.stdout.write(
+                f"Successfully initialized project in '{root_dir}':\n"
+                f"- Tier 1 Rules: {result.rules_path} ({result.rules_bytes} bytes)\n"
+                f"- Tier 2 Memory: {result.chunks_indexed} doc sections indexed\n"
+            )
+        return 0
+
+    wizard = OnboardingWizard(target_dir=root_dir)
     success = wizard.run()
     return 0 if success else 1
 
@@ -310,9 +363,18 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # 0. Init
-    p_init = subparsers.add_parser("init", help="Bootstrap project SDK configuration interactively")
+    p_init = subparsers.add_parser("init", help="Bootstrap project SDK configuration interactively or via auto-scan")
     p_init.add_argument("--target-dir", default=None, help="Target project directory")
+    p_init.add_argument("--root", default=None, help="Target project root directory")
+    p_init.add_argument("--auto", action="store_true", help="Auto-scan and initialize brownfield project without prompts")
+    p_init.add_argument("--json", action="store_true", help="Output initialization result as JSON")
     p_init.set_defaults(func=cmd_init)
+
+    # 0.1 Scan
+    p_scan = subparsers.add_parser("scan", help="Scan codebase and extract manifest/rules")
+    p_scan.add_argument("--root", default=".", help="Root directory to scan")
+    p_scan.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    p_scan.set_defaults(func=cmd_scan)
 
     # 1. Plan
     p_plan = subparsers.add_parser("plan", help="Synthesize action plan via A* or MCTS")
