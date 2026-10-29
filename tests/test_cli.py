@@ -82,6 +82,29 @@ def test_cli_critic_and_reflect(tmp_path, capsys):
     assert "# [Self-Reflection" in captured.out
 
 
+def test_cli_critic_markdown_and_manifest(tmp_path, capsys):
+    # Test valid markdown
+    md_file = tmp_path / "rules.md"
+    md_file.write_text("# Test Rules\n\n## Guidelines\nClean code\n", encoding="utf-8")
+
+    rc = main(["critic", "--file", str(md_file)])
+    assert rc == 0
+    captured = capsys.readouterr()
+    res = json.loads(captured.out)
+    assert res["status"] == "PASS"
+    assert res["score"] == 100.0
+
+    # Test broken markdown (unclosed fence)
+    bad_md = tmp_path / "broken.md"
+    bad_md.write_text("# Rules\n\n```python\nprint('unclosed')\n", encoding="utf-8")
+    rc = main(["critic", "--file", str(bad_md)])
+    assert rc == 1
+    captured = capsys.readouterr()
+    res = json.loads(captured.out)
+    assert res["status"] == "REJECT"
+    assert any(d["code"] == "UNCLOSED_CODE_FENCE" for d in res["diagnostics"])
+
+
 def test_cli_plan(tmp_path, capsys):
     init_file = tmp_path / "init.json"
     init_file.write_text(json.dumps({"has_key": False, "door_unlocked": False}), encoding="utf-8")

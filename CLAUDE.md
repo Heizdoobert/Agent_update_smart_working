@@ -23,9 +23,10 @@ All AI agents in this repository MUST strictly follow these rules and standards.
 | [`agent_system.reflection`](file:///mnt/second_drive/Agent_system/agent_system/reflection/) | Multi-stage Critic & self-reflection | `CriticEngine`, `PythonAstCritic`, `SelfReflector` |
 | [`agent_system.memory`](file:///mnt/second_drive/Agent_system/agent_system/memory/) | 3-Tier memory: Episodic, Semantic, Scratchpad | `EpisodicMemory`, `SemanticMemory`, `WorkingScratchpad` |
 | [`agent_system.skills`](file:///mnt/second_drive/Agent_system/agent_system/skills/) | Dynamic skill discovery & validation | `SkillRegistry`, `SkillDefinition` |
-| [`agent_system.sdk`](file:///mnt/second_drive/Agent_system/agent_system/sdk/) | Pluggable SDK, rules & onboarding wizard | `BasePlugin`, `PluginRegistry`, `OnboardingWizard` |
+| [`agent_system.sdk`](file:///mnt/second_drive/Agent_system/agent_system/sdk/) | Pluggable SDK, scanner, ingestion & wizard | `BasePlugin`, `PluginRegistry`, `CodebaseScanner` |
 | [`agent_system.distillation`](file:///mnt/second_drive/Agent_system/agent_system/distillation/) | Offline prompt optimization | `DistillationEngine`, `PromptCandidate` |
-| [`agent_system.cli`](file:///mnt/second_drive/Agent_system/agent_system/cli/) | CLI with UNIX pipe support | `agent_system.cli.main` (`init`, `plan`, `critic`, `reflect`, `skill`) |
+| [`agent_system.mcp`](file:///mnt/second_drive/Agent_system/agent_system/mcp/) | Zero-dep MCP stdio server & tools dispatcher | `MCPServer`, `CognitiveToolsDispatcher` |
+| [`agent_system.cli`](file:///mnt/second_drive/Agent_system/agent_system/cli/) | CLI with UNIX pipe support | `agent_system.cli.main` (`init`, `plan`, `critic`, `mcp`, `scan`) |
 
 ---
 
@@ -35,15 +36,15 @@ All AI agents in this repository MUST strictly follow these rules and standards.
 # Run unit tests
 PYTHONPATH=. python3 -m pytest tests/ -v
 
-# Interactive project onboarding wizard
-agent-system init
+# Codebase scan & brownfield onboarding
+agent-system scan --root .
+agent-system init --auto
 
-# CLI planning (plugin actions fallback)
+# Model Context Protocol (MCP) server
+agent-system mcp
+
+# CLI planning / critic / reflect
 python3 -m agent_system.cli.main plan --initial state.json --goal-key is_ready
-
-# CLI code audit / critic
 cat script.py | python3 -m agent_system.cli.main critic --file -
-
-# CLI self-reflection
 python3 -m agent_system.cli.main reflect --file draft.py --output-code
 ```

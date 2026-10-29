@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Multi-Format Critic Routing**: Auto-detection and routing for Markdown prompt rules (`MarkdownRulesCritic`) and plugin manifests (`PluginManifestCritic`) across CLI `agent-system critic` and MCP tool `agent_critic`.
+- **Hierarchical Project Map (`docs/PROJECT_MAP.md`)**: Structured Level 2/3 summary index for selective context loading and subagent isolation.
+
+### Optimized
+- **Rules File Synchronization**: Updated Level 1 rules files (`CLAUDE.md`, `GEMINI.md`, `AGENTS.md`) to include `agent_system.mcp` and new CLI commands (`scan`, `mcp`), strictly bounded at 3,024 bytes (<3KB) with 100/100 `MarkdownRulesCritic` score.
+
 ## [0.4.0] - 2026-10-29
 
 ### Added

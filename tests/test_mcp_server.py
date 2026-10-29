@@ -100,6 +100,23 @@ def test_mcp_tools_call_critic_and_reflect():
     ref_text = resp_ref["result"]["content"][0]["text"]
     assert "# [Self-Reflection" in ref_text
 
+    # Tool call: agent_critic on markdown rules
+    critic_md_req = {
+        "jsonrpc": "2.0",
+        "id": 22,
+        "method": "tools/call",
+        "params": {
+            "name": "agent_critic",
+            "arguments": {
+                "code": "# Project Rules\n\n```python\nprint('safe')\n```\n",
+            },
+        },
+    }
+    resp_md = json.loads(server.handle_message(json.dumps(critic_md_req)))
+    assert resp_md["id"] == 22
+    assert resp_md["result"]["isError"] is False
+    assert "PASS" in resp_md["result"]["content"][0]["text"]
+
 
 def test_mcp_tools_call_plan():
     server = MCPServer()

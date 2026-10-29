@@ -16,6 +16,7 @@ from agent_system.reasoning.transition import (
     StateMachineTransitionModel,
     StateNode,
 )
+from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic, PluginManifestCritic
 from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine, SchemaCritic
 from agent_system.reflection.reflector import SelfReflector
@@ -68,8 +69,8 @@ TOOLS_SCHEMA: List[Dict[str, Any]] = [
                 },
                 "language": {
                     "type": "string",
-                    "enum": ["python", "json", "text"],
-                    "description": "Target language (default 'python').",
+                    "enum": ["auto", "python", "json", "markdown", "manifest", "text"],
+                    "description": "Target language/format (auto, python, json, markdown, manifest, text; default 'auto').",
                 },
                 "strict": {
                     "type": "boolean",
@@ -257,14 +258,31 @@ class CognitiveToolsDispatcher:
 
     def _tool_agent_critic(self, args: Dict[str, Any]) -> str:
         code = args.get("code", "")
-        language = args.get("language", "python")
+        language = args.get("language", "auto")
         strict = args.get("strict", False)
+
+        if language == "auto":
+            clean = code.strip()
+            if clean.startswith("# "):
+                language = "markdown"
+            elif clean.startswith("{") and ("rules_path" in clean or "entrypoint" in clean):
+                language = "manifest"
+            elif clean.startswith("{") or clean.startswith("["):
+                language = "json"
+            else:
+                language = "python"
 
         critics = []
         if language == "python":
             critics.append(PythonAstCritic(require_type_annotations=strict))
+        elif language == "markdown":
+            critics.append(MarkdownRulesCritic())
+        elif language == "manifest":
+            critics.append(PluginManifestCritic())
         elif language == "json":
             critics.append(SchemaCritic())
+        else:
+            critics.append(PythonAstCritic())
 
         engine = CriticEngine(critics)
         report = engine.evaluate(code)

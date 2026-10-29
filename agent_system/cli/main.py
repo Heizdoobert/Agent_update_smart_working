@@ -15,6 +15,7 @@ from agent_system.memory.semantic import SemanticMemory
 from agent_system.reasoning.astar import AStarPlanner
 from agent_system.reasoning.mcts import MCTSPlanner
 from agent_system.reasoning.transition import ActionDefinition, StateMachineTransitionModel, StateNode
+from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic, PluginManifestCritic
 from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine, SchemaCritic
 from agent_system.reflection.reflector import SelfReflector
@@ -129,15 +130,39 @@ def cmd_critic(args: argparse.Namespace) -> int:
         sys.stderr.write("Error: No artifact content provided to evaluate.\n")
         return 1
 
+    lang = getattr(args, "language", "auto")
+    if lang == "auto":
+        fname = (args.file or "").lower()
+        if fname.endswith((".md", ".markdown")):
+            lang = "markdown"
+        elif fname.endswith("agent_plugin.json") or fname.endswith("manifest.json"):
+            lang = "manifest"
+        elif fname.endswith(".json"):
+            lang = "json"
+        elif fname.endswith(".py"):
+            lang = "python"
+        elif content.strip().startswith("# "):
+            lang = "markdown"
+        elif content.strip().startswith("{") and ("rules_path" in content or "entrypoint" in content):
+            lang = "manifest"
+        elif content.strip().startswith("{") or content.strip().startswith("["):
+            lang = "json"
+        else:
+            lang = "python"
+
     engine = CriticEngine()
-    if args.language == "python":
+    if lang == "python":
         engine.register_critic(PythonAstCritic(require_type_annotations=args.strict))
-    elif args.language == "json":
+    elif lang == "markdown":
+        engine.register_critic(MarkdownRulesCritic())
+    elif lang == "manifest":
+        engine.register_critic(PluginManifestCritic())
+    elif lang == "json":
         engine.register_critic(SchemaCritic())
     else:
         engine.register_critic(PythonAstCritic())
 
-    report = engine.evaluate(content, context={"language": args.language})
+    report = engine.evaluate(content, context={"language": lang})
 
     output = {
         "status": report.verdict.status.value,
@@ -403,7 +428,12 @@ def build_parser() -> argparse.ArgumentParser:
     # 2. Critic
     p_critic = subparsers.add_parser("critic", help="Audit artifact compliance with static rules")
     p_critic.add_argument("--file", default="-", help="Path to artifact file or '-' for stdin")
-    p_critic.add_argument("--language", choices=["python", "json", "text"], default="python")
+    p_critic.add_argument(
+        "--language",
+        choices=["auto", "python", "json", "markdown", "manifest", "text"],
+        default="auto",
+        help="Target language/format to evaluate (default: auto)",
+    )
     p_critic.add_argument("--strict", action="store_true", help="Require type annotations")
     p_critic.set_defaults(func=cmd_critic)
 
