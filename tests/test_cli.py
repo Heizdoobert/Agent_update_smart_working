@@ -24,6 +24,21 @@ def test_cli_version(capsys):
     assert "agent-system 0.1.0" in captured.out
 
 
+def test_cli_package_invocation_no_runtime_warnings():
+    import subprocess
+    # Verify python -m agent_system and python -m agent_system.cli run cleanly with zero stderr warnings
+    for mod in ["agent_system", "agent_system.cli", "agent_system.cli.main"]:
+        proc = subprocess.run(
+            ["python3", "-m", mod, "--version"],
+            capture_output=True,
+            text=True,
+        )
+        assert proc.returncode == 0
+        assert "agent-system 0.1.0" in proc.stdout
+        assert "RuntimeWarning" not in proc.stderr
+        assert proc.stderr.strip() == ""
+
+
 def test_cli_session_lifecycle(capsys):
     # Set
     rc = main(["session", "set", "--id", "cli_sess", "--key", "user", "--value", "agent_1"])
