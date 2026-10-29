@@ -151,6 +151,44 @@ def test_cli_plan(tmp_path, capsys):
     assert plan_out["steps"][1]["action"] == "unlock_door"
 
 
+def test_cli_plan_with_inline_json(capsys):
+    inline_init = json.dumps({"has_key": False, "door_unlocked": False})
+    inline_actions = json.dumps(
+        [
+            {
+                "name": "pickup_key",
+                "cost": 1.0,
+                "preconditions": {"has_key": False},
+                "effects": {"has_key": True},
+            },
+            {
+                "name": "unlock_door",
+                "cost": 1.0,
+                "preconditions": {"has_key": True, "door_unlocked": False},
+                "effects": {"door_unlocked": True},
+            },
+        ]
+    )
+
+    rc = main(
+        [
+            "plan",
+            "--initial",
+            inline_init,
+            "--actions",
+            inline_actions,
+            "--goal-key",
+            "door_unlocked",
+        ]
+    )
+    assert rc == 0
+    captured = capsys.readouterr()
+    res = json.loads(captured.out)
+    assert len(res["steps"]) == 2
+    assert res["steps"][0]["action"] == "pickup_key"
+    assert res["steps"][1]["action"] == "unlock_door"
+
+
 def test_cli_plan_goal_value_primitives(tmp_path, capsys):
     init_file = tmp_path / "init_num.json"
     init_file.write_text(json.dumps({"stage": 0}), encoding="utf-8")

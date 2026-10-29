@@ -28,15 +28,29 @@ from agent_system.mcp.server import MCPServer
 
 
 def _read_input(file_arg: Optional[str] = None) -> str:
-    """Read input from file path, or stdin if '-' or piped."""
-    if file_arg and file_arg != "-":
-        p = Path(file_arg)
-        if not p.is_file():
-            sys.stderr.write(f"Error: File '{file_arg}' not found.\n")
-            sys.exit(1)
-        return p.read_text(encoding="utf-8")
+    """Read input from inline JSON string, file path, or stdin if '-' or piped."""
+    if not file_arg:
+        if not sys.stdin.isatty():
+            return sys.stdin.read()
+        return ""
 
-    # If stdin has data piped into it
+    stripped = file_arg.strip()
+    if (stripped.startswith("{") and stripped.endswith("}")) or (
+        stripped.startswith("[") and stripped.endswith("]")
+    ):
+        return file_arg
+
+    if file_arg != "-":
+        try:
+            p = Path(file_arg)
+            if p.is_file():
+                return p.read_text(encoding="utf-8")
+        except OSError:
+            pass
+        sys.stderr.write(f"Error: File '{file_arg}' not found.\n")
+        sys.exit(1)
+
+    # If stdin has data piped into it or file_arg == "-"
     if not sys.stdin.isatty() or file_arg == "-":
         return sys.stdin.read()
 
