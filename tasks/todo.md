@@ -302,3 +302,131 @@
 - [x] 100% test cases pass trên toàn bộ test suite.
 - [x] Hệ thống hoạt động độc lập hoàn toàn, không có dependency nào của game Knit hay Airtest.
 - [x] Sẵn sàng để các AI Agent khác gọi qua Python SDK hoặc CLI.
+
+---
+
+# Phase 6: Pluggable SDK & Interactive Onboarding Wizard (`agent_system.sdk`)
+
+## Task 12: Markdown Fence Preservation in StructuralTruncator & SDK Contracts
+
+**Description:** Nâng cấp `StructuralTruncator` tự động đóng code fence markdown (` ``` `) khi cắt chuỗi <3KB, và xây dựng các hợp đồng giao diện cốt lõi cho SDK trong `agent_system/sdk/contracts.py` (`PluginManifest`, `BasePlugin`, `ProjectContext`).
+
+**Acceptance criteria:**
+- [x] `StructuralTruncator.truncate_text` phát hiện số lượng dấu markdown code fence lẻ và tự động thêm `\n```\n` trước chuỗi hậu tố `...[TRUNCATED]`.
+- [x] `BasePlugin` khai báo chuẩn xác `get_actions() -> List[ActionDefinition]`, `get_critics() -> List[CriticProtocol]`, và `get_rules() -> str`.
+- [x] `PluginManifest` định nghĩa đầy đủ metadata cấu hình (tên, version, description, entrypoint, rules_path).
+
+**Verification:**
+- [x] Tests pass: `pytest tests/test_sdk_contracts.py tests/test_contracts.py`
+- [x] Manual check: Truncate đoạn markdown chứa code block dài >3KB, kiểm tra khối code block kết thúc bằng ```` ``` ```` hợp lệ.
+
+**Dependencies:** None (kế thừa từ Phase 1-5)
+
+**Files likely touched:**
+- `agent_system/core/truncator.py`
+- `agent_system/sdk/__init__.py`
+- `agent_system/sdk/contracts.py`
+- `tests/test_sdk_contracts.py`
+
+**Estimated scope:** Small (3-4 files)
+
+---
+
+## Task 13: Instance-Based PluginRegistry with Safe Dynamic Loader & Whitelisting
+
+**Description:** Hiện thực hóa `PluginRegistry` theo mô hình instance độc lập (tránh đột biến singleton toàn cục), tự động phát hiện `agent_plugin.json`, nạp động class kế thừa `BasePlugin` bằng `importlib.util.spec_from_file_location` với kiểm tra an toàn thư mục (chống ACE & Module Shadowing).
+
+**Acceptance criteria:**
+- [ ] `PluginRegistry` chỉ nạp các file plugin nằm bên trong Project Root đã được xác thực, không chèn CWD vào `sys.path`.
+- [ ] Không chia sẻ trạng thái mutable toàn cục giữa các instance registry khác nhau.
+- [ ] Xử lý an toàn khi file manifest hoặc code plugin bị lỗi cú pháp: ghi log cảnh báo và fallback về chế độ thuần Core (Plug-out an toàn).
+
+**Verification:**
+- [ ] Tests pass: `pytest tests/test_sdk_registry.py`
+- [ ] Security check: Thử nạp plugin trỏ ra ngoài project root, kiểm tra bị từ chối với ngoại lệ `PermissionError`.
+
+**Dependencies:** Task 12
+
+**Files likely touched:**
+- `agent_system/sdk/registry.py`
+- `tests/test_sdk_registry.py`
+
+**Estimated scope:** Medium (2-3 files)
+
+---
+
+## Task 14: Interactive Onboarding Wizard with Safe I/O & Rollback
+
+**Description:** Xây dựng `OnboardingWizard` tại `agent_system/sdk/wizard.py` để phỏng vấn tương tác 4 câu hỏi định hình dự án, validate tên định danh hợp lệ (`str.isidentifier()`), bắt an toàn `KeyboardInterrupt`/`EOFError`, và sinh trọn gói cấu trúc `.agent/rules.md`, `agent_plugin.json`, cùng `plugin.py`.
+
+**Acceptance criteria:**
+- [ ] Hỏi 4 câu hỏi thiết lập: (1) Project Name, (2) Prompt Rules summary, (3) Custom Actions, (4) Critic requirements.
+- [ ] Xác thực tính hợp lệ của identifier (tên biến, tên action Python); từ chối các ký tự đặc biệt nguy hiểm.
+- [ ] Bắt ngoại lệ khi người dùng hủy (Ctrl+C / Ctrl+D) và dọn dẹp sạch các file rác đang ghi dở.
+
+**Verification:**
+- [ ] Tests pass: `pytest tests/test_sdk_wizard.py`
+- [ ] Simulation check: Giả lập stdin trong test case, kiểm tra các file sinh ra có cú pháp Python và JSON hoàn toàn hợp lệ.
+
+**Dependencies:** Task 12, Task 13
+
+**Files likely touched:**
+- `agent_system/sdk/wizard.py`
+- `tests/test_sdk_wizard.py`
+
+**Estimated scope:** Medium (2-3 files)
+
+---
+
+## Task 15: CLI Integration (`init` Subcommand, Interactive Bootstrap & Optional `--actions`)
+
+**Description:** Tích hợp SDK vào giao diện dòng lệnh: bổ sung subcommand `agent-system init`, kích hoạt wizard an toàn khi chạy root command `agent-system` không kèm tham số trong terminal tương tác (TTY), và cập nhật `cmd_plan` để tham số `--actions` là tùy chọn khi plugin đã cung cấp action.
+
+**Acceptance criteria:**
+- [ ] Lệnh `agent-system init` kích hoạt trực tiếp `OnboardingWizard`.
+- [ ] Chạy `agent-system` gốc trong terminal TTY chưa cấu hình plugin sẽ gợi ý/kích hoạt wizard; tuyệt đối KHÔNG chặn các lệnh con (`critic`, `session`, `plan`, `memory`, `skill`) hoặc khi chạy qua pipe/subagent.
+- [ ] Lệnh `agent-system plan` tự động lấy actions từ plugin nếu không truyền flag `--actions`.
+
+**Verification:**
+- [ ] Tests pass: `pytest tests/test_cli_sdk.py tests/test_cli.py`
+- [ ] Pipe check: `cat script.py | agent-system critic` chạy trơn tru, không bao giờ bị wizard chặn.
+
+**Dependencies:** Task 13, Task 14
+
+**Files likely touched:**
+- `agent_system/cli/main.py`
+- `tests/test_cli_sdk.py`
+- `tests/test_cli.py`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+## Task 16: End-to-End SDK Integration Tests & Documentation
+
+**Description:** Xây dựng kịch bản kiểm thử E2E hoàn chỉnh từ lúc khởi tạo dự án -> nạp plugin -> tiêm rules dự án (<3KB) -> lập kế hoạch với custom action -> kiểm định với custom critic -> tháo plugin (plug-out), đồng thời cập nhật tài liệu hướng dẫn (`README.md`, `GEMINI.md`).
+
+**Acceptance criteria:**
+- [ ] Kịch bản E2E kiểm tra toàn bộ vòng đời Plug-in và Plug-out thành công 100%.
+- [ ] Tài liệu `README.md` và `GEMINI.md` bổ sung hướng dẫn chi tiết cách viết plugin và sử dụng lệnh `agent-system init`.
+- [ ] 100% test cases (toàn bộ các test cũ + test mới) vượt qua.
+
+**Verification:**
+- [ ] Full suite pass: `PYTHONPATH=. pytest tests/ -v` (toàn bộ 100% tests pass).
+- [ ] Static Critic Audit: Toàn bộ code mới đạt điểm 100/100 qua `CriticEngine`.
+
+**Dependencies:** Tasks 12-15
+
+**Files likely touched:**
+- `tests/test_sdk_e2e.py`
+- `README.md`
+- `GEMINI.md`
+
+**Estimated scope:** Medium (3 files)
+
+---
+
+## Final Checkpoint: Pluggable SDK & Wizard Verified
+- [ ] Toàn bộ 5 task mới hoàn thành trọn vẹn với đầy đủ unit test.
+- [ ] Không có bất kỳ vi phạm AST, kiểu dữ liệu hay rò rỉ trạng thái toàn cục.
+- [ ] Toàn bộ test suite pass 100%.

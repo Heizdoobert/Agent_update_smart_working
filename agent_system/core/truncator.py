@@ -41,10 +41,28 @@ class StructuralTruncator:
         if last_newline != -1 and last_newline >= len(truncated_raw) * 0.7:
             truncated_raw = truncated_raw[:last_newline]
 
+        # Preserve markdown code block syntax: if unclosed code fence is detected, close it
+        if truncated_raw.count("```") % 2 == 1:
+            close_fence = "\n```"
+            adjusted_target = target_bytes - len(close_fence.encode("utf-8"))
+            if adjusted_target > 0:
+                truncated_raw = encoded[:adjusted_target].decode("utf-8", errors="ignore")
+                last_nl = truncated_raw.rfind("\n")
+                if last_nl != -1 and last_nl >= len(truncated_raw) * 0.7:
+                    truncated_raw = truncated_raw[:last_nl]
+                truncated_raw += close_fence
+            else:
+                truncated_raw = ""
+
         result = truncated_raw + suffix
         # Ensure strict compliance
         while len(result.encode("utf-8")) > max_bytes and len(truncated_raw) > 0:
             truncated_raw = truncated_raw[:-1]
+            if truncated_raw.count("```") % 2 == 1:
+                candidate = truncated_raw + "\n```" + suffix
+                if len(candidate.encode("utf-8")) <= max_bytes:
+                    result = candidate
+                    break
             result = truncated_raw + suffix
         return result
 
