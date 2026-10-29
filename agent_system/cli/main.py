@@ -19,6 +19,8 @@ from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine, SchemaCritic
 from agent_system.reflection.reflector import SelfReflector
 from agent_system.skills.registry import SkillRegistry
+from agent_system.sdk.registry import PluginRegistry
+from agent_system.sdk.wizard import OnboardingWizard
 
 
 def _read_input(file_arg: Optional[str] = None) -> str:
@@ -47,21 +49,38 @@ def cmd_plan(args: argparse.Namespace) -> int:
     init_dict = json.loads(initial_raw)
     initial_state = StateNode(state_id="init", attributes=init_dict)
 
-    actions_raw = _read_input(args.actions)
-    if not actions_raw:
-        sys.stderr.write("Error: Missing actions JSON (--actions).\n")
-        return 1
+    action_defs: List[ActionDefinition] = []
+    if args.actions:
+        actions_raw = _read_input(args.actions)
+        if not actions_raw:
+            sys.stderr.write("Error: Missing actions JSON (--actions).\n")
+            return 1
 
-    actions_data = json.loads(actions_raw)
-    action_defs = [
-        ActionDefinition(
-            name=a["name"],
-            cost=a.get("cost", 1.0),
-            preconditions=a.get("preconditions", {}),
-            effects=a.get("effects", {}),
+        actions_data = json.loads(actions_raw)
+        action_defs = [
+            ActionDefinition(
+                name=a["name"],
+                cost=a.get("cost", 1.0),
+                preconditions=a.get("preconditions", {}),
+                effects=a.get("effects", {}),
+            )
+            for a in actions_data
+        ]
+    else:
+        # Fallback to actions provided by project plugin if available
+        try:
+            registry = PluginRegistry(allowed_roots=[Path.cwd()])
+            plugin = registry.load_plugin(Path.cwd())
+            if plugin:
+                action_defs = registry.get_all_actions()
+        except Exception as e:
+            sys.stderr.write(f"Warning: Failed to load plugin actions: {e}\n")
+
+    if not action_defs:
+        sys.stderr.write(
+            "Error: No action definitions found via --actions or project plugin.\n"
         )
-        for a in actions_data
-    ]
+        return 1
 
     model = StateMachineTransitionModel(action_defs)
     goal_key = args.goal_key
@@ -273,6 +292,13 @@ def cmd_session(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_init(args: argparse.Namespace) -> int:
+    """Run interactive onboarding wizard to bootstrap project SDK configuration."""
+    wizard = OnboardingWizard(target_dir=args.target_dir)
+    success = wizard.run()
+    return 0 if success else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agent-system",
@@ -281,10 +307,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"agent-system {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    # 0. Init
+    p_init = subparsers.add_parser("init", help="Bootstrap project SDK configuration interactively")
+    p_init.add_argument("--target-dir", default=None, help="Target project directory")
+    p_init.set_defaults(func=cmd_init)
+
     # 1. Plan
     p_plan = subparsers.add_parser("plan", help="Synthesize action plan via A* or MCTS")
     p_plan.add_argument("--initial", help="Path to initial state JSON or '-' for stdin")
-    p_plan.add_argument("--actions", required=True, help="Path to actions JSON")
+    p_plan.add_argument("--actions", default=None, help="Path to actions JSON (optional if provided by plugin)")
     p_plan.add_argument("--goal-key", required=True, help="State attribute key denoting goal")
     p_plan.add_argument("--goal-value", default=None, help="State attribute value denoting goal")
     p_plan.add_argument("--method", choices=["astar", "mcts"], default="astar", help="Planning method")
@@ -365,6 +396,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    effective_args = sys.argv[1:] if argv is None else list(argv)
+    if not effective_args:
+        # Bare root invocation: check if interactive first-time setup is needed
+        wizard = OnboardingWizard()
+        if wizard.is_interactive() and wizard.is_needed():
+            success = wizard.run()
+            return 0 if success else 1
+        parser = build_parser()
+        parser.print_help()
+        return 0
+
     parser = build_parser()
     args = parser.parse_args(argv)
     if hasattr(args, "func"):

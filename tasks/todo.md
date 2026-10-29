@@ -383,13 +383,13 @@
 **Description:** Tích hợp SDK vào giao diện dòng lệnh: bổ sung subcommand `agent-system init`, kích hoạt wizard an toàn khi chạy root command `agent-system` không kèm tham số trong terminal tương tác (TTY), và cập nhật `cmd_plan` để tham số `--actions` là tùy chọn khi plugin đã cung cấp action.
 
 **Acceptance criteria:**
-- [ ] Lệnh `agent-system init` kích hoạt trực tiếp `OnboardingWizard`.
-- [ ] Chạy `agent-system` gốc trong terminal TTY chưa cấu hình plugin sẽ gợi ý/kích hoạt wizard; tuyệt đối KHÔNG chặn các lệnh con (`critic`, `session`, `plan`, `memory`, `skill`) hoặc khi chạy qua pipe/subagent.
-- [ ] Lệnh `agent-system plan` tự động lấy actions từ plugin nếu không truyền flag `--actions`.
+- [x] Lệnh `agent-system init` kích hoạt trực tiếp `OnboardingWizard`.
+- [x] Chạy `agent-system` gốc trong terminal TTY chưa cấu hình plugin sẽ gợi ý/kích hoạt wizard; tuyệt đối KHÔNG chặn các lệnh con (`critic`, `session`, `plan`, `memory`, `skill`) hoặc khi chạy qua pipe/subagent.
+- [x] Lệnh `agent-system plan` tự động lấy actions từ plugin nếu không truyền flag `--actions`.
 
 **Verification:**
-- [ ] Tests pass: `pytest tests/test_cli_sdk.py tests/test_cli.py`
-- [ ] Pipe check: `cat script.py | agent-system critic` chạy trơn tru, không bao giờ bị wizard chặn.
+- [x] Tests pass: `pytest tests/test_cli_sdk.py tests/test_cli.py`
+- [x] Pipe check: `cat script.py | agent-system critic` chạy trơn tru, không bao giờ bị wizard chặn.
 
 **Dependencies:** Task 13, Task 14
 
