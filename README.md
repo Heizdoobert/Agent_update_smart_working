@@ -1,4 +1,24 @@
-# Agent System (`agent_system`)
+
+## 🚀 Deterministic Token Engine
+
+The **Deterministic Token Engine** provides a lightweight, rule‑based token budgeting system for AI‑coding agents. It estimates token usage, enforces a configurable budget (default 10 % over a minimum), and can optionally override the limit.
+
+### Usage
+```bash
+python -m token_engine.cli "<your prompt>"
+# Enable override when you need to temporarily exceed the budget:
+python -m token_engine.cli "<prompt>" --allow-override
+```
+
+- **`engine.py`** – Core engine handling estimation, throttling, and override.
+- **`predictor.py`** – Simple word‑count heuristic (replace with a ML model later).
+- **`rules.py`** – Threshold logic.
+- **`audit.py`** – JSON‑lines audit log with basic rotation.
+- **`cli.py`** – Command‑line wrapper with interactive confirmation.
+- **`tests/`** – Basic pytest suite covering normal flow, throttling, and override.
+
+This component is isolated under `token_engine/` and can be integrated into larger agents via the `TokenEngine` class.
+
 
 > **Domain-Agnostic Cognitive Agent Framework** trang bị năng lực nhận thức cấp cao (High-Level Cognitive Reasoning) cho AI Agents và các hệ thống tự hành.
 

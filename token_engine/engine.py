@@ -11,40 +11,35 @@ class TokenEngine:
     """Calculate token budget, apply throttling, and handle override."""
 
     def __init__(self, threshold_percent: float = 10.0, min_tokens: int = 5):
-        self.predictor = TokenPredictor()
-        self.rules = RuleEngine(threshold_percent, min_tokens)
-        self.audit = AuditLogger()
+        # Initialise components in a single line for brevity
+        self.predictor, self.rules, self.audit = (
+            TokenPredictor(),
+            RuleEngine(threshold_percent, min_tokens),
+            AuditLogger(),
+        )
 
     def process(self, prompt: str, allow_override: bool = False) -> str:
-        """Return the final output after applying token budget logic.
+        """Return output after applying token budget logic.
 
-        If throttling is required and no override, returns the sentinel
-        ``THROTTLE_REQUIRED`` so the CLI layer can ask the user.
+        Returns ``THROTTLE_REQUIRED`` when user confirmation is needed.
         """
         estimated = self.predictor.estimate(prompt)
         self.audit.log_estimate(prompt, estimated)
 
         if allow_override:
             self.audit.log_override(prompt, allowed=True)
-            output = self._run_model(prompt)
-            return self._compress(output)
+            return self._compress(self._run_model(prompt))
 
         if self.rules.should_throttle(estimated):
             self.audit.log_throttle(prompt, decision="required")
             return "THROTTLE_REQUIRED"
 
-        output = self._run_model(prompt)
-        return output
+        return self._run_model(prompt)
 
-    # ---- internal helpers -------------------------------------------------
     def _run_model(self, prompt: str) -> str:
-        """Placeholder for a real LLM call.
-        In the prototype we simply echo the prompt.
-        """
+        """Placeholder LLM call – echo prompt for prototype."""
         return f"MODEL_OUTPUT:{prompt}"
 
     def _compress(self, text: str) -> str:
-        """Very naive compression – just collapse whitespace.
-        Replace with a proper summarizer/compressor later.
-        """
+        """Collapse whitespace – naive compression placeholder."""
         return " ".join(text.split())

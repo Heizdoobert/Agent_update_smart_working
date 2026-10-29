@@ -24,20 +24,15 @@ def main() -> int:
 
     if result == "THROTTLE_REQUIRED":
         # Interactive confirmation loop.
-        while True:
-            answer = input(
-                "Estimated token usage exceeds budget. Reduce token output? (y/n): "
-            ).strip().lower()
-            if answer in {"y", "yes"}:
-                # Very naive reduction for prototype – cut the output length.
-                reduced = engine._run_model(args.prompt)[: len(args.prompt) // 2]
-                print("✅ Reduced output:", reduced)
-                break
-            if answer in {"n", "no"}:
-                print("❌ Full output returned.")
-                print(engine._run_model(args.prompt))
-                break
-            print("Please answer 'y' or 'n'.")
+        answer = input(
+            "Estimated token usage exceeds budget. Reduce token output? (y/n): "
+        ).strip().lower()
+        if answer in {"y", "yes"}:
+            reduced = engine._run_model(args.prompt)[: len(args.prompt) // 2]
+            print("✅ Reduced output:", reduced)
+        else:
+            print("❌ Full output returned.")
+            print(engine._run_model(args.prompt))
     else:
         print("✅ Output:", result)
     return 0
