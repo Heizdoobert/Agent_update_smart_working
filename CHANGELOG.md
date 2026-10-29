@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-29
+
 ### Added
 - **Zero-Dependency Model Context Protocol (MCP) Server (`agent_system.mcp`)**:
   - `MCPServer`: Compliant JSON-RPC 2.0 stdio engine adhering to MCP Protocol Version `2024-11-05` using 100% Python standard library (`sys`, `json`, `dataclasses`).
@@ -16,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CLI subcommand: `agent-system mcp [--root PATH]` enabling native plug-and-play tool execution for Claude Desktop, Cursor, Antigravity, and Windsurf.
   - Documented **ADR-006** (`docs/decisions/0006-zero-dependency-mcp-server-protocol.md`) and **SPEC-mcp-server** (`docs/specs/SPEC-mcp-server.md`).
 - **End-to-End Bidirectional Stdio MCP Test**: Added `tests/test_mcp_e2e.py` testing subprocess stdio piping and JSON-RPC handshakes.
+
+### Optimized
+- **MCP Response Helper Simplification**: Unified JSON-RPC response construction across all server methods via `_json_result` and `_json_error`.
+- **Shared Persistent Storage Instance**: Lazily cached `SQLiteStore` instance across memory tool executions in `CognitiveToolsDispatcher`, preventing file descriptor churn.
 
 ## [0.3.0] - 2026-10-29
 
