@@ -15,3 +15,9 @@ htmlcov/
 .env
 .DS_Store
 .agent/
+
+# IDE & OS files
+.idea/
+.vscode/
+*.log
+node_modules/
