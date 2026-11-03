@@ -1,0 +1,13 @@
+# Configuration for Long‑Term Memory Vector DB (Milvus 2)
+
+milvus:
+  host: "localhost"
+  port: 19530
+  # Base name for the collection; version will be appended
+  collection_base: agent_insights
+  collection_version: v1
+  # Full collection name used by the client (e.g., agent_insights_v1)
+  collection: "agent_insights_v1"
+  # Dimension of the embedding vectors (must match embedder output)
+  dimension: 128
+  lite_path: ./milvus_lite.db

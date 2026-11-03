@@ -1,23 +1,64 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-build/
-dist/
+
+# Virtual Environments
+venv/
+.venv/
+ENV/
+env/
+
+# Testing & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+.nox/
+
+# Databases & WAL files
+.db
 *.db
 *.db-shm
 *.db-wal
+*.sqlite
+*.sqlite3
+
+# Environment & Credentials
 .env
-.DS_Store
-.agent/
+.env.*
+!.env.example
 
 # IDE & OS files
 .idea/
 .vscode/
 *.log
 node_modules/
+.DS_Store
+
+# Agent runtime & temporary files
+.gemini/
+brain/
+.agent/*
+!.agent/rules.md
