@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  redis:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+  coordination:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+  worker:
+    deploy:
+      resources:
+        limits:
+          memory: 128M

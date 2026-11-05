@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server","--requirepass","${REDIS_PASSWORD}"]
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    mem_limit: 128m
+
+  coordination:
+    build: ../coordination_service
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+
+  worker:
+    image: python:3.11-slim
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      bash -c "
+      pip install --no-cache-dir -r /app/requirements.txt &&
+      celery -A coordination_service.celery_app worker --loglevel=info
+      "
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+      - coordination
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+
