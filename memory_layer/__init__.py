@@ -1,4 +1,14 @@
-# Package-level re-exports for memory_layer
+# memory_layer package
+# Minimal exports for hardening, commit, rollback utilities.
+
+from . import hardening, commit, rollback
+
+__all__ = ["hardening", "commit", "rollback"]
+
+# Expose core hardening and transaction utilities.
+from . import hardening, commit, rollback
+
+__all__ = ["hardening", "commit", "rollback"]
 from ._client import get_client, reset_client, _client_instance
 from .agent_hooks import pre_task_hook, post_task_hook
 from .api import (
