@@ -1,9 +1,6 @@
-# Core Cognitive Architecture & Big Data Heavy-Compute Engine Dependencies
-# Python requirement: Python 3.11 (3.11.x) strictly required for C-Extension ABI compatibility.
-
-pymilvus>=3.0.0
-duckdb>=1.0.0
-blake3>=1.0.0
-fsspec>=2024.1.0
-celery>=5.3.0
-pytest>=8.0.0
+fastapi==0.110.0
+uvicorn[standard]==0.27.0
+celery==5.4.0
+redis==5.0.3
+pydantic==2.6.4
+psutil==5.9.8
