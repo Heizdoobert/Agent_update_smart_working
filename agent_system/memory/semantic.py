@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from agent_system.core.contracts import MemoryItem
 from agent_system.core.truncator import StructuralTruncator
+from agent_system.memory import embedder
 from agent_system.storage.sqlite_store import SQLiteStore
 
 
@@ -196,6 +197,17 @@ class SemanticMemory:
         # 3. Always maintain in-memory fallback index
         self.fallback_bm25.add_document(item)
 
+        # 4. Store embedding when available (None = fastembed missing, BM25 only)
+        vecs = embedder.embed([content])
+        if vecs:
+            blob = embedder.pack(vecs[0])
+            self.store.execute_with_retry(
+                lambda cur: cur.execute(
+                    "INSERT OR REPLACE INTO memory_vectors (item_id, vec) VALUES (?, ?);",
+                    (item_id, blob),
+                )
+            )
+
     def search(
         self,
         query: str,
@@ -203,7 +215,10 @@ class SemanticMemory:
         top_k: int = 3,
         max_bytes: int = StructuralTruncator.DEFAULT_MAX_BYTES,
     ) -> List[MemoryItem]:
-        """Search memory with query, ranking via BM25, bounded by max_bytes."""
+        """Search memory: embedding cosine first, BM25 tops up the rest; bounded by max_bytes."""
+        vec_hits = self._search_vectors(query, category, top_k)
+        if len(vec_hits) >= top_k:
+            return self._truncate_results(vec_hits, max_bytes=max_bytes)
         results: List[MemoryItem] = []
 
         if self.has_fts5:
@@ -219,8 +234,47 @@ class SemanticMemory:
                 self._load_fallback_from_db()
             results = self.fallback_bm25.search(query, category=category, top_k=top_k)
 
+        seen = {r.item_id for r in vec_hits}
+        results = (vec_hits + [r for r in results if r.item_id not in seen])[:top_k]
+
         # Apply StructuralTruncator to enforce context limit across results
         return self._truncate_results(results, max_bytes=max_bytes)
+
+    def _search_vectors(
+        self, query: str, category: Optional[str], top_k: int
+    ) -> List[MemoryItem]:
+        """Brute-force cosine over stored vectors. ponytail: O(n) scan, add an ANN index past ~10k rows."""
+        qv = embedder.embed([query], query=True)
+        if not qv:
+            return []
+
+        def _load(cur: sqlite3.Cursor) -> list:
+            sql = (
+                "SELECT m.item_id, m.category, m.content, m.timestamp, m.metadata_json, v.vec "
+                "FROM memory_vectors v JOIN memories m ON m.item_id = v.item_id"
+            )
+            if category:
+                cur.execute(sql + " WHERE m.category = ?;", (category,))
+            else:
+                cur.execute(sql + ";")
+            return cur.fetchall()
+
+        scored = sorted(
+            ((embedder.cosine(qv[0], embedder.unpack(r["vec"])), r) for r in self.store.execute_with_retry(_load)),
+            key=lambda x: x[0],
+            reverse=True,
+        )[:top_k]
+        return [
+            MemoryItem(
+                item_id=r["item_id"],
+                category=r["category"],
+                content=r["content"],
+                score=round(s, 4),
+                timestamp=r["timestamp"],
+                metadata=json.loads(r["metadata_json"] or "{}"),
+            )
+            for s, r in scored
+        ]
 
     def _search_fts5(
         self, query: str, category: Optional[str] = None, top_k: int = 3

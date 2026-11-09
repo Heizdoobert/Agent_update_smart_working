@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 from pathlib import Path
 import sys
 from typing import Any, Dict, List, Optional
@@ -38,6 +39,7 @@ All AI Agents working in this environment MUST strictly follow this Operating Pr
 ## 4. Strict Context Budget (<3KB) & Episodic Memory
 - Bound all active prompt context under 3072 bytes (<3KB) via Structural Truncation.
 - After resolving an issue, record the solution into Episodic Memory: Run `agent-system memory recipe-record --key "<key>" --recipe "<solution>"` (or invoke MCP `agent_memory_recipe_record`).
+- Large task: `flow_plan_create` (pass your own model id) -> show the plan, wait for the user's OK -> `flow_plan_approve` -> `flow_plan_status` -> give the user report.md. Never approve without that OK.
 - Communicate with concise, professional technical Vietnamese, and include clickable links (`file:///...`).
 """
 
@@ -68,12 +70,38 @@ def get_windsurf_config_path() -> Path:
     return Path.home() / ".codeium" / "windsurf" / "mcp_config.json"
 
 
-def get_mcp_server_entry(command: str = "agent-system") -> Dict[str, Any]:
+def resolve_command() -> str:
+    """Absolute path of the agent-system launcher (GUI clients do not inherit the shell PATH)."""
+    exe = "agent-system.exe" if sys.platform == "win32" else "agent-system"
+    for cand in (Path(sys.executable).parent / exe, shutil.which("agent-system")):
+        if cand and Path(cand).is_file():
+            return str(cand)
+    return "agent-system"
+
+
+def get_mcp_server_entry(command: Optional[str] = None) -> Dict[str, Any]:
     """Return standard MCP server configuration dictionary."""
     return {
-        "command": command,
+        "command": command or resolve_command(),
         "args": ["mcp"],
     }
+
+
+RULES_BEGIN = "<!-- agent-system:begin -->"
+RULES_END = "<!-- agent-system:end -->"
+
+
+def write_managed_block(path: Path, text: str) -> None:
+    """Insert or replace our marked block; never touch the rest of the user's file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    old = path.read_text(encoding="utf-8") if path.is_file() else ""
+    block = f"{RULES_BEGIN}\n{text.strip()}\n{RULES_END}\n"
+    i, j = old.find(RULES_BEGIN), old.find(RULES_END)
+    if i != -1 and j > i:
+        new = old[:i] + block + old[j + len(RULES_END):].lstrip("\n")
+    else:
+        new = (old.rstrip("\n") + "\n\n" if old.strip() else "") + block
+    path.write_text(new, encoding="utf-8")
 
 
 def inject_mcp_config(config_path: Path, server_name: str = "agent-system") -> bool:
@@ -160,7 +188,6 @@ def install_agent_environment(
                 {"path": str(rp), "bytes": len(instruction.encode("utf-8")), "status": "PENDING" if dry_run else "SUCCESS"}
             )
             if not dry_run:
-                rp.parent.mkdir(parents=True, exist_ok=True)
-                rp.write_text(instruction, encoding="utf-8")
+                write_managed_block(rp, instruction)
 
     return results

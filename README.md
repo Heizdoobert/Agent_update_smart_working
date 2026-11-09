@@ -1,6 +1,28 @@
-# Deterministic Token Engine
+# agent-system
 
-## 📦 Installation
+Domain-agnostic agent engine: semantic + episodic memory (SQLite, optional fastembed vectors), critic and self-reflection loop, A*/MCTS planning, and a zero-dependency MCP server. Pairs with [FLOW_SKILL](../FLOW_SKILL), a Redis task engine with a cheap `claude -p` worker.
+
+## Install (Linux, macOS, Windows)
+Easiest: install both together from FLOW_SKILL (`./install.sh` / `.\install.ps1`, see its INSTALL.md): one venv, MCP registered, task engine wired.
+
+Standalone:
+```bash
+pip install -e ".[embed]"        # drop [embed] for BM25-only memory (no model download)
+agent-system install --target mcp   # register the MCP server in Claude Desktop, Cursor, Windsurf, Antigravity
+agent-system doctor              # DB, embeddings, registered clients, flow-task bridge
+```
+`agent-system install` (default `--target all`) also writes the Universal Operating Protocol into `~/.claude/CLAUDE.md`, `~/.gemini/.../AGENTS.md`, `~/.cursorrules`, `~/.agent/rules.md` as a marked block (`<!-- agent-system:begin -->`) and never touches the rest of those files. Claude Code CLI: `claude mcp add agent-system -- agent-system mcp`.
+
+Memory lives in `~/.agent_system/agent_system.db` (`AGENT_SYSTEM_DB_DIR` moves it; `AGENT_SYSTEM_NO_EMBED=1` forces BM25). `AGENT_SYSTEM_LLM_PATCH=1` lets `reflect` call a cheap Claude model for violations the rule patcher cannot fix.
+
+## Wiring with FLOW_SKILL
+- MCP tools `flow_task_submit` / `flow_task_status` queue work on the task engine (`flow-task` found next to this interpreter, on PATH, or via `FLOW_TASK_BIN`; absent = a clear error, nothing breaks).
+- FLOW calls back into `agent-system memory search | index | recipe-record` around every task.
+
+---
+
+# Deterministic Token Engine (`token_engine/`)
+### Installation
 ```bash
 # Clone the repository (if not already)
 cd /mnt/second_drive/Agent_system

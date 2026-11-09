@@ -36,7 +36,7 @@ def test_inject_mcp_config(tmp_path):
     data = json.loads(config_file.read_text(encoding="utf-8"))
     assert "mcpServers" in data
     assert "agent-system" in data["mcpServers"]
-    assert data["mcpServers"]["agent-system"]["command"] == "agent-system"
+    assert Path(data["mcpServers"]["agent-system"]["command"]).stem == "agent-system"
     assert data["mcpServers"]["agent-system"]["args"] == ["mcp"]
 
     # Inject into existing file with other servers preserved

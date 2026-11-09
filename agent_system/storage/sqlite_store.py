@@ -17,7 +17,8 @@ class SQLiteStore:
 
     def __init__(self, db_path: Optional[Union[str, Path]] = None) -> None:
         if db_path is None:
-            default_dir = Path.home() / ".agent_system"
+            # AGENT_SYSTEM_DB_DIR pins one DB for host and sandbox (Path.home() differs inside Docker)
+            default_dir = Path(os.environ.get("AGENT_SYSTEM_DB_DIR") or Path.home() / ".agent_system")
             default_dir.mkdir(parents=True, exist_ok=True)
             self.db_path = default_dir / "agent_system.db"
         else:
@@ -122,6 +123,10 @@ class SQLiteStore:
             )
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS idx_memories_cat ON memories(category);"
+            )
+            # Optional embeddings (float32 blob) for semantic search
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS memory_vectors (item_id TEXT PRIMARY KEY, vec BLOB NOT NULL);"
             )
 
         self.execute_with_retry(_init)

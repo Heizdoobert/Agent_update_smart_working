@@ -21,3 +21,7 @@ htmlcov/
 .vscode/
 *.log
 node_modules/
+
+# virtualenvs are per-machine
+.venv/
+venv/

@@ -16,6 +16,9 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
 
+[project.optional-dependencies]
+embed = ["fastembed>=0.3"]  # semantic memory; without it search falls back to BM25
+
 [project.scripts]
 agent-system = "agent_system.cli.main:main"
 

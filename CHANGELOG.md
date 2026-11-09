@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `agent-system doctor [--json]`: health report (DB, embeddings, MCP clients, flow-task bridge).
+- MCP tools `flow_task_submit` / `flow_task_status` and `agent_system.flow` bridge to the FLOW_SKILL task engine.
+- Optional semantic search: `pip install 'agent-system[embed]'` (fastembed, `memory_vectors` table, BM25 top-up); `AGENT_SYSTEM_DB_DIR`.
+- Opt-in LLM patcher for `reflect` (`AGENT_SYSTEM_LLM_PATCH=1`); MCP tool `agent_memory_index`.
+
+### Fixed
+- Installer wrote rules files with `write_text`, overwriting the user's own `~/.claude/CLAUDE.md`; it now maintains a marked block only.
+- Installer registered the bare command `agent-system`, which GUI clients cannot resolve; it now writes the absolute launcher path.
+- MCP recipe tools called methods that do not exist.
+- `.venv/` was tracked in git; now ignored.
+
 ## [0.4.2] - 2026-10-29
 
 ### Added

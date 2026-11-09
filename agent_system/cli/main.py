@@ -18,6 +18,7 @@ from agent_system.reasoning.transition import ActionDefinition, StateMachineTran
 from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic, PluginManifestCritic
 from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine, SchemaCritic
+from agent_system.reflection.llm_patcher import default_patcher
 from agent_system.reflection.reflector import SelfReflector
 from agent_system.skills.registry import SkillRegistry
 from agent_system.sdk.registry import PluginRegistry
@@ -206,7 +207,7 @@ def cmd_reflect(args: argparse.Namespace) -> int:
         return 1
 
     engine = CriticEngine([PythonAstCritic(require_type_annotations=args.strict)])
-    reflector = SelfReflector(engine, max_iterations=args.max_iterations)
+    reflector = SelfReflector(engine, custom_patcher=default_patcher(), max_iterations=args.max_iterations)
 
     res = reflector.reflect_and_patch(content, context={"language": "python"})
 
@@ -425,6 +426,15 @@ def cmd_install(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_doctor(args: argparse.Namespace) -> int:
+    """Print a health report; exit 1 when a required check fails."""
+    from agent_system import doctor
+
+    report = doctor.run()
+    sys.stdout.write(json.dumps(report, indent=2) + "\n" if args.json else doctor.render(report))
+    return 0 if report["ok"] else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agent-system",
@@ -432,6 +442,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"agent-system {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    p_doc = subparsers.add_parser("doctor", help="Health report: memory DB, embeddings, MCP clients, flow-task bridge")
+    p_doc.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    p_doc.set_defaults(func=cmd_doctor)
 
     # 0.0 Install
     p_install = subparsers.add_parser("install", help="Install System Instructions and MCP server into AI clients (Claude Desktop, Cursor, etc.)")
