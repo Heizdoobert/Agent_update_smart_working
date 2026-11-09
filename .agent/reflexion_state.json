@@ -1,0 +1,15 @@
+{
+  "session_id": "test123",
+  "goal": "demo task",
+  "iteration": 0,
+  "max_retries": 3,
+  "status": "EXECUTING",
+  "few_shots": [
+    "[]"
+  ],
+  "trace": [],
+  "last_error": null,
+  "rca_diagnosis": null,
+  "hitl_feedback": null,
+  "recovered": false
+}

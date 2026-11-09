@@ -1,0 +1,14 @@
+version: '3.5'
+services:
+  milvus-standalone:
+    image: milvusdb/milvus:2.4.9-cpu-d010621-5ef5c8
+    container_name: milvus-standalone
+    environment:
+      - TZ=UTC
+    ports:
+      - "19530:19530"
+      - "19121:19121"
+    volumes:
+      - ./milvus_data:/var/lib/milvus
+    command: ["milvus", "run", "standalone"]
+    restart: unless-stopped
