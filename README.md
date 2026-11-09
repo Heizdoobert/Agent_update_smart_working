@@ -16,7 +16,7 @@ agent-system doctor              # DB, embeddings, registered clients, flow-task
 Memory lives in `~/.agent_system/agent_system.db` (`AGENT_SYSTEM_DB_DIR` moves it; `AGENT_SYSTEM_NO_EMBED=1` forces BM25). `AGENT_SYSTEM_LLM_PATCH=1` lets `reflect` call a cheap Claude model for violations the rule patcher cannot fix.
 
 ## Wiring with FLOW_SKILL
-- MCP tools `flow_task_submit` / `flow_task_status` queue work on the task engine (`flow-task` found next to this interpreter, on PATH, or via `FLOW_TASK_BIN`; absent = a clear error, nothing breaks).
+- MCP tools `flow_task_submit` / `flow_task_status` queue work, and `flow_plan_create` / `flow_plan_approve` / `flow_plan_status` run plan -> your OK -> parallel sub-agents -> evidence report, on the task engine (`flow-task` found next to this interpreter, on PATH, or via `FLOW_TASK_BIN`; absent = a clear error, nothing breaks).
 - FLOW calls back into `agent-system memory search | index | recipe-record` around every task.
 
 ---

@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `agent-system doctor [--json]`: health report (DB, embeddings, MCP clients, flow-task bridge).
-- MCP tools `flow_task_submit` / `flow_task_status` and `agent_system.flow` bridge to the FLOW_SKILL task engine.
+- MCP tools `flow_task_submit` / `flow_task_status` / `flow_plan_create` / `flow_plan_approve` / `flow_plan_status` and the `agent_system.flow` bridge to the FLOW_SKILL task engine (plan -> approval -> parallel sub-agents -> evidence report).
+- Universal protocol tells agents to pass their own model id and wait for the user's OK before `flow_plan_approve`.
 - Optional semantic search: `pip install 'agent-system[embed]'` (fastembed, `memory_vectors` table, BM25 top-up); `AGENT_SYSTEM_DB_DIR`.
 - Opt-in LLM patcher for `reflect` (`AGENT_SYSTEM_LLM_PATCH=1`); MCP tool `agent_memory_index`.
 
