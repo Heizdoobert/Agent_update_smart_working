@@ -39,7 +39,7 @@ All AI Agents working in this environment MUST strictly follow this Operating Pr
 ## 4. Strict Context Budget (<3KB) & Episodic Memory
 - Bound all active prompt context under 3072 bytes (<3KB) via Structural Truncation.
 - After resolving an issue, record the solution into Episodic Memory: Run `agent-system memory recipe-record --key "<key>" --recipe "<solution>"` (or invoke MCP `agent_memory_recipe_record`).
-- Large task: `flow_plan_create` (pass your own model id) -> show the plan, wait for the user's OK -> `flow_plan_approve` -> `flow_plan_status` -> give the user report.md. Never approve without that OK.
+- User message `task:[...]` (or a large task): memory search + `agent_scan`, then `flow_plan_create` (pass your own model id) -> show the plan, wait for the user's OK -> `flow_plan_approve` -> `flow_plan_status` -> give the user report.md (việc làm / file / lý do / bằng chứng). Never approve without that OK.
 - Communicate with concise, professional technical Vietnamese, and include clickable links (`file:///...`).
 """
 
