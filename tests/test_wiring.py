@@ -38,6 +38,7 @@ def test_flow_tools_call_flow_task(tmp_path, monkeypatch):
         return
     d = CognitiveToolsDispatcher(root_path=tmp_path)
     assert d.dispatch("flow_task_submit", {"message": "do x"}) == "ran: enqueue do x"
+    assert d.dispatch("flow_task_submit", {"message": "do x", "model": "gemini-3.8-flash-high"}) == "ran: enqueue do x --model gemini-3.8-flash-high"
     assert d.dispatch("flow_task_status", {"task_id": "42"}) == "ran: status 42"
     assert d.dispatch("flow_task_submit", {"message": " "}).startswith("error")
 

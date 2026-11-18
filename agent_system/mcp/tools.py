@@ -160,10 +160,13 @@ TOOLS_SCHEMA: List[Dict[str, Any]] = [
     },
     {
         "name": "flow_task_submit",
-        "description": "Queue a task for the FLOW task engine listener (cheap haiku worker, gated, logged to Grafana). Returns a task id.",
+        "description": "Queue a task for the FLOW task engine listener (gated, logged to Grafana). Pass your own model id: the engine picks the worker from it (Gemini Flash caller -> GPT-OSS 120B does the work). Returns a task id.",
         "inputSchema": {
             "type": "object",
-            "properties": {"message": {"type": "string", "description": "Task description."}},
+            "properties": {
+                "message": {"type": "string", "description": "Task description."},
+                "model": {"type": "string", "description": "Your own exact model id (e.g. gemini-3.8-flash-high)."},
+            },
             "required": ["message"],
         },
     },
@@ -412,7 +415,8 @@ class CognitiveToolsDispatcher:
 
     def _tool_flow_task_submit(self, args: Dict[str, Any]) -> str:
         message = str(args.get("message", "")).strip()
-        return flow.run("enqueue", message) if message else "error: empty message"
+        model = str(args.get("model", "")).strip()
+        return flow.run("enqueue", message, *(["--model", model] if model else [])) if message else "error: empty message"
 
     def _tool_flow_task_status(self, args: Dict[str, Any]) -> str:
         return flow.run("status", str(args.get("task_id", "")))
