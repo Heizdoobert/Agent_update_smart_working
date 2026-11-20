@@ -6,26 +6,33 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from agent_system import __version__
 from agent_system.core.session import SessionManager
+from agent_system.mcp.server import MCPServer
 from agent_system.memory.episodic import EpisodicMemory
 from agent_system.memory.semantic import SemanticMemory
 from agent_system.reasoning.astar import AStarPlanner
 from agent_system.reasoning.mcts import MCTSPlanner
-from agent_system.reasoning.transition import ActionDefinition, StateMachineTransitionModel, StateNode
-from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic, PluginManifestCritic
+from agent_system.reasoning.transition import (
+    ActionDefinition,
+    StateMachineTransitionModel,
+    StateNode,
+)
+from agent_system.reflection.adapters.config_rules import (
+    MarkdownRulesCritic,
+    PluginManifestCritic,
+)
 from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine, SchemaCritic
 from agent_system.reflection.llm_patcher import default_patcher
 from agent_system.reflection.reflector import SelfReflector
-from agent_system.skills.registry import SkillRegistry
-from agent_system.sdk.registry import PluginRegistry
-from agent_system.sdk.wizard import OnboardingWizard
-from agent_system.sdk.scanner import CodebaseScanner
 from agent_system.sdk.ingestion import KnowledgeIngester
-from agent_system.mcp.server import MCPServer
+from agent_system.sdk.registry import PluginRegistry
+from agent_system.sdk.scanner import CodebaseScanner
+from agent_system.sdk.wizard import OnboardingWizard
+from agent_system.skills.registry import SkillRegistry
 
 
 def _read_input(file_arg: Optional[str] = None) -> str:
@@ -404,7 +411,10 @@ def cmd_mcp(args: argparse.Namespace) -> int:
 
 def cmd_install(args: argparse.Namespace) -> int:
     """Install Universal System Instructions and MCP configurations into AI clients."""
-    from agent_system.sdk.installer import install_agent_environment, UNIVERSAL_SYSTEM_INSTRUCTION
+    from agent_system.sdk.installer import (
+        UNIVERSAL_SYSTEM_INSTRUCTION,
+        install_agent_environment,
+    )
 
     if args.print_instruction:
         sys.stdout.write(UNIVERSAL_SYSTEM_INSTRUCTION)
@@ -553,7 +563,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_sess = subparsers.add_parser("session", help="Session token management across commands")
     sess_sub = p_sess.add_subparsers(dest="session_action", required=True)
 
-    ss_list = sess_sub.add_parser("list", help="List all active sessions")
+    sess_sub.add_parser("list", help="List all active sessions")
     ss_get = sess_sub.add_parser("get", help="Get session data")
     ss_get.add_argument("--id", required=True, help="Session ID")
     ss_set = sess_sub.add_parser("set", help="Set session key-value")

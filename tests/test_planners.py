@@ -1,11 +1,16 @@
 """Tests for A* and MCTS Planners."""
 
 import time
+
 import pytest
 
 from agent_system.reasoning.astar import AStarPlanner
 from agent_system.reasoning.mcts import MCTSPlanner
-from agent_system.reasoning.transition import ActionDefinition, StateMachineTransitionModel, StateNode
+from agent_system.reasoning.transition import (
+    ActionDefinition,
+    StateMachineTransitionModel,
+    StateNode,
+)
 
 
 @pytest.fixture

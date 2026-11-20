@@ -1,9 +1,7 @@
 """Unit tests for agent_system.mcp.server and tools."""
 import json
-import pytest
 
 from agent_system.mcp.server import MCPServer
-from agent_system.mcp.tools import CognitiveToolsDispatcher
 
 
 def test_mcp_handshake_and_ping():

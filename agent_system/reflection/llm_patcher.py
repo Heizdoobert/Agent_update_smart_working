@@ -39,7 +39,7 @@ def claude_patcher(model: str = "haiku", max_usd: float = 0.20, timeout: int = 1
         if proc.returncode != 0:
             return artifact
         text = json.loads(proc.stdout).get("result", "").strip()
-        fenced = re.match(r"^```[\w-]*\n(.*?)\n```$", text, re.S)
+        fenced = re.match(r"^```[\w-]*\n(.*?)\n```$", text, re.DOTALL)
         return fenced.group(1) if fenced else text or artifact
 
     return patch

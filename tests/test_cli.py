@@ -1,8 +1,7 @@
 """Tests for Unified CLI interface."""
 
 import json
-import tempfile
-from pathlib import Path
+
 import pytest
 
 from agent_system import __version__

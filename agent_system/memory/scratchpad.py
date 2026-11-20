@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import threading
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Optional
+from typing import Any, Dict, Optional
 
 
 class WorkingScratchpad:
@@ -71,10 +72,9 @@ class WorkingScratchpad:
         """Clear scratchpad contents."""
         sid = session_id or self._default_session
         lock = self._get_session_lock(sid)
-        with lock:
-            with self._meta_lock:
-                if sid in self._sessions:
-                    self._sessions[sid].clear()
+        with lock, self._meta_lock:
+            if sid in self._sessions:
+                self._sessions[sid].clear()
 
     def export_dict(self, session_id: Optional[str] = None) -> Dict[str, Any]:
         """Export a copy of current scratchpad state."""

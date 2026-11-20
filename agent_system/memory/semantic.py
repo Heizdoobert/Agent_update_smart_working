@@ -8,7 +8,7 @@ import re
 import sqlite3
 import time
 from collections import Counter, defaultdict
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 from agent_system.core.contracts import MemoryItem
 from agent_system.core.truncator import StructuralTruncator

@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import io
-import json
-from pathlib import Path
-import pytest
 
 from agent_system.core.contracts import CriticStatus
 from agent_system.reasoning.astar import AStarPlanner
 from agent_system.reasoning.mcts import MCTSPlanner
-from agent_system.reasoning.transition import ActionDefinition, StateMachineTransitionModel, StateNode
+from agent_system.reasoning.transition import (
+    StateMachineTransitionModel,
+    StateNode,
+)
 from agent_system.reflection.critic import CriticEngine
-from agent_system.sdk.contracts import BasePlugin, PluginManifest, ProjectContext
 from agent_system.sdk.registry import PluginRegistry
 from agent_system.sdk.wizard import OnboardingWizard
 

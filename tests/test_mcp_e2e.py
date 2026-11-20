@@ -4,7 +4,6 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-import pytest
 
 
 def test_mcp_server_stdio_e2e():

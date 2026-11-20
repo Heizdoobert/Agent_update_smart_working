@@ -1,18 +1,7 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["agent_system"]
-
 [project]
 name = "agent-system"
 version = "0.4.4"
-description = "Domain-Agnostic Cognitive Agent Engine with ToT/MCTS Reasoning, Reflection, 3-Tier Memory, and Skill Management"
-authors = [{ name = "Agent System Core Team" }]
-readme = "README.md"
+description = "Cognitive architecture & deterministic agent engine (domain-agnostic)"
 requires-python = ">=3.9"
 dependencies = []
 
@@ -22,8 +11,42 @@ embed = ["fastembed>=0.3"]  # semantic memory; without it search falls back to B
 [project.scripts]
 agent-system = "agent_system.cli.main:main"
 
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent_system"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+# ── Lint & format gate (module ci-quality, 2026-11-20) ──────────────────
+# Core ruleset E,F,W,I is the CI gate (safe for py>=3.9).
+# pyupgrade (UP*) is tracked separately in docs/lint-baseline.md as a follow-up
+# because it requires dropping the py3.9 floor.
+[tool.ruff]
+line-length = 140
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E731",  # lambda assignment in tests (intentional style)
+    "W293",  # blank line with whitespace (ruff format normalizes; keep lenient)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# These files hold long natural-language tool/prompt descriptions (MCP schemas,
+# onboarding wizard prose). Wrapping them would harm readability, so allow long
+# lines there only. Every other file is still gated on E501 at 140.
+"agent_system/mcp/tools.py" = ["E501"]
+"agent_system/sdk/installer.py" = ["E501"]
+"agent_system/doctor.py" = ["E501"]
+"agent_system/cli/main.py" = ["E501"]
+"tests/*" = ["E501"]

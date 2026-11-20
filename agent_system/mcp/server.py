@@ -47,7 +47,7 @@ class MCPServer:
         try:
             req: Dict[str, Any] = json.loads(message_str)
         except (json.JSONDecodeError, ValueError) as err:
-            return _json_error(None, -32700, f"Parse error: {str(err)}")
+            return _json_error(None, -32700, f"Parse error: {err!s}")
 
         if not isinstance(req, dict):
             return _json_error(None, -32600, "Invalid Request: expected JSON object")
@@ -96,7 +96,7 @@ class MCPServer:
                     req_id,
                     {
                         "content": [
-                            {"type": "text", "text": f"Error executing tool '{tool_name}': {str(exc)}"}
+                            {"type": "text", "text": f"Error executing tool '{tool_name}': {exc!s}"}
                         ],
                         "isError": True,
                     },

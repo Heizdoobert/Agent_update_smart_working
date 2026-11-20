@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import heapq
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from agent_system.core.contracts import ActionStep, Plan
-from agent_system.reasoning.transition import ActionDefinition, StateMachineTransitionModel, StateNode
+from agent_system.reasoning.transition import (
+    ActionDefinition,
+    StateMachineTransitionModel,
+    StateNode,
+)
 
 
 def _zero_heuristic(_: StateNode) -> float:

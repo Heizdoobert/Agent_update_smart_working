@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+
 import pytest
 
-from agent_system.core.contracts import CriticProtocol, CriticReport, CriticStatus, CriticVerdict, DiagnosticItem
-from agent_system.reasoning.transition import ActionDefinition
-from agent_system.sdk.contracts import BasePlugin, PluginManifest, ProjectContext
+from agent_system.core.contracts import (
+    CriticStatus,
+)
 from agent_system.sdk.registry import PluginRegistry
 
 

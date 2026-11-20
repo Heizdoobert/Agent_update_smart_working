@@ -6,7 +6,6 @@ import ast
 from typing import Any, Dict, List, Optional, Set
 
 from agent_system.core.contracts import (
-    CriticProtocol,
     CriticReport,
     CriticStatus,
     CriticVerdict,

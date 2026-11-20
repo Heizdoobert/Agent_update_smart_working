@@ -3,15 +3,18 @@
 import tempfile
 import time
 from pathlib import Path
-import pytest
 
-from agent_system.core.contracts import ActionStep, TaskGoal, TraceRecord
+from agent_system.core.contracts import TraceRecord
 from agent_system.core.session import SessionManager
 from agent_system.memory.episodic import EpisodicMemory
 from agent_system.memory.scratchpad import WorkingScratchpad
 from agent_system.memory.semantic import SemanticMemory
 from agent_system.reasoning.astar import AStarPlanner
-from agent_system.reasoning.transition import ActionDefinition, StateMachineTransitionModel, StateNode
+from agent_system.reasoning.transition import (
+    ActionDefinition,
+    StateMachineTransitionModel,
+    StateNode,
+)
 from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine
 from agent_system.reflection.reflector import SelfReflector

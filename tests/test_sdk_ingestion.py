@@ -1,14 +1,12 @@
 """Tests for KnowledgeIngester in agent_system.sdk.ingestion."""
-import os
-from pathlib import Path
 import tempfile
-import pytest
+from pathlib import Path
 
-from agent_system.sdk.scanner import ProjectManifest
-from agent_system.sdk.ingestion import KnowledgeIngester, IngestionResult
 from agent_system.memory.semantic import SemanticMemory
-from agent_system.storage.sqlite_store import SQLiteStore
 from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic
+from agent_system.sdk.ingestion import IngestionResult, KnowledgeIngester
+from agent_system.sdk.scanner import ProjectManifest
+from agent_system.storage.sqlite_store import SQLiteStore
 
 
 def test_ingestion_creates_tier1_rules_under_3kb_and_symlink():

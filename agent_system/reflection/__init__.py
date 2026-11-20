@@ -6,8 +6,8 @@ from .reflector import ReflectionResult, SelfReflector
 
 __all__ = [
     "CriticEngine",
-    "SchemaCritic",
     "PythonAstCritic",
-    "SelfReflector",
     "ReflectionResult",
+    "SchemaCritic",
+    "SelfReflector",
 ]

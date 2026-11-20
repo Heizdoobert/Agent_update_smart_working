@@ -3,10 +3,10 @@
 Synthesizes Tier 1 Level 1 Rules (<3KB, strictly truncated and validated)
 and indexes Tier 2 documentation into Semantic Memory (SQLite Store).
 """
-from dataclasses import dataclass
 import json
-from pathlib import Path
 import re
+from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional
 
 from agent_system.core.truncator import StructuralTruncator
@@ -164,7 +164,7 @@ class KnowledgeIngester:
             try:
                 with open(doc_file, "rb") as f:
                     content = f.read(50_000).decode("utf-8", errors="ignore")
-            except (IOError, OSError):
+            except OSError:
                 continue
 
             # Split by markdown headings: ## or #

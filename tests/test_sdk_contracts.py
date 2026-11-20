@@ -2,11 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-import pytest
-
-from agent_system.core.contracts import CriticProtocol, CriticReport, CriticStatus, CriticVerdict
 from agent_system.core.truncator import StructuralTruncator
 from agent_system.reasoning.transition import ActionDefinition
 from agent_system.sdk.contracts import (

@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from agent_system.core.contracts import CriticProtocol
+from agent_system.core.contracts import CriticProtocol, CriticReport
 from agent_system.reasoning.transition import ActionDefinition
 
 
@@ -72,15 +72,12 @@ class BasePlugin:
 
     def on_load(self) -> None:
         """Lifecycle hook called when plugin is activated in a workspace."""
-        pass
 
     def on_unload(self) -> None:
         """Lifecycle hook called when plugin is deactivated."""
-        pass
 
     def on_before_plan(self, initial_state: Any, goal: Any) -> None:
         """Lifecycle hook called before planner begins state exploration."""
-        pass
 
     def on_after_plan(self, plan: Optional[Any]) -> Optional[Any]:
         """Lifecycle hook called after planner returns a plan.

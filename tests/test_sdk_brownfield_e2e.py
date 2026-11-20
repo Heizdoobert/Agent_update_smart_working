@@ -1,15 +1,14 @@
 """End-to-End integration test for Brownfield Codebase Scanner and Ingestion."""
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
-import pytest
+from pathlib import Path
 
-from agent_system.sdk.registry import PluginRegistry
-from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic
-from agent_system.storage.sqlite_store import SQLiteStore
 from agent_system.memory.semantic import SemanticMemory
+from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic
+from agent_system.sdk.registry import PluginRegistry
+from agent_system.storage.sqlite_store import SQLiteStore
 
 
 def test_brownfield_full_lifecycle_e2e():

@@ -7,7 +7,6 @@ import re
 from typing import Any, Dict, List, Optional
 
 from agent_system.core.contracts import (
-    CriticProtocol,
     CriticReport,
     CriticStatus,
     CriticVerdict,
@@ -206,7 +205,7 @@ class PluginManifestCritic:
             )
             score -= 10.0
 
-        if "rules_path" in data and data["rules_path"]:
+        if data.get("rules_path"):
             rpath = str(data["rules_path"])
             if not rpath.endswith(".md"):
                 diagnostics.append(

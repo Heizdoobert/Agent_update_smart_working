@@ -18,7 +18,10 @@ from agent_system.reasoning.transition import (
     StateMachineTransitionModel,
     StateNode,
 )
-from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic, PluginManifestCritic
+from agent_system.reflection.adapters.config_rules import (
+    MarkdownRulesCritic,
+    PluginManifestCritic,
+)
 from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine, SchemaCritic
 from agent_system.reflection.llm_patcher import default_patcher

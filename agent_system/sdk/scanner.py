@@ -3,10 +3,10 @@
 100% Python standard library. Extracts tech stack, testing workflows,
 manifest details, and documentation conventions from existing repositories.
 """
-from dataclasses import dataclass, field
 import json
-from pathlib import Path
 import re
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 MAX_DOC_READ_BYTES = 50_000
@@ -90,7 +90,7 @@ class CodebaseScanner:
             with open(path, "rb") as f:
                 data = f.read(max_bytes)
             return data.decode("utf-8", errors="ignore")
-        except (IOError, OSError):
+        except OSError:
             return ""
 
     def _detect_python(
@@ -262,7 +262,7 @@ class CodebaseScanner:
                         manifest.documentation_files.append(rel)
                         if len(manifest.detected_rules) < 15:
                             self._extract_rules_from_file(entry, manifest)
-            except (IOError, OSError):
+            except OSError:
                 pass
 
     def _extract_rules_from_file(self, file_path: Path, manifest: ProjectManifest) -> None:

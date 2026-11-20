@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-import pytest
 
 from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic
 from agent_system.sdk.installer import (

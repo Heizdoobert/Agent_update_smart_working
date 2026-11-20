@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 from typing import Any, Optional
-import pytest
 
 from agent_system.core.contracts import (
-    ActionStep,
     CriticReport,
     CriticStatus,
     CriticVerdict,
-    DiagnosticItem,
     Plan,
 )
 from agent_system.reasoning.transition import StateNode

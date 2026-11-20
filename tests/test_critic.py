@@ -1,6 +1,5 @@
 """Tests for Critic Coordinator and PythonAstCritic adapter."""
 
-import pytest
 
 from agent_system.core.contracts import CriticStatus
 from agent_system.reflection.adapters.python_ast import PythonAstCritic

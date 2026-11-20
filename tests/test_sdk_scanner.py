@@ -1,9 +1,7 @@
 """Tests for CodebaseScanner & ProjectManifest in agent_system.sdk.scanner."""
 import json
-import os
 import tempfile
 from pathlib import Path
-import pytest
 
 from agent_system.sdk.scanner import CodebaseScanner, ProjectManifest
 

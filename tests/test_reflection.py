@@ -1,8 +1,6 @@
 """Tests for In-Memory Self-Reflection Engine."""
 
-import pytest
 
-from agent_system.core.contracts import CriticStatus, DiagnosticItem
 from agent_system.reflection.adapters.python_ast import PythonAstCritic
 from agent_system.reflection.critic import CriticEngine
 from agent_system.reflection.reflector import SelfReflector

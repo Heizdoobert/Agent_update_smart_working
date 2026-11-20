@@ -9,9 +9,9 @@ from __future__ import annotations
 import json
 import os
 import shutil
-from pathlib import Path
 import sys
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 UNIVERSAL_SYSTEM_INSTRUCTION = """# Universal Agent Cognitive Operating Protocol
 

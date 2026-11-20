@@ -12,8 +12,8 @@ from agent_system.sdk.wizard import OnboardingWizard
 
 __all__ = [
     "BasePlugin",
-    "PluginManifest",
-    "ProjectContext",
-    "PluginRegistry",
     "OnboardingWizard",
+    "PluginManifest",
+    "PluginRegistry",
+    "ProjectContext",
 ]

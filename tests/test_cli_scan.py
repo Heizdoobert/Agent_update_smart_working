@@ -4,7 +4,6 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-import pytest
 
 
 def test_cli_scan_json_output():

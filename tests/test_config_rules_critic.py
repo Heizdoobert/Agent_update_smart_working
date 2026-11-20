@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
-import pytest
-
 from agent_system.core.contracts import CriticStatus
-from agent_system.reflection.adapters.config_rules import MarkdownRulesCritic, PluginManifestCritic
+from agent_system.reflection.adapters.config_rules import (
+    MarkdownRulesCritic,
+    PluginManifestCritic,
+)
 
 
 def test_markdown_rules_critic_valid():

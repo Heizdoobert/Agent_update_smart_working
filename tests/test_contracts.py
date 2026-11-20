@@ -1,7 +1,6 @@
 """Unit tests for Core Contracts and StructuralTruncator."""
 
 import json
-import pytest
 
 from agent_system.core.contracts import (
     ActionSpace,
