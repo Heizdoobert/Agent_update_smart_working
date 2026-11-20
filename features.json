@@ -89,7 +89,9 @@
     {
       "id": "F-005",
       "name": "error-taxonomy — failure taxonomy + trace log + error-analysis process",
-      "status": "pending",
+      "status": "done",
+      "done_date": "2026-11-20",
+      "commit": "see git log (error-taxonomy)",
       "priority": "medium",
       "acceptance_criteria": [
         "docs/failure-taxonomy.md: >=4 categories, 7 columns each",
