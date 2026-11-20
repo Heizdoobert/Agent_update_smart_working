@@ -1,0 +1,25 @@
+=== SESSION 2026-11-20T18:30 (v2.0 remediation) ===
+Context used at end: ~55% (near Dumb Zone — compact via this file)
+Features in progress: F-004 (handoff), F-005 (error-taxonomy), F-006 (verification-harness), F-007 (metrics-kpi)
+Done (with evidence):
+  - F-001 cleanup    commit b90f07a  115 passed / 0 failed / 0 error
+  - F-002 docs-hyg   commit 670f344  115 passed, workflow x1
+  - F-003 ci-quality commit 9650cdb  ruff All-pass, 115 passed
+Steps completed:
+  - archived big-data cluster to Archive/bigdata-v04/
+  - fixed cross-repo venv leak (SKILL/.venv -> SKILL, untracked .venv)
+  - dedup GEMINI/CLAUDE protocol (GEMINI is symlink to CLAUDE)
+  - rewrote README to describe live cognitive engine
+  - added ruff gate + lint CI job; fixed F821 CriticReport, F841 ss_list
+  - created features.json (7 features), this progress file, todo.md, SESSION_RITUAL.md
+Next:
+  - F-005: failure-taxonomy.md + trace-log/ + ERROR_ANALYSIS.md + rules trigger
+  - F-006: init.sh + FEATURE_MAP.md + scripts/verify/verify_cli.sh
+  - F-007: agent_system/metrics.py + tests/test_metrics.py + KPI_DASHBOARD.md + retry ceiling
+  - FINAL: full test run (all) + email full report to hhhuygiau@gmail.com
+Blockers: none
+Git HEAD: (updated each commit)
+Evidence captured:
+  - pytest: 115 passed (repeatedly, per module)
+  - ruff: All checks passed
+  - mypy baseline: 7 errors documented (docs/lint-baseline.md)

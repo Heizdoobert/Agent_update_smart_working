@@ -29,3 +29,12 @@
   - **`flash` (Triển khai & Kiểm thử):** Viết code tính năng, vá bug cụ thể, viết unit test, kiểm tra định dạng.
   - **`inherit` / `pro` (Đặc thù cấp cao):** Chỉ dành cho thẩm định kiến trúc trừu tượng hoặc audit bảo mật chuyên sâu.
 
+## 6. Session Handoff Ritual (bắt buộc mỗi session)
+- **Khởi động:** đọc `claude-progress.txt` + `todo.md`; nếu chưa có, chạy `bash init.sh` (xem `docs/SESSION_RITUAL.md`).
+- **Kết thúc:** ghi `claude-progress.txt`, cập nhật `features.json` (chỉ flip `done` khi đã có evidence + commit SHA), rồi commit.
+- **Xác nhận done:** chỉ xem là done khi (1) evidence thật, (2) commit SHA, (3) toàn bộ `acceptance_criteria` tick. "Build pass" ≠ "Working".
+
+## 7. Trace-on-Failure (error-taxonomy)
+- Mỗi lần lỗi (test fail, build break, critic < 100) sau khi xử lý: ghi 1 trace vào `docs/trace-log/` theo 7 cột của `docs/failure-taxonomy.md`.
+- Không xoá trace cũ; tích luỹ cho ERROR_ANALYSIS.
+

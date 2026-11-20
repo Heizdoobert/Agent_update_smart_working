@@ -1,0 +1,145 @@
+{
+  "project": "agent-system",
+  "version": "2.0-remediation",
+  "source_of_truth": "docs/reference/rfc-agent-design.md",
+  "map": "CAPABILITY_MAP.md",
+  "updated": "2026-11-20",
+  "features": [
+    {
+      "id": "F-001",
+      "name": "cleanup — archive Big Data cluster + junk",
+      "status": "done",
+      "done_date": "2026-11-20",
+      "commit": "b90f07a",
+      "priority": "high",
+      "acceptance_criteria": [
+        "Top-level big-data cluster 0 tracked files (all in Archive/)",
+        "pytest 115 passed / 0 failed / 0 error",
+        "branch backup/pre-cleanup-v2 exists",
+        "agent_system imports from repo; token_engine -> ModuleNotFoundError",
+        "SKILL/.venv resolves token_engine -> SKILL (cross-wired leak fixed)"
+      ],
+      "verification": {
+        "type": "cli",
+        "command": "uv run --no-project --python 3.11 --with pytest python -m pytest tests/ -q",
+        "evidence_required": ["git status clean", "115 passed", "token_engine ModuleNotFoundError"]
+      },
+      "dependencies": []
+    },
+    {
+      "id": "F-002",
+      "name": "docs-hygiene — dedup protocol, fix manifest, README, PROJECT_MAP",
+      "status": "done",
+      "done_date": "2026-11-20",
+      "commit": "670f344",
+      "priority": "high",
+      "acceptance_criteria": [
+        "CLAUDE.md workflow appears exactly once (GEMINI.md is symlink to it)",
+        "agent_plugin.json valid, no dead entrypoint, correct name/description",
+        "README describes live cognitive engine, not the archived big-data",
+        "PROJECT_MAP matches real tree (flow.py, doctor.py present; no phantom files)",
+        "Tài THIẾT rfc-agent-design.md committed to git"
+      ],
+      "verification": {
+        "type": "cli",
+        "command": "grep -c 'Immutable Task Execution Workflow' CLAUDE.md",
+        "evidence_required": ["grep = 1", "pytest 115 passed"]
+      },
+      "dependencies": ["F-001"]
+    },
+    {
+      "id": "F-003",
+      "name": "ci-quality — ruff gate + lint CI job + real bug fixes",
+      "status": "done",
+      "done_date": "2026-11-20",
+      "commit": "9650cdb",
+      "priority": "high",
+      "acceptance_criteria": [
+        "ruff check agent_system/ tests/ -> All checks passed",
+        "F821 CriticReport latent bug fixed (sdk/contracts.py)",
+        "F841 ss_list fixed (cli/main.py)",
+        "CI has a lint job that gates the test job",
+        "mypy 7 errors + pyupgrade 357 documented in docs/lint-baseline.md"
+      ],
+      "verification": {
+        "type": "cli",
+        "command": "ruff check agent_system/ tests/",
+        "evidence_required": ["All checks passed", "pytest 115 passed"]
+      },
+      "dependencies": ["F-001"]
+    },
+    {
+      "id": "F-004",
+      "name": "handoff — session handoff files + ritual",
+      "status": "in_progress",
+      "priority": "high",
+      "acceptance_criteria": [
+        "features.json + claude-progress.txt + todo.md + docs/SESSION_RITUAL.md exist",
+        "features.json = 7 features matching CAPABILITY_MAP ids/dependencies",
+        "ritual 3-step command runs green",
+        "completion only marked after self-verification (evidence + commit SHA)"
+      ],
+      "verification": {
+        "type": "cli",
+        "command": "python3 -m json.tool features.json > /dev/null && ls claude-progress.txt todo.md docs/SESSION_RITUAL.md",
+        "evidence_required": ["JSON valid", "4 files present"]
+      },
+      "dependencies": ["F-003"]
+    },
+    {
+      "id": "F-005",
+      "name": "error-taxonomy — failure taxonomy + trace log + error-analysis process",
+      "status": "pending",
+      "priority": "medium",
+      "acceptance_criteria": [
+        "docs/failure-taxonomy.md: >=4 categories, 7 columns each",
+        "docs/trace-log/ has >=1 properly formatted trace",
+        "docs/ERROR_ANALYSIS.md describes Open + Axial coding (~100 traces)",
+        ".agent/rules.md has a trigger to log trace on failure"
+      ],
+      "verification": {
+        "type": "manual",
+        "command": "ls docs/failure-taxonomy.md docs/ERROR_ANALYSIS.md docs/trace-log/",
+        "evidence_required": ["3 paths exist", "taxonomy >=4 rows"]
+      },
+      "dependencies": ["F-004"]
+    },
+    {
+      "id": "F-006",
+      "name": "verification-harness — init.sh + FEATURE_MAP + verify scripts",
+      "status": "pending",
+      "priority": "high",
+      "acceptance_criteria": [
+        "bash init.sh -> exit 0 + 4 handoff files + 'Workspace ready'",
+        "scripts/verify/verify_cli.sh -> exit 0 + evidence files",
+        "docs/FEATURE_MAP.md has Entry Points + >=5 flows each with Verification",
+        "DoD table covers CLI / perf / UI domains; rejects 'build pass'"
+      ],
+      "verification": {
+        "type": "cli",
+        "command": "bash init.sh && bash scripts/verify/verify_cli.sh",
+        "evidence_required": ["Workspace ready", "evidence files in docs/trace-log/evidence/"]
+      },
+      "dependencies": ["F-004"]
+    },
+    {
+      "id": "F-007",
+      "name": "metrics-kpi — context dashboard + KPI + retry ceiling",
+      "status": "pending",
+      "priority": "medium",
+      "acceptance_criteria": [
+        "tests/test_metrics.py passes (>=21 boundary tests)",
+        "agent-system metrics -> 8 metrics with value+level+action",
+        "agent-system metrics --json -> valid JSON, 8 keys",
+        "FLOW parallel retry ceiling = 2 (Human Gate) in code + test",
+        "docs/KPI_DASHBOARD.md: 8 metrics x 4 columns"
+      ],
+      "verification": {
+        "type": "cli",
+        "command": "uv run --no-project --python 3.11 --with pytest python -m pytest tests/test_metrics.py -v",
+        "evidence_required": ["metrics tests pass", "metrics --json valid"]
+      },
+      "dependencies": ["F-006"]
+    }
+  ]
+}
