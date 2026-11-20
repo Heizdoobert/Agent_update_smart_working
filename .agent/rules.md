@@ -38,3 +38,8 @@
 - Mỗi lần lỗi (test fail, build break, critic < 100) sau khi xử lý: ghi 1 trace vào `docs/trace-log/` theo 7 cột của `docs/failure-taxonomy.md`.
 - Không xoá trace cũ; tích luỹ cho ERROR_ANALYSIS.
 
+## 8. Verification Integrity (cấm "verification giả")
+- Mọi "PASS" trong script verify phải kèm **output không rỗng**. Lệnh exit 0 nhưng không in ra kết quả = **FAIL** (xem TR-20261120-003).
+- Test-data phải khớp đúng schema của function đang gọi (vd `ActionDefinition` dùng `preconditions`/`effects`, không phải `pre`/`post`).
+- Trước khi tin 1 "PASS", mở evidence log và xác nhận có nội dung thật.
+

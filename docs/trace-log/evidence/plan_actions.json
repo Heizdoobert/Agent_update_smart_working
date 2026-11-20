@@ -1,0 +1,1 @@
+[{"name": "move", "cost": 1, "preconditions": {"pos": 0}, "effects": {"pos": 1}}]
