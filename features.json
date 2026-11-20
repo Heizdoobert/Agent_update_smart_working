@@ -129,7 +129,9 @@
     {
       "id": "F-007",
       "name": "metrics-kpi — context dashboard + KPI + retry ceiling",
-      "status": "pending",
+      "status": "done",
+      "done_date": "2026-11-20",
+      "commit": "see git log (metrics-kpi)",
       "priority": "medium",
       "acceptance_criteria": [
         "tests/test_metrics.py passes (>=21 boundary tests)",

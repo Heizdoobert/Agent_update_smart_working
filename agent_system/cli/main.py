@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, List, Optional
@@ -13,6 +14,18 @@ from agent_system.core.session import SessionManager
 from agent_system.mcp.server import MCPServer
 from agent_system.memory.episodic import EpisodicMemory
 from agent_system.memory.semantic import SemanticMemory
+from agent_system.metrics import (
+    FLOW_RETRY_CEILING,
+    FLOW_RETRY_CEILING_SINGLE,
+    context_usage_pct,
+    flow_should_handoff,
+    input_output_ratio,
+    kv_cache_hit_rate,
+    rollback_rate,
+    self_verification_rate,
+    token_shift_to_verification,
+    tool_count,
+)
 from agent_system.reasoning.astar import AStarPlanner
 from agent_system.reasoning.mcts import MCTSPlanner
 from agent_system.reasoning.transition import (
@@ -574,7 +587,88 @@ def build_parser() -> argparse.ArgumentParser:
     ss_del.add_argument("--id", required=True, help="Session ID")
     p_sess.set_defaults(func=cmd_session)
 
+    # 7. Metrics & KPI dashboard
+    p_metrics = subparsers.add_parser("metrics", help="KPI dashboard (context, KV-cache, rollback, verification, retry ceiling)")
+    p_metrics.add_argument("--json", action="store_true", help="Machine-readable JSON output")
+    p_metrics.add_argument("--context-pct", type=int, default=None, help="Override context usage %% (default: read from claude-progress.txt)")
+    p_metrics.set_defaults(func=cmd_metrics)
+
     return parser
+
+
+def cmd_metrics(args: argparse.Namespace) -> int:
+    """Render the KPI dashboard (M3/M6). Computes from handoff files, never a server.
+
+    Never crashes on missing data: metrics with no source report level='no_data'.
+    """
+    root = Path.cwd()
+
+    def _read(p: Path) -> Optional[str]:
+        try:
+            return p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return None
+
+    progress = _read(root / "claude-progress.txt")
+    feats_raw = _read(root / "features.json")
+
+    # context usage % — last "NN%" mentioned in progress (or --context override)
+    ctx_tokens = ctx_window = None
+    m = re.search(r"(\d{1,3})\s*%", progress or "")
+    if m:
+        pct = min(99, int(m.group(1)))
+        ctx_tokens, ctx_window = pct, 100
+    if getattr(args, "context_pct", None) is not None:
+        ctx_tokens, ctx_window = min(99, args.context_pct), 100
+
+    # self-verification from features.json (done / total)
+    proven = total = None
+    if feats_raw:
+        try:
+            feats = json.loads(feats_raw).get("features", [])
+            if feats:
+                total = len(feats)
+                proven = sum(1 for f in feats if f.get("status") == "done")
+        except (json.JSONDecodeError, AttributeError):
+            pass
+
+    # rollback — no revert source configured yet => no_data (documented, not fabricated)
+    dash = [
+        context_usage_pct(ctx_tokens, ctx_window),
+        kv_cache_hit_rate(None, None),
+        input_output_ratio(None, None),
+        tool_count(12),  # live CLI subcommand surface count
+        rollback_rate(None, None),
+        self_verification_rate(proven, total),
+        token_shift_to_verification(None, None),
+        {
+            "name": "flow_retry_ceiling",
+            "value": float(FLOW_RETRY_CEILING),
+            "level": "safe",
+            "action": (
+                f"parallel FLOW loop: {FLOW_RETRY_CEILING} fails -> Human Gate; "
+                f"single loop keeps {FLOW_RETRY_CEILING_SINGLE} (THIẾT §18.5)"
+            ),
+        },
+    ]
+
+    if args.json:
+        sys.stdout.write(json.dumps([d if isinstance(d, dict) else d.to_dict() for d in dash], indent=2, ensure_ascii=False) + "\n")
+        return 0
+
+    # text table
+    sys.stdout.write("=== Agent System — KPI Dashboard ===\n")
+    for d in dash:
+        dd = d if isinstance(d, dict) else d.to_dict()
+        val = dd.get("value")
+        val_s = "n/a" if val != val else (str(val))  # NaN -> n/a
+        sys.stdout.write(f"  [{dd['level']:<8}] {dd['name']:<28} = {val_s}\n")
+        sys.stdout.write(f"               action: {dd['action']}\n")
+    sys.stdout.write("=== flow retry ceiling ===\n")
+    sys.stdout.write(f"  parallel  FLOW loop: max {FLOW_RETRY_CEILING} failed rounds -> Human Gate\n")
+    sys.stdout.write(f"  single-agent loop  : max {FLOW_RETRY_CEILING_SINGLE} failed rounds (reflect ceiling)\n")
+    sys.stdout.write(f"  handoff after {FLOW_RETRY_CEILING} parallel fails? {flow_should_handoff(FLOW_RETRY_CEILING, parallel=True)}\n")
+    return 0
 
 
 def main(argv: Optional[List[str]] = None) -> int:
