@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["agent_system", "token_engine"]
+include = ["agent_system"]
 
 [project]
 name = "agent-system"

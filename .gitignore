@@ -66,3 +66,9 @@ brain/
 # virtualenvs are per-machine
 .venv/
 venv/
+
+# v2.0 remediation (cleanup module)
+*.rdb
+Archive/
+
+uv.lock
