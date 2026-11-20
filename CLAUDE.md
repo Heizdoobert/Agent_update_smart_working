@@ -1,4 +1,4 @@
-# Agent System - Operating Protocol & Guidelines
+# Agent System — Operating Protocol & Guidelines
 
 All AI agents in this repository MUST strictly follow these rules and standards.
 
@@ -11,6 +11,8 @@ All AI agents in this repository MUST strictly follow these rules and standards.
 3. **Concurrency-Safe Persistence**: SQLite MUST use `SQLiteStore` (`PRAGMA journal_mode=WAL;`, `PRAGMA busy_timeout=5000;`).
 4. **In-Memory Reflection Before Output**: Run generation/code through `CriticEngine` & `SelfReflector` before handoff.
 5. **Test-Driven Verification**: 100% tests must pass: `PYTHONPATH=. python3 -m pytest tests/ -v`.
+6. **Session Ritual**: Before any task, read `git log --oneline -10`, then `claude-progress.txt`, then run the health check — only proceed when green (see `docs/SESSION_RITUAL.md`).
+7. **Trace on Failure**: Any unresolved failure is recorded to `docs/trace-log/` and tagged with a failure-taxonomy ID (see `docs/failure-taxonomy.md`) — never fixed "by feel".
 
 ---
 
@@ -18,36 +20,24 @@ All AI agents in this repository MUST strictly follow these rules and standards.
 
 | Module | Purpose | Key Classes |
 |---|---|---|
-| [`agent_system.core`](file:///mnt/second_drive/Agent_system/agent_system/core/) | Contracts, protocols, session, safe truncator | `TaskGoal`, `Plan`, `ThoughtNode`, `StructuralTruncator` |
-| [`agent_system.reasoning`](file:///mnt/second_drive/Agent_system/agent_system/reasoning/) | ToT/GoT DAG, $A^*$ Search, MCTS Planner | `ThoughtGraph`, `AStarPlanner`, `MCTSPlanner` |
-| [`agent_system.reflection`](file:///mnt/second_drive/Agent_system/agent_system/reflection/) | Multi-stage Critic & self-reflection | `CriticEngine`, `PythonAstCritic`, `SelfReflector` |
-| [`agent_system.memory`](file:///mnt/second_drive/Agent_system/agent_system/memory/) | 3-Tier memory: Episodic, Semantic, Scratchpad | `EpisodicMemory`, `SemanticMemory`, `WorkingScratchpad` |
-| [`agent_system.skills`](file:///mnt/second_drive/Agent_system/agent_system/skills/) | Dynamic skill discovery & validation | `SkillRegistry`, `SkillDefinition` |
-| [`agent_system.sdk`](file:///mnt/second_drive/Agent_system/agent_system/sdk/) | Pluggable SDK, scanner, ingestion & wizard | `BasePlugin`, `PluginRegistry`, `CodebaseScanner` |
-| [`agent_system.distillation`](file:///mnt/second_drive/Agent_system/agent_system/distillation/) | Offline prompt optimization | `DistillationEngine`, `PromptCandidate` |
-| [`agent_system.mcp`](file:///mnt/second_drive/Agent_system/agent_system/mcp/) | Zero-dep MCP stdio server & tools dispatcher | `MCPServer`, `CognitiveToolsDispatcher` |
-| [`agent_system.cli`](file:///mnt/second_drive/Agent_system/agent_system/cli/) | CLI with UNIX pipe support | `agent_system.cli.main` (`init`, `plan`, `critic`, `mcp`, `scan`) |
+| `agent_system/core` | Contracts, protocols, session, safe truncator | `TaskGoal`, `Plan`, `ThoughtNode`, `StructuralTruncator` |
+| `agent_system/reasoning` | ToT/GoT DAG, A* Search, MCTS Planner | `ThoughtGraph`, `AStarPlanner`, `MCTSPlanner` |
+| `agent_system/reflection` | Multi-stage Critic & self-reflection | `CriticEngine`, `PythonAstCritic`, `SelfReflector` |
+| `agent_system/memory` | 3-Tier memory: Episodic, Semantic, Scratchpad | `EpisodicMemory`, `SemanticMemory`, `WorkingScratchpad` |
+| `agent_system/skills` | Dynamic skill discovery & validation | `SkillRegistry`, `SkillDefinition` |
+| `agent_system/sdk` | Pluggable SDK, scanner, ingestion & wizard | `BasePlugin`, `PluginRegistry`, `CodebaseScanner` |
+| `agent_system/distillation` | Offline prompt optimization | `DistillationEngine`, `PromptCandidate` |
+| `agent_system/mcp` | Zero-dep MCP stdio server & tools dispatcher | `MCPServer`, `CognitiveToolsDispatcher` |
+| `agent_system/cli` | CLI with UNIX pipe support | `agent_system.cli.main` |
+| `agent_system/flow.py` | FLOW_SKILL task-engine bridge | `find()`, `run()` |
+| `agent_system/doctor.py` | Health report (DB, embeddings, clients, bridge) | `agent-system doctor` |
+
+> **Archive**: the Big-Data cluster (`token_engine`, `data_pipeline`, `tri_modal_router`, `memory_layer`, `distributed_queue`, `coordination_service`) was moved to `Archive/bigdata-v04/` on 2026-11-20. It is NOT part of the live engine. See `CAPABILITY_MAP.md`.
 
 ---
 
 ## 3. Command Reference
 
-# Immutable Task Execution Workflow
-
-Mỗi khi thực hiện bất kỳ task nào, Agent BẮT BUỘC tuân thủ nghiêm ngặt quy trình làm việc bất di bất dịch theo đúng 12 bước sau:
-
-1. **Research Information**: Thu thập đầy đủ dữ kiện, log, mã nguồn liên quan và hiện trạng hệ thống trước khi đưa ra bất kỳ kết luận nào.
-2. **Thinking Why**: Phân tích sâu nguyên nhân gốc rễ (Root Cause Analysis), tại sao lỗi xảy ra, dựa trên cơ chế nào (OS, ADB, Virtualization, Logic code).
-3. **How Can Do That**: Xác định các hướng tiếp cận có thể giải quyết vấn đề.
-4. **How Can Fix That**: Lựa chọn giải pháp tối ưu và chính xác nhất để khắc phục triệt để.
-5. **Did It Effect Anything**: Đánh giá toàn diện tác động phụ (Blast Radius & Side Effects), đảm bảo không làm vỡ các module khác và TUYỆT ĐỐI không thay đổi bất kỳ đường dẫn (path) nào trong code.
-6. **Spec**: Lập đặc tả kỹ thuật chi tiết cho giải pháp.
-7. **Plan**: Lập kế hoạch các bước triển khai cụ thể, rõ ràng.
-8. **Build**: Tiến hành chỉnh sửa code/triển khai giải pháp theo đúng Spec và Plan.
-9. **Test**: Chạy kiểm thử tự động (Unit Test / Integration Test / Diag Script) để xác thực.
-10. **Review**: Tự rà soát lại toàn bộ diff, kiểm tra edge cases và đảm bảo tính nguyên vẹn của codebase.
-11. **Simply Code**: Tinh giản code, loại bỏ code thừa/phức tạp không cần thiết, giữ code gọn gàng, trong sáng và dễ bảo trì.
-12. **Report What and Why You Do That**: Báo cáo chi tiết cho người dùng: ĐÃ LÀM GÌ, TẠI SAO LÀM NHƯ VẬY, và kết quả đạt được.
 ```bash
 # Run unit tests
 PYTHONPATH=. python3 -m pytest tests/ -v
@@ -63,7 +53,14 @@ agent-system mcp
 python3 -m agent_system.cli.main plan --initial state.json --goal-key is_ready
 cat script.py | python3 -m agent_system.cli.main critic --file -
 python3 -m agent_system.cli.main reflect --file draft.py --output-code
-# Immutable Task Execution Workflow
+
+# Health report
+agent-system doctor
+```
+
+---
+
+## 4. Immutable Task Execution Workflow
 
 Mỗi khi thực hiện bất kỳ task nào, Agent BẮT BUỘC tuân thủ nghiêm ngặt quy trình làm việc bất di bất dịch theo đúng 12 bước sau:
 
@@ -79,4 +76,3 @@ Mỗi khi thực hiện bất kỳ task nào, Agent BẮT BUỘC tuân thủ ngh
 10. **Review**: Tự rà soát lại toàn bộ diff, kiểm tra edge cases và đảm bảo tính nguyên vẹn của codebase.
 11. **Simply Code**: Tinh giản code, loại bỏ code thừa/phức tạp không cần thiết, giữ code gọn gàng, trong sáng và dễ bảo trì.
 12. **Report What and Why You Do That**: Báo cáo chi tiết cho người dùng: ĐÃ LÀM GÌ, TẠI SAO LÀM NHƯ VẬY, và kết quả đạt được.
-```
