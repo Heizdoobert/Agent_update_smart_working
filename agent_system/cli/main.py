@@ -476,7 +476,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_install = subparsers.add_parser("install", help="Install System Instructions and MCP server into AI clients (Claude Desktop, Cursor, etc.)")
     p_install.add_argument(
         "--target",
-        choices=["all", "agy", "antigravity", "claude", "cursor", "windsurf", "mcp", "rules"],
+        choices=["all", "agy", "antigravity", "claude", "cursor", "windsurf", "hermes", "opencode", "mcp", "rules"],
         default="all",
         help="Target client or component (default: all)",
     )

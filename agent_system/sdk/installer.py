@@ -1,13 +1,14 @@
 """Automated installer and configuration generator for AI Agent environments.
 
 Installs Universal System Instructions and MCP Server configurations into
-Claude Desktop, Cursor, Windsurf, Claude Code, and global agent rules.
+Claude Desktop, Cursor, Windsurf, Hermes Agent, OpenCode, and global agent rules.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -68,6 +69,62 @@ def get_antigravity_config_path() -> Path:
 def get_windsurf_config_path() -> Path:
     """Resolve default path for Windsurf MCP configuration file."""
     return Path.home() / ".codeium" / "windsurf" / "mcp_config.json"
+
+
+def get_hermes_config_path() -> Path:
+    """Hermes Agent config: ``$HERMES_HOME/config.yaml`` (or ``~/.hermes/config.yaml``)."""
+    home = os.environ.get("HERMES_HOME")
+    base = Path(home) if home else Path.home() / ".hermes"
+    return base / "config.yaml"
+
+
+def get_opencode_config_path() -> Path:
+    """OpenCode global config: ``~/.config/opencode/opencode.json``."""
+    return Path.home() / ".config" / "opencode" / "opencode.json"
+
+
+_HERMES_BLOCK = re.compile(
+    r"(?m)^  agent-system:\n(?:^    .*(?:\n|\Z))*",
+)
+
+
+def write_hermes_mcp_yaml(path: Path, command: str, args: list[str]) -> None:
+    """Insert or replace the ``agent-system`` entry under ``mcp_servers:``.
+
+    Surgical text patch (keeps comments/other keys). Zero-dependency: no PyYAML.
+    """
+    entry = f"  agent-system:\n    command: {command}\n    args: {json.dumps(args)}\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    old = path.read_text(encoding="utf-8") if path.is_file() else ""
+    if _HERMES_BLOCK.search(old):
+        new = _HERMES_BLOCK.sub(entry, old, count=1)
+    elif re.search(r"(?m)^mcp_servers:", old):
+        new = old.rstrip("\n") + "\n" + entry
+    else:
+        new = (old.rstrip("\n") + "\n\n" if old.strip() else "") + "mcp_servers:\n" + entry
+    path.write_text(new, encoding="utf-8")
+
+
+def inject_opencode_mcp_json(path: Path, command: str, args: list[str]) -> None:
+    """Insert or update the ``agent-system`` MCP server in OpenCode config.
+
+    V2 schema (``mcp.servers``) preferred; V1 fallback (``mcp`` direct).
+    Preserves every other key in the file.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data: dict[str, Any] = {}
+    if path.is_file():
+        raw = path.read_text(encoding="utf-8").strip()
+        if raw:
+            try:
+                data = json.loads(raw)
+            except ValueError:
+                data = {}
+    if not isinstance(data.get("mcp"), dict) or not isinstance(data["mcp"].get("servers"), dict):
+        data["mcp"] = {"servers": {}}
+    entry: dict[str, Any] = {"type": "local", "command": [command, *args]}
+    data["mcp"]["servers"]["agent-system"] = entry
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def resolve_command() -> str:
@@ -175,13 +232,32 @@ def install_agent_environment(
         if not dry_run:
             inject_mcp_config(windsurf_path)
 
-    # 4. Global System Instructions / Rules
+    # 4. MCP Configuration for Hermes Agent (config.yaml -> mcp_servers:)
+    if target in ("all", "hermes", "mcp"):
+        hermes_path = get_hermes_config_path()
+        results["mcp_installed"].append(
+            {"client": "Hermes Agent", "path": str(hermes_path), "status": "PENDING" if dry_run else "SUCCESS"}
+        )
+        if not dry_run:
+            write_hermes_mcp_yaml(hermes_path, resolve_command(), ["mcp"])
+
+    # 5. MCP Configuration for OpenCode (~/.config/opencode/opencode.json)
+    if target in ("all", "opencode", "mcp"):
+        opencode_path = get_opencode_config_path()
+        results["mcp_installed"].append(
+            {"client": "OpenCode", "path": str(opencode_path), "status": "PENDING" if dry_run else "SUCCESS"}
+        )
+        if not dry_run:
+            inject_opencode_mcp_json(opencode_path, resolve_command(), ["mcp"])
+
+    # 6. Global System Instructions / Rules
     if target in ("all", "rules", "agy", "antigravity"):
         rules_targets = [
             Path.home() / ".gemini" / "config" / "rules" / "AGENTS.md",
             Path.home() / ".claude" / "CLAUDE.md",
             Path.home() / ".cursorrules",
             Path.home() / ".agent" / "rules.md",
+            Path.home() / ".config" / "opencode" / "AGENTS.md",
         ]
         for rp in rules_targets:
             results["rules_installed"].append(
