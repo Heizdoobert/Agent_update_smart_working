@@ -22,7 +22,11 @@
       "verification": {
         "type": "cli",
         "command": "uv run --no-project --python 3.11 --with pytest python -m pytest tests/ -q",
-        "evidence_required": ["git status clean", "115 passed", "token_engine ModuleNotFoundError"]
+        "evidence_required": [
+          "git status clean",
+          "115 passed",
+          "token_engine ModuleNotFoundError"
+        ]
       },
       "dependencies": []
     },
@@ -43,9 +47,14 @@
       "verification": {
         "type": "cli",
         "command": "grep -c 'Immutable Task Execution Workflow' CLAUDE.md",
-        "evidence_required": ["grep = 1", "pytest 115 passed"]
+        "evidence_required": [
+          "grep = 1",
+          "pytest 115 passed"
+        ]
       },
-      "dependencies": ["F-001"]
+      "dependencies": [
+        "F-001"
+      ]
     },
     {
       "id": "F-003",
@@ -64,14 +73,19 @@
       "verification": {
         "type": "cli",
         "command": "ruff check agent_system/ tests/",
-        "evidence_required": ["All checks passed", "pytest 115 passed"]
+        "evidence_required": [
+          "All checks passed",
+          "pytest 115 passed"
+        ]
       },
-      "dependencies": ["F-001"]
+      "dependencies": [
+        "F-001"
+      ]
     },
     {
       "id": "F-004",
       "name": "handoff — session handoff files + ritual",
-      "status": "in_progress",
+      "status": "done",
       "priority": "high",
       "acceptance_criteria": [
         "features.json + claude-progress.txt + todo.md + docs/SESSION_RITUAL.md exist",
@@ -82,9 +96,16 @@
       "verification": {
         "type": "cli",
         "command": "python3 -m json.tool features.json > /dev/null && ls claude-progress.txt todo.md docs/SESSION_RITUAL.md",
-        "evidence_required": ["JSON valid", "4 files present"]
+        "evidence_required": [
+          "JSON valid",
+          "4 files present"
+        ]
       },
-      "dependencies": ["F-003"]
+      "dependencies": [
+        "F-003"
+      ],
+      "done_date": "2026-11-20",
+      "commit": "0484564"
     },
     {
       "id": "F-005",
@@ -102,9 +123,14 @@
       "verification": {
         "type": "manual",
         "command": "ls docs/failure-taxonomy.md docs/ERROR_ANALYSIS.md docs/trace-log/",
-        "evidence_required": ["3 paths exist", "taxonomy >=4 rows"]
+        "evidence_required": [
+          "3 paths exist",
+          "taxonomy >=4 rows"
+        ]
       },
-      "dependencies": ["F-004"]
+      "dependencies": [
+        "F-004"
+      ]
     },
     {
       "id": "F-006",
@@ -122,9 +148,14 @@
       "verification": {
         "type": "cli",
         "command": "bash init.sh && bash scripts/verify/verify_cli.sh",
-        "evidence_required": ["Workspace ready", "evidence files in docs/trace-log/evidence/"]
+        "evidence_required": [
+          "Workspace ready",
+          "evidence files in docs/trace-log/evidence/"
+        ]
       },
-      "dependencies": ["F-004"]
+      "dependencies": [
+        "F-004"
+      ]
     },
     {
       "id": "F-007",
@@ -143,9 +174,43 @@
       "verification": {
         "type": "cli",
         "command": "uv run --no-project --python 3.11 --with pytest python -m pytest tests/test_metrics.py -v",
-        "evidence_required": ["metrics tests pass", "metrics --json valid"]
+        "evidence_required": [
+          "metrics tests pass",
+          "metrics --json valid"
+        ]
       },
-      "dependencies": ["F-006"]
+      "dependencies": [
+        "F-006"
+      ]
+    },
+    {
+      "id": "F-008",
+      "name": "mypy-fix — 9 type errors -> 0 + blocking CI gate",
+      "status": "done",
+      "priority": "high",
+      "acceptance_criteria": [
+        "mypy agent_system/ (baseline flags) -> Found 0 errors (was 9)",
+        "pytest tests/ -q -> 164 passed (150 baseline + 14 new test_mypy_fix)",
+        "ruff check -> All checks passed",
+        "metrics --json -> 8 keys intact (flow_retry_ceiling + context_usage_pct)",
+        "ci.yml has blocking mypy job (lint -> mypy -> test)",
+        "docs/lint-baseline.md: mypy baseline CLOSED + pilot follow-up noted",
+        "Python 3.9 import smoke test passes (CI matrix 3.9)"
+      ],
+      "verification": {
+        "type": "cli",
+        "command": "uvx mypy agent_system/ --ignore-missing-imports --no-strict-optional --follow-imports=silent && uv run --no-project --python 3.11 --with pytest python -m pytest tests/ -q && uvx ruff check agent_system/ tests/",
+        "evidence_required": [
+          "mypy 0 errors",
+          "164 passed",
+          "ruff clean"
+        ]
+      },
+      "dependencies": [
+        "F-007"
+      ],
+      "done_date": "2026-11-20",
+      "commit": "12b38fb"
     }
   ]
 }

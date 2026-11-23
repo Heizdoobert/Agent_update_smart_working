@@ -3,6 +3,9 @@
 100% Python standard library. Extracts tech stack, testing workflows,
 manifest details, and documentation conventions from existing repositories.
 """
+
+from __future__ import annotations
+
 import json
 import re
 from dataclasses import dataclass, field

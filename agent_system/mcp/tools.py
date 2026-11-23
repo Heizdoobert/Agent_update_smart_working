@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from agent_system import flow
+from agent_system.core.contracts import CriticProtocol
 from agent_system.core.truncator import StructuralTruncator
 from agent_system.memory.episodic import EpisodicMemory
 from agent_system.memory.semantic import SemanticMemory
@@ -304,6 +305,7 @@ class CognitiveToolsDispatcher:
         def is_goal(state: StateNode) -> bool:
             return state.get(goal_key) == goal_val
 
+        planner: AStarPlanner | MCTSPlanner
         if method == "mcts":
             planner = MCTSPlanner(model, max_rollout_depth=15)
             plan = planner.plan(initial_state, is_goal, simulations=50)
@@ -341,7 +343,7 @@ class CognitiveToolsDispatcher:
             else:
                 language = "python"
 
-        critics = []
+        critics: List[CriticProtocol] = []
         if language == "python":
             critics.append(PythonAstCritic(require_type_annotations=strict))
         elif language == "markdown":

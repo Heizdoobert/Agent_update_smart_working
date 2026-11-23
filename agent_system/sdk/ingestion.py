@@ -3,6 +3,9 @@
 Synthesizes Tier 1 Level 1 Rules (<3KB, strictly truncated and validated)
 and indexes Tier 2 documentation into Semantic Memory (SQLite Store).
 """
+
+from __future__ import annotations
+
 import json
 import re
 from dataclasses import dataclass

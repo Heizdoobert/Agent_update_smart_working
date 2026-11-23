@@ -17,6 +17,7 @@ from agent_system.memory.semantic import SemanticMemory
 from agent_system.metrics import (
     FLOW_RETRY_CEILING,
     FLOW_RETRY_CEILING_SINGLE,
+    Metric,
     context_usage_pct,
     flow_should_handoff,
     input_output_ratio,
@@ -133,6 +134,7 @@ def cmd_plan(args: argparse.Namespace) -> int:
     def is_goal(state: StateNode) -> bool:
         return state.get(goal_key) == goal_val
 
+    planner: AStarPlanner | MCTSPlanner
     if args.method == "mcts":
         planner = MCTSPlanner(model, max_rollout_depth=args.max_depth)
         plan = planner.plan(initial_state, is_goal, simulations=args.simulations)
@@ -641,25 +643,25 @@ def cmd_metrics(args: argparse.Namespace) -> int:
         rollback_rate(None, None),
         self_verification_rate(proven, total),
         token_shift_to_verification(None, None),
-        {
-            "name": "flow_retry_ceiling",
-            "value": float(FLOW_RETRY_CEILING),
-            "level": "safe",
-            "action": (
+        Metric(
+            name="flow_retry_ceiling",
+            value=float(FLOW_RETRY_CEILING),
+            level="safe",
+            action=(
                 f"parallel FLOW loop: {FLOW_RETRY_CEILING} fails -> Human Gate; "
                 f"single loop keeps {FLOW_RETRY_CEILING_SINGLE} (THIẾT §18.5)"
             ),
-        },
+        ),
     ]
 
     if args.json:
-        sys.stdout.write(json.dumps([d if isinstance(d, dict) else d.to_dict() for d in dash], indent=2, ensure_ascii=False) + "\n")
+        sys.stdout.write(json.dumps([d.to_dict() for d in dash], indent=2, ensure_ascii=False) + "\n")
         return 0
 
     # text table
     sys.stdout.write("=== Agent System — KPI Dashboard ===\n")
     for d in dash:
-        dd = d if isinstance(d, dict) else d.to_dict()
+        dd = d.to_dict()
         val = dd.get("value")
         val_s = "n/a" if val != val else (str(val))  # NaN -> n/a
         sys.stdout.write(f"  [{dd['level']:<8}] {dd['name']:<28} = {val_s}\n")

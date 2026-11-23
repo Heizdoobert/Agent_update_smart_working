@@ -18,8 +18,20 @@ jobs:
       - name: Ruff gate (E,F,W,I @140)
         run: ruff check agent_system/ tests/
 
-  test:
+  mypy:
     needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install mypy
+        run: pip install mypy
+      - name: Mypy gate (non-strict baseline flags)
+        run: mypy agent_system/ --ignore-missing-imports --no-strict-optional --follow-imports=silent
+
+  test:
+    needs: [lint, mypy]
     strategy:
       fail-fast: false
       matrix:

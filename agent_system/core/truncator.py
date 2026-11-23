@@ -103,15 +103,15 @@ class StructuralTruncator:
             keys = list(data.keys())
             for k in keys:
                 v = data[k]
-                candidate = dict(trimmed_dict)
-                candidate[k] = v
-                if _json_bytes(candidate) > max_bytes:
+                candidate_dict = dict(trimmed_dict)
+                candidate_dict[k] = v
+                if _json_bytes(candidate_dict) > max_bytes:
                     if isinstance(v, (dict, list)):
                         budget = max_bytes - _json_bytes(trimmed_dict) - 32
                         if budget > 64:
                             sub = cls.truncate_json(v, max_bytes=budget)
-                            candidate[k] = sub
-                            if _json_bytes(candidate) <= max_bytes:
+                            candidate_dict[k] = sub
+                            if _json_bytes(candidate_dict) <= max_bytes:
                                 trimmed_dict[k] = sub
                                 continue
                     break
