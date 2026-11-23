@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import ast
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from agent_system.core.contracts import (
     CriticReport,
@@ -18,14 +18,14 @@ class PythonAstAuditor(ast.NodeVisitor):
 
     def __init__(
         self,
-        forbidden_modules: Optional[Set[str]] = None,
-        forbidden_calls: Optional[Set[str]] = None,
+        forbidden_modules: set[str] | None = None,
+        forbidden_calls: set[str] | None = None,
         require_type_annotations: bool = False,
     ) -> None:
         self.forbidden_modules = forbidden_modules or {"pdb", "ipdb"}
         self.forbidden_calls = forbidden_calls or {"eval", "exec", "breakpoint"}
         self.require_type_annotations = require_type_annotations
-        self.diagnostics: List[DiagnosticItem] = []
+        self.diagnostics: list[DiagnosticItem] = []
 
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
@@ -60,7 +60,7 @@ class PythonAstAuditor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
-        call_name: Optional[str] = None
+        call_name: str | None = None
         if isinstance(node.func, ast.Name):
             if node.func.id in self.forbidden_calls or node.func.id == "breakpoint":
                 call_name = node.func.id
@@ -127,8 +127,8 @@ class PythonAstCritic:
 
     def __init__(
         self,
-        forbidden_modules: Optional[List[str]] = None,
-        forbidden_calls: Optional[List[str]] = None,
+        forbidden_modules: list[str] | None = None,
+        forbidden_calls: list[str] | None = None,
         require_type_annotations: bool = False,
     ) -> None:
         self.forbidden_modules = set(forbidden_modules or ["pdb", "ipdb"])
@@ -136,7 +136,7 @@ class PythonAstCritic:
         self.require_type_annotations = require_type_annotations
 
     def validate(
-        self, artifact: Any, context: Optional[Dict[str, Any]] = None
+        self, artifact: Any, context: dict[str, Any] | None = None
     ) -> CriticReport:
         if not isinstance(artifact, str):
             return CriticReport(

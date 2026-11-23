@@ -5,7 +5,7 @@ from __future__ import annotations
 import threading
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class WorkingScratchpad:
@@ -14,13 +14,13 @@ class WorkingScratchpad:
     def __init__(self) -> None:
         self._meta_lock = threading.RLock()
         self._lock = self._meta_lock
-        self._session_locks: Dict[str, threading.RLock] = {}
-        self._sessions: Dict[str, Dict[str, Any]] = {}
+        self._session_locks: dict[str, threading.RLock] = {}
+        self._sessions: dict[str, dict[str, Any]] = {}
         self._default_session = "default"
         self._sessions[self._default_session] = {}
         self._session_locks[self._default_session] = threading.RLock()
 
-    def _get_session_lock(self, session_id: Optional[str] = None) -> threading.RLock:
+    def _get_session_lock(self, session_id: str | None = None) -> threading.RLock:
         sid = session_id or self._default_session
         with self._meta_lock:
             if sid not in self._session_locks:
@@ -29,7 +29,7 @@ class WorkingScratchpad:
                     self._sessions[sid] = {}
             return self._session_locks[sid]
 
-    def _get_bucket(self, session_id: Optional[str] = None) -> Dict[str, Any]:
+    def _get_bucket(self, session_id: str | None = None) -> dict[str, Any]:
         sid = session_id or self._default_session
         with self._meta_lock:
             if sid not in self._sessions:
@@ -37,28 +37,28 @@ class WorkingScratchpad:
                 self._session_locks[sid] = threading.RLock()
             return self._sessions[sid]
 
-    def set(self, key: str, value: Any, session_id: Optional[str] = None) -> None:
+    def set(self, key: str, value: Any, session_id: str | None = None) -> None:
         """Store a key-value pair in scratchpad."""
         lock = self._get_session_lock(session_id)
         with lock:
             bucket = self._get_bucket(session_id)
             bucket[key] = value
 
-    def get(self, key: str, default: Any = None, session_id: Optional[str] = None) -> Any:
+    def get(self, key: str, default: Any = None, session_id: str | None = None) -> Any:
         """Retrieve a value from scratchpad."""
         lock = self._get_session_lock(session_id)
         with lock:
             bucket = self._get_bucket(session_id)
             return bucket.get(key, default)
 
-    def has(self, key: str, session_id: Optional[str] = None) -> bool:
+    def has(self, key: str, session_id: str | None = None) -> bool:
         """Check if key exists in scratchpad."""
         lock = self._get_session_lock(session_id)
         with lock:
             bucket = self._get_bucket(session_id)
             return key in bucket
 
-    def delete(self, key: str, session_id: Optional[str] = None) -> bool:
+    def delete(self, key: str, session_id: str | None = None) -> bool:
         """Delete key from scratchpad."""
         lock = self._get_session_lock(session_id)
         with lock:
@@ -68,7 +68,7 @@ class WorkingScratchpad:
                 return True
             return False
 
-    def clear(self, session_id: Optional[str] = None) -> None:
+    def clear(self, session_id: str | None = None) -> None:
         """Clear scratchpad contents."""
         sid = session_id or self._default_session
         lock = self._get_session_lock(sid)
@@ -76,7 +76,7 @@ class WorkingScratchpad:
             if sid in self._sessions:
                 self._sessions[sid].clear()
 
-    def export_dict(self, session_id: Optional[str] = None) -> Dict[str, Any]:
+    def export_dict(self, session_id: str | None = None) -> dict[str, Any]:
         """Export a copy of current scratchpad state."""
         lock = self._get_session_lock(session_id)
         with lock:
@@ -84,7 +84,7 @@ class WorkingScratchpad:
             return dict(bucket)
 
     @contextmanager
-    def session(self, session_id: str) -> Generator[Dict[str, Any], None, None]:
+    def session(self, session_id: str) -> Generator[dict[str, Any]]:
         """Context manager scoping mutations to a specific session."""
         lock = self._get_session_lock(session_id)
         with lock:

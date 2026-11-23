@@ -5,10 +5,10 @@ from __future__ import annotations
 import os
 import sqlite3
 import time
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Optional, TypeVar, Union
+from typing import TypeVar
 
 T = TypeVar("T")
 
@@ -16,7 +16,7 @@ T = TypeVar("T")
 class SQLiteStore:
     """Thread-safe and multi-process friendly SQLite store configured with WAL mode."""
 
-    def __init__(self, db_path: Optional[Union[str, Path]] = None) -> None:
+    def __init__(self, db_path: str | Path | None = None) -> None:
         if db_path is None:
             # AGENT_SYSTEM_DB_DIR pins one DB for host and sandbox (Path.home() differs inside Docker)
             default_dir = Path(os.environ.get("AGENT_SYSTEM_DB_DIR") or Path.home() / ".agent_system")
@@ -43,7 +43,7 @@ class SQLiteStore:
         return conn
 
     @contextmanager
-    def transaction(self) -> Generator[sqlite3.Cursor, None, None]:
+    def transaction(self) -> Generator[sqlite3.Cursor]:
         """Context manager for atomic transaction with auto-commit and rollback."""
         conn = self.get_connection()
         cursor = conn.cursor()

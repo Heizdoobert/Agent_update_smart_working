@@ -211,6 +211,27 @@
       ],
       "done_date": "2026-11-20",
       "commit": "12b38fb"
+    },
+    {
+      "id": "F-009",
+      "name": "python-floor-314 — requires-python >=3.14 + apply 397 pyupgrade (UP gate)",
+      "status": "done",
+      "acceptance": [
+        "pyproject.toml: requires-python >=3.14, ruff target-version py314, UP in select",
+        "ruff check agent_system/ tests/ -> All checks passed (0 UP errors, was 397)",
+        "pytest tests/ -q on 3.14 -> 167 passed (164 + 3 test_python_floor)",
+        "mypy (baseline flags) -> 0 errors in 46 files",
+        "ci.yml: lint+mypy 3.14, test matrix [\"3.14\"]",
+        "docs/lint-baseline.md: pyupgrade section closed (397 -> 0)"
+      ],
+      "evidence": {
+        "date": "2026-11-20",
+        "commit": "(final commit - see git log)",
+        "up_errors_before": 397,
+        "up_errors_after": 0,
+        "tests_passed": 167,
+        "python": "3.14"
+      }
     }
   ]
 }

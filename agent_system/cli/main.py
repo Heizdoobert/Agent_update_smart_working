@@ -7,7 +7,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any
 
 from agent_system import __version__
 from agent_system.core.session import SessionManager
@@ -49,7 +49,7 @@ from agent_system.sdk.wizard import OnboardingWizard
 from agent_system.skills.registry import SkillRegistry
 
 
-def _read_input(file_arg: Optional[str] = None) -> str:
+def _read_input(file_arg: str | None = None) -> str:
     """Read input from inline JSON string, file path, or stdin if '-' or piped."""
     if not file_arg:
         if not sys.stdin.isatty():
@@ -89,7 +89,7 @@ def cmd_plan(args: argparse.Namespace) -> int:
     init_dict = json.loads(initial_raw)
     initial_state = StateNode(state_id="init", attributes=init_dict)
 
-    action_defs: List[ActionDefinition] = []
+    action_defs: list[ActionDefinition] = []
     if args.actions:
         actions_raw = _read_input(args.actions)
         if not actions_raw:
@@ -605,7 +605,7 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     """
     root = Path.cwd()
 
-    def _read(p: Path) -> Optional[str]:
+    def _read(p: Path) -> str | None:
         try:
             return p.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -673,7 +673,7 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return 0
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     effective_args = sys.argv[1:] if argv is None else list(argv)
     if not effective_args:
         # Bare root invocation: check if interactive first-time setup is needed

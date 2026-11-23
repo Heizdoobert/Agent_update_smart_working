@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Tuple, runtime_checkable
+from enum import StrEnum
+from typing import Any, Protocol, runtime_checkable
 
 
-class CriticStatus(str, Enum):
+class CriticStatus(StrEnum):
     PASS = "PASS"
     REJECT = "REJECT"
     WARNING = "WARNING"
@@ -18,9 +18,9 @@ class DiagnosticItem:
     code: str
     message: str
     severity: str = "ERROR"  # ERROR, WARNING, INFO
-    line: Optional[int] = None
-    column: Optional[int] = None
-    fix_recipe: Optional[str] = None
+    line: int | None = None
+    column: int | None = None
+    fix_recipe: str | None = None
 
 
 @dataclass
@@ -33,9 +33,9 @@ class CriticVerdict:
 @dataclass
 class CriticReport:
     verdict: CriticVerdict
-    diagnostics: List[DiagnosticItem] = field(default_factory=list)
-    suggestions: List[str] = field(default_factory=list)
-    raw_artifact: Optional[str] = None
+    diagnostics: list[DiagnosticItem] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
+    raw_artifact: str | None = None
 
     @property
     def is_passed(self) -> bool:
@@ -46,9 +46,9 @@ class CriticReport:
 class TaskGoal:
     goal_id: str
     description: str
-    constraints: List[str] = field(default_factory=list)
-    target_output: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    constraints: list[str] = field(default_factory=list)
+    target_output: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -56,8 +56,8 @@ class ActionStep:
     step_id: str
     action_type: str
     description: str
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    expected_outcome: Optional[str] = None
+    parameters: dict[str, Any] = field(default_factory=dict)
+    expected_outcome: str | None = None
     status: str = "PENDING"  # PENDING, RUNNING, COMPLETED, FAILED
 
 
@@ -65,23 +65,23 @@ class ActionStep:
 class ThoughtNode:
     node_id: str
     thought: str
-    parent_ids: List[str] = field(default_factory=list)
-    children_ids: List[str] = field(default_factory=list)
+    parent_ids: list[str] = field(default_factory=list)
+    children_ids: list[str] = field(default_factory=list)
     score: float = 0.0
     depth: int = 0
     visits: int = 0
     is_terminal: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class Plan:
     plan_id: str
     goal_id: str
-    steps: List[ActionStep] = field(default_factory=list)
+    steps: list[ActionStep] = field(default_factory=list)
     total_score: float = 0.0
     rationale: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -93,7 +93,7 @@ class TraceRecord:
     reward: float = 0.0
     done: bool = False
     timestamp: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -103,7 +103,7 @@ class MemoryItem:
     category: str = "general"
     score: float = 1.0
     timestamp: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @runtime_checkable
@@ -111,7 +111,7 @@ class CriticProtocol(Protocol):
     """Abstract protocol for artifact evaluation and compliance."""
 
     def validate(
-        self, artifact: Any, context: Optional[Dict[str, Any]] = None
+        self, artifact: Any, context: dict[str, Any] | None = None
     ) -> CriticReport:
         """Validate artifact and return structured diagnostic report."""
         ...
@@ -121,7 +121,7 @@ class CriticProtocol(Protocol):
 class ActionSpace(Protocol):
     """Abstract protocol defining available actions for a given state."""
 
-    def get_available_actions(self, state: Any) -> List[Any]:
+    def get_available_actions(self, state: Any) -> list[Any]:
         """Return list of valid actions executable from state."""
         ...
 
@@ -132,7 +132,7 @@ class TransitionModel(Protocol):
 
     def step(
         self, state: Any, action: Any
-    ) -> Tuple[Any, float, bool, Dict[str, Any]]:
+    ) -> tuple[Any, float, bool, dict[str, Any]]:
         """Execute action on state.
 
         Returns: (next_state, reward, is_terminal, info_dict)

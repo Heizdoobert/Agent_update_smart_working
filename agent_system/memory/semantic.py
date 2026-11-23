@@ -8,7 +8,7 @@ import re
 import sqlite3
 import time
 from collections import Counter, defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from agent_system.core.contracts import MemoryItem
 from agent_system.core.truncator import StructuralTruncator
@@ -22,14 +22,14 @@ class PurePythonBM25:
     def __init__(self, k1: float = 1.5, b: float = 0.75) -> None:
         self.k1 = k1
         self.b = b
-        self.docs: Dict[str, MemoryItem] = {}
-        self.doc_lengths: Dict[str, int] = {}
+        self.docs: dict[str, MemoryItem] = {}
+        self.doc_lengths: dict[str, int] = {}
         self.total_doc_len: int = 0
         self.avg_doc_len: float = 0.0
-        self.inverted_index: Dict[str, Dict[str, int]] = defaultdict(dict)  # term -> {doc_id: freq}
+        self.inverted_index: dict[str, dict[str, int]] = defaultdict(dict)  # term -> {doc_id: freq}
         self.doc_count: int = 0
 
-    def _tokenize(self, text: str) -> List[str]:
+    def _tokenize(self, text: str) -> list[str]:
         return re.findall(r"\w+", text.lower(), re.UNICODE)
 
     def add_document(self, item: MemoryItem) -> None:
@@ -56,13 +56,13 @@ class PurePythonBM25:
         self.avg_doc_len = self.total_doc_len / max(1, self.doc_count)
 
     def search(
-        self, query: str, category: Optional[str] = None, top_k: int = 3
-    ) -> List[MemoryItem]:
+        self, query: str, category: str | None = None, top_k: int = 3
+    ) -> list[MemoryItem]:
         query_terms = self._tokenize(query)
         if not query_terms or self.doc_count == 0:
             return []
 
-        scores: Dict[str, float] = defaultdict(float)
+        scores: dict[str, float] = defaultdict(float)
 
         for term in query_terms:
             if term not in self.inverted_index:
@@ -83,7 +83,7 @@ class PurePythonBM25:
                 scores[doc_id] += idf * (num / den)
 
         ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
-        result: List[MemoryItem] = []
+        result: list[MemoryItem] = []
         for doc_id, score in ranked:
             item = self.docs[doc_id]
             result.append(
@@ -102,7 +102,7 @@ class PurePythonBM25:
 class SemanticMemory:
     """Hybrid Semantic Memory: SQLite FTS5 primary with transparent Pure-Python BM25 fallback."""
 
-    def __init__(self, store: Optional[SQLiteStore] = None) -> None:
+    def __init__(self, store: SQLiteStore | None = None) -> None:
         self.store = store or SQLiteStore()
         self.has_fts5 = self._check_and_init_fts5()
         self.fallback_bm25 = PurePythonBM25()
@@ -152,7 +152,7 @@ class SemanticMemory:
         content: str,
         category: str = "general",
         score: float = 1.0,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Index a document into semantic memory."""
         now = time.time()
@@ -211,15 +211,15 @@ class SemanticMemory:
     def search(
         self,
         query: str,
-        category: Optional[str] = None,
+        category: str | None = None,
         top_k: int = 3,
         max_bytes: int = StructuralTruncator.DEFAULT_MAX_BYTES,
-    ) -> List[MemoryItem]:
+    ) -> list[MemoryItem]:
         """Search memory: embedding cosine first, BM25 tops up the rest; bounded by max_bytes."""
         vec_hits = self._search_vectors(query, category, top_k)
         if len(vec_hits) >= top_k:
             return self._truncate_results(vec_hits, max_bytes=max_bytes)
-        results: List[MemoryItem] = []
+        results: list[MemoryItem] = []
 
         if self.has_fts5:
             try:
@@ -241,8 +241,8 @@ class SemanticMemory:
         return self._truncate_results(results, max_bytes=max_bytes)
 
     def _search_vectors(
-        self, query: str, category: Optional[str], top_k: int
-    ) -> List[MemoryItem]:
+        self, query: str, category: str | None, top_k: int
+    ) -> list[MemoryItem]:
         """Brute-force cosine over stored vectors. ponytail: O(n) scan, add an ANN index past ~10k rows."""
         qv = embedder.embed([query], query=True)
         if not qv:
@@ -277,15 +277,15 @@ class SemanticMemory:
         ]
 
     def _search_fts5(
-        self, query: str, category: Optional[str] = None, top_k: int = 3
-    ) -> List[MemoryItem]:
+        self, query: str, category: str | None = None, top_k: int = 3
+    ) -> list[MemoryItem]:
         # Sanitize query for FTS5 (escape quotes, split words)
         words = re.findall(r"\w+", query, re.UNICODE)
         if not words:
             return []
         sanitized = " OR ".join(f'"{w}"' for w in words)
 
-        def _query_db(cur: sqlite3.Cursor) -> List[MemoryItem]:
+        def _query_db(cur: sqlite3.Cursor) -> list[MemoryItem]:
             if category:
                 sql = """
                 SELECT f.item_id, f.category, f.content, bm25(semantic_fts) as rank, m.metadata_json, m.timestamp
@@ -323,9 +323,9 @@ class SemanticMemory:
         return self.store.execute_with_retry(_query_db)
 
     def _truncate_results(
-        self, results: List[MemoryItem], max_bytes: int
-    ) -> List[MemoryItem]:
-        truncated_results: List[MemoryItem] = []
+        self, results: list[MemoryItem], max_bytes: int
+    ) -> list[MemoryItem]:
+        truncated_results: list[MemoryItem] = []
         used_bytes = 0
 
         for item in results:

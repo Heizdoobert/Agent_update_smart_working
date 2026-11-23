@@ -10,7 +10,6 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
 
 from agent_system.core.truncator import StructuralTruncator
 from agent_system.memory.semantic import SemanticMemory
@@ -37,7 +36,7 @@ class KnowledgeIngester:
     def __init__(
         self,
         root_path: str | Path = ".",
-        db_path: Optional[str | Path] = None,
+        db_path: str | Path | None = None,
         max_rules_bytes: int = DEFAULT_RULES_BUDGET,
     ) -> None:
         self.root_path = Path(root_path).resolve()
@@ -102,7 +101,7 @@ class KnowledgeIngester:
         lang = manifest.primary_language if manifest.primary_language != "Unknown" else "Repository"
         stack_str = ", ".join(manifest.tech_stack[:10]) if manifest.tech_stack else "Standard"
 
-        lines: List[str] = [
+        lines: list[str] = [
             f"# Project Rules: {lang}",
             "",
             "## 1. Environment & Tech Stack",
@@ -186,11 +185,11 @@ class KnowledgeIngester:
 
         return chunks_count
 
-    def _chunk_markdown(self, content: str) -> List[tuple[str, str]]:
+    def _chunk_markdown(self, content: str) -> list[tuple[str, str]]:
         """Split markdown text by H2 (##) or H1 (#) headings."""
-        chunks: List[tuple[str, str]] = []
+        chunks: list[tuple[str, str]] = []
         current_heading = "Overview"
-        current_lines: List[str] = []
+        current_lines: list[str] = []
 
         def _flush() -> None:
             text = "\n".join(current_lines).strip()

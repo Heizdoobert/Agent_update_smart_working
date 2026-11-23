@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from agent_system.core.contracts import (
     CriticReport,
@@ -25,7 +25,7 @@ class AuditingPlugin(BasePlugin):
         self.before_plan_called = True
         self.recorded_initial_state = initial_state
 
-    def on_after_plan(self, plan: Optional[Plan]) -> Optional[Plan]:
+    def on_after_plan(self, plan: Plan | None) -> Plan | None:
         if plan is not None:
             # Decorate rationale with plugin audit trail
             plan.rationale += " [Audited by AuditingPlugin]"

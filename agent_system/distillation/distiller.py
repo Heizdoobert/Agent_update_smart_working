@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from agent_system.core.contracts import TraceRecord
 
@@ -14,10 +15,10 @@ from agent_system.core.contracts import TraceRecord
 class PromptCandidate:
     prompt_id: str
     system_prompt: str
-    few_shot_examples: List[Dict[str, str]] = field(default_factory=list)
+    few_shot_examples: list[dict[str, str]] = field(default_factory=list)
     average_score: float = 0.0
     token_estimate: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def render(self) -> str:
         parts = [self.system_prompt]
@@ -31,7 +32,7 @@ class PromptCandidate:
 class DistillationEngine:
     """Offline batch optimizer compressing teacher reasoning traces into compact student prompts."""
 
-    def __init__(self, trace_store: Optional[List[TraceRecord]] = None):
+    def __init__(self, trace_store: list[TraceRecord] | None = None):
         self.traces = trace_store or []
 
     def record_trace(self, trace: TraceRecord) -> None:
@@ -39,10 +40,10 @@ class DistillationEngine:
 
     def extract_distilled_examples(
         self, min_reward: float = 0.5, max_examples: int = 5
-    ) -> List[Dict[str, str]]:
+    ) -> list[dict[str, str]]:
         """Filter traces by high reward to construct exemplary few-shot demonstrations."""
         successful_traces = [t for t in self.traces if t.reward >= min_reward]
-        examples: List[Dict[str, str]] = []
+        examples: list[dict[str, str]] = []
 
         for t in successful_traces[:max_examples]:
             examples.append(
@@ -57,14 +58,14 @@ class DistillationEngine:
     def generate_candidate_prompts(
         self,
         base_instruction: str,
-        rules: Optional[List[str]] = None,
-        few_shot_pool: Optional[List[Dict[str, str]]] = None,
-    ) -> List[PromptCandidate]:
+        rules: list[str] | None = None,
+        few_shot_pool: list[dict[str, str]] | None = None,
+    ) -> list[PromptCandidate]:
         """Synthesize multiple candidate prompt variants (compact, detailed, rule-focused)."""
         rule_list = rules or []
         examples = few_shot_pool or self.extract_distilled_examples()
 
-        candidates: List[PromptCandidate] = []
+        candidates: list[PromptCandidate] = []
 
         # Candidate 1: Minimal concise instruction
         c1_text = f"{base_instruction}\n" + "\n".join(f"- {r}" for r in rule_list[:3])
@@ -92,9 +93,9 @@ class DistillationEngine:
 
     def benchmark_and_optimize(
         self,
-        candidates: List[PromptCandidate],
-        benchmark_dataset: List[Dict[str, Any]],
-        evaluator_fn: Callable[[PromptCandidate, Dict[str, Any]], float],
+        candidates: list[PromptCandidate],
+        benchmark_dataset: list[dict[str, Any]],
+        evaluator_fn: Callable[[PromptCandidate, dict[str, Any]], float],
     ) -> PromptCandidate:
         """Evaluate candidate prompts on benchmark cases and select highest performing prompt."""
         if not candidates:

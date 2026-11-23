@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 def _make_hashable(val: Any) -> Any:
@@ -22,7 +22,7 @@ def _make_hashable(val: Any) -> Any:
 class StateNode:
     """Immutable state representation for search algorithms."""
     state_id: str
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
     is_terminal: bool = False
 
     def get(self, key: str, default: Any = None) -> Any:
@@ -49,9 +49,9 @@ class ActionDefinition:
     """Action definition with preconditions, effects, and execution cost."""
     name: str
     cost: float = 1.0
-    preconditions: Dict[str, Any] = field(default_factory=dict)
-    effects: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    preconditions: dict[str, Any] = field(default_factory=dict)
+    effects: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def is_applicable(self, state: StateNode) -> bool:
         """Check if action preconditions are met by current state attributes."""
@@ -73,16 +73,16 @@ class ActionDefinition:
 class StateMachineTransitionModel:
     """Domain-agnostic transition model for discrete state-space planning."""
 
-    def __init__(self, actions: List[ActionDefinition]) -> None:
+    def __init__(self, actions: list[ActionDefinition]) -> None:
         self.actions = actions
 
-    def get_available_actions(self, state: StateNode) -> List[ActionDefinition]:
+    def get_available_actions(self, state: StateNode) -> list[ActionDefinition]:
         """Return actions whose preconditions are satisfied."""
         return [a for a in self.actions if a.is_applicable(state)]
 
     def step(
         self, state: StateNode, action: ActionDefinition
-    ) -> Tuple[StateNode, float, bool, Dict[str, Any]]:
+    ) -> tuple[StateNode, float, bool, dict[str, Any]]:
         """Transition state by applying action. Reward is negative of cost."""
         next_state = action.apply(state)
         cost = action.cost

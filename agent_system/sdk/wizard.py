@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import os
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union
+from typing import Any
 
 
 def _pascal_case(name: str) -> str:
@@ -20,14 +21,14 @@ class OnboardingWizard:
 
     def __init__(
         self,
-        target_dir: Optional[Union[str, Path]] = None,
+        target_dir: str | Path | None = None,
         stdin: Any = None,
         stdout: Any = None,
     ) -> None:
         self.target_dir = Path(target_dir or Path.cwd()).resolve()
         self.stdin = stdin if stdin is not None else sys.stdin
         self.stdout = stdout if stdout is not None else sys.stdout
-        self._created_paths: List[Path] = []
+        self._created_paths: list[Path] = []
 
     def is_needed(self) -> bool:
         """Check if project currently lacks SDK plugin configuration."""
@@ -56,7 +57,7 @@ class OnboardingWizard:
         self,
         question: str,
         default: str = "",
-        validator: Optional[Callable[[str], bool]] = None,
+        validator: Callable[[str], bool] | None = None,
         error_msg: str = "Invalid input. Please try again.",
     ) -> str:
         prompt = f"{question} [{default}]: " if default else f"{question}: "

@@ -6,7 +6,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from agent_system.storage.sqlite_store import SQLiteStore
 
@@ -14,7 +14,7 @@ from agent_system.storage.sqlite_store import SQLiteStore
 @dataclass
 class Session:
     session_id: str
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
 
@@ -29,13 +29,13 @@ class Session:
 class SessionManager:
     """Manages persistent sessions backed by SQLiteStore."""
 
-    def __init__(self, store: Optional[SQLiteStore] = None):
+    def __init__(self, store: SQLiteStore | None = None):
         self.store = store or SQLiteStore()
 
     def create_session(
         self,
-        session_id: Optional[str] = None,
-        initial_data: Optional[Dict[str, Any]] = None,
+        session_id: str | None = None,
+        initial_data: dict[str, Any] | None = None,
     ) -> Session:
         sid = session_id or str(uuid.uuid4())[:8]
         now = time.time()
@@ -48,7 +48,7 @@ class SessionManager:
         self.save_session(session)
         return session
 
-    def get_session(self, session_id: str) -> Optional[Session]:
+    def get_session(self, session_id: str) -> Session | None:
         def _fetch(cur):
             cur.execute(
                 "SELECT session_id, data_json, created_at, updated_at FROM sessions WHERE session_id = ?;",
@@ -97,7 +97,7 @@ class SessionManager:
 
         return self.store.execute_with_retry(_delete)
 
-    def list_sessions(self) -> List[str]:
+    def list_sessions(self) -> list[str]:
         def _list(cur):
             cur.execute("SELECT session_id FROM sessions ORDER BY updated_at DESC;")
             return [row["session_id"] for row in cur.fetchall()]

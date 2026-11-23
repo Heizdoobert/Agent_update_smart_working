@@ -7,10 +7,9 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 
-def find() -> Optional[str]:
+def find() -> str | None:
     """Locate flow-task: $FLOW_TASK_BIN, next to this interpreter (shared venv), then PATH."""
     exe = "flow-task.exe" if sys.platform == "win32" else "flow-task"
     for cand in (os.environ.get("FLOW_TASK_BIN"), Path(sys.executable).parent / exe, shutil.which("flow-task")):

@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import random
 import time
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 from agent_system.core.contracts import ActionStep, Plan
 from agent_system.reasoning.transition import (
@@ -21,14 +21,14 @@ class MCTSNode:
     def __init__(
         self,
         state: StateNode,
-        parent: Optional[MCTSNode] = None,
-        action: Optional[ActionDefinition] = None,
-        untried_actions: Optional[List[ActionDefinition]] = None,
+        parent: MCTSNode | None = None,
+        action: ActionDefinition | None = None,
+        untried_actions: list[ActionDefinition] | None = None,
     ) -> None:
         self.state = state
         self.parent = parent
         self.action = action
-        self.children: List[MCTSNode] = []
+        self.children: list[MCTSNode] = []
         self.visits: int = 0
         self.total_value: float = 0.0
         self.untried_actions = untried_actions or []
@@ -54,7 +54,7 @@ class MCTSPlanner:
     def __init__(
         self,
         transition_model: StateMachineTransitionModel,
-        evaluation_fn: Optional[Callable[[StateNode], float]] = None,
+        evaluation_fn: Callable[[StateNode], float] | None = None,
         exploration_constant: float = 1.414,
         max_rollout_depth: int = 15,
     ) -> None:
@@ -69,7 +69,7 @@ class MCTSPlanner:
         is_goal: Callable[[StateNode], bool],
         simulations: int = 100,
         goal_id: str = "mcts_goal",
-    ) -> Optional[Plan]:
+    ) -> Plan | None:
         start_time = time.time()
         if is_goal(initial_state):
             elapsed = time.time() - start_time
@@ -142,14 +142,14 @@ class MCTSPlanner:
                 sim_reward += self.eval_fn(sim_state)
 
             # 4. Backpropagation
-            curr: Optional[MCTSNode] = node
+            curr: MCTSNode | None = node
             while curr is not None:
                 curr.visits += 1
                 curr.total_value += sim_reward
                 curr = curr.parent
 
         # Extract best trajectory from root by highest visits
-        trajectory: List[ActionDefinition] = []
+        trajectory: list[ActionDefinition] = []
         curr = root
         while curr.children:
             best_child = max(curr.children, key=lambda c: c.visits)

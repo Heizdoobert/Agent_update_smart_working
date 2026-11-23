@@ -10,7 +10,6 @@ Thresholds are HARD per THIẾT §14.5 / §22 / §18.5:
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Optional
 
 # ── Hard ceilings (THIẾT §18.5 / §22) ──────────────────────────────────────
 FLOW_RETRY_CEILING = 2          # parallel FLOW loop: fail 2 rounds -> Human Gate (M4)
@@ -48,7 +47,7 @@ def _no_data(name: str, action: str) -> Metric:
 
 # ── Context economy (M1, THIẾT §14.5) ──────────────────────────────────────
 
-def context_usage_pct(tokens_used: Optional[int], window: Optional[int]) -> Metric:
+def context_usage_pct(tokens_used: int | None, window: int | None) -> Metric:
     """Context usage %; warn @30, critical @40 (reset session, no summarization)."""
     if not tokens_used or not window or window <= 0:
         return _no_data("context_usage_pct", "no data — pass tokens_used + context window")
@@ -62,7 +61,7 @@ def context_usage_pct(tokens_used: Optional[int], window: Optional[int]) -> Metr
     return _metric("context_usage_pct", round(pct, 1), "safe", "continue")
 
 
-def kv_cache_hit_rate(hits: Optional[int], total: Optional[int]) -> Metric:
+def kv_cache_hit_rate(hits: int | None, total: int | None) -> Metric:
     """KV-cache hit rate %; target > 80."""
     if not hits or total is None or total <= 0:
         return _no_data("kv_cache_hit_rate", "no data — pass hits + total requests")
@@ -76,7 +75,7 @@ def kv_cache_hit_rate(hits: Optional[int], total: Optional[int]) -> Metric:
                    "far below 80% — restructure prompts to share prefixes")
 
 
-def input_output_ratio(in_tokens: Optional[int], out_tokens: Optional[int]) -> Metric:
+def input_output_ratio(in_tokens: int | None, out_tokens: int | None) -> Metric:
     """Tokens-in : tokens-out ratio; target < 80:1."""
     if not in_tokens or not out_tokens or out_tokens <= 0:
         return _no_data("input_output_ratio", "no data — pass in_tokens + out_tokens")
@@ -90,7 +89,7 @@ def input_output_ratio(in_tokens: Optional[int], out_tokens: Optional[int]) -> M
                    ">>80:1 — context bloat; reset session + re-verify from handoff files")
 
 
-def tool_count(n: Optional[int]) -> Metric:
+def tool_count(n: int | None) -> Metric:
     """Registered tools; <15 safe, >30 prune."""
     if n is None or n < 0:
         return _no_data("tool_count", "no data — pass registered tool count")
@@ -105,7 +104,7 @@ def tool_count(n: Optional[int]) -> Metric:
 
 # ── KPI North Star (M2, THIẾT §22) ─────────────────────────────────────────
 
-def rollback_rate(reverted: Optional[int], total: Optional[int]) -> Metric:
+def rollback_rate(reverted: int | None, total: int | None) -> Metric:
     """Reverted / total changes; North Star <= 0.5%."""
     if reverted is None or total is None or total <= 0:
         return _no_data("rollback_rate", "no data — count reverts (git 'Revert' + features.json rolled_back)")
@@ -119,7 +118,7 @@ def rollback_rate(reverted: Optional[int], total: Optional[int]) -> Metric:
                    "rollback storm — stop shipping, audit verification step")
 
 
-def self_verification_rate(proven: Optional[int], total: Optional[int]) -> Metric:
+def self_verification_rate(proven: int | None, total: int | None) -> Metric:
     """Claims proven with evidence / total claims; target > 90%."""
     if proven is None or total is None or total <= 0:
         return _no_data("self_verification_rate", "no data — mark proven/total in features.json")
@@ -133,7 +132,7 @@ def self_verification_rate(proven: Optional[int], total: Optional[int]) -> Metri
                    "<<90% — verification theater; enforce SESSION_RITUAL step 3")
 
 
-def token_shift_to_verification(verify_tokens: Optional[int], total_tokens: Optional[int]) -> Metric:
+def token_shift_to_verification(verify_tokens: int | None, total_tokens: int | None) -> Metric:
     """Share of tokens spent verifying; target ~70% (estimate from trace-log)."""
     if verify_tokens is None or total_tokens is None or total_tokens <= 0:
         return _no_data("token_shift_to_verification",

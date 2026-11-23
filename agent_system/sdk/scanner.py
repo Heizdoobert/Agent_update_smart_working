@@ -10,7 +10,7 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 MAX_DOC_READ_BYTES = 50_000
 
@@ -21,14 +21,14 @@ class ProjectManifest:
 
     root_path: str
     primary_language: str = "Unknown"
-    tech_stack: List[str] = field(default_factory=list)
-    test_framework: Optional[str] = None
-    build_commands: Dict[str, str] = field(default_factory=dict)
-    documentation_files: List[str] = field(default_factory=list)
-    detected_rules: List[str] = field(default_factory=list)
-    extra_metadata: Dict[str, Any] = field(default_factory=dict)
+    tech_stack: list[str] = field(default_factory=list)
+    test_framework: str | None = None
+    build_commands: dict[str, str] = field(default_factory=dict)
+    documentation_files: list[str] = field(default_factory=list)
+    detected_rules: list[str] = field(default_factory=list)
+    extra_metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert manifest to serializable dictionary."""
         return {
             "root_path": self.root_path,
@@ -51,8 +51,8 @@ class CodebaseScanner:
     def scan(self) -> ProjectManifest:
         """Execute scan across root directory and return populated ProjectManifest."""
         manifest = ProjectManifest(root_path=str(self.root_path))
-        manifest_files: List[str] = []
-        stack_set: Set[str] = set()
+        manifest_files: list[str] = []
+        stack_set: set[str] = set()
 
         if not self.root_path.exists() or not self.root_path.is_dir():
             manifest.extra_metadata["manifest_files"] = manifest_files
@@ -99,8 +99,8 @@ class CodebaseScanner:
     def _detect_python(
         self,
         manifest: ProjectManifest,
-        stack_set: Set[str],
-        manifest_files: List[str],
+        stack_set: set[str],
+        manifest_files: list[str],
     ) -> None:
         """Check for Python manifests (pyproject.toml, setup.py, requirements.txt)."""
         pyproject = self.root_path / "pyproject.toml"
@@ -150,8 +150,8 @@ class CodebaseScanner:
     def _detect_node(
         self,
         manifest: ProjectManifest,
-        stack_set: Set[str],
-        manifest_files: List[str],
+        stack_set: set[str],
+        manifest_files: list[str],
     ) -> None:
         """Check for Node.js / TypeScript (package.json, tsconfig.json)."""
         pkg_json_path = self.root_path / "package.json"
@@ -201,8 +201,8 @@ class CodebaseScanner:
     def _detect_rust(
         self,
         manifest: ProjectManifest,
-        stack_set: Set[str],
-        manifest_files: List[str],
+        stack_set: set[str],
+        manifest_files: list[str],
     ) -> None:
         """Check for Rust manifests (Cargo.toml)."""
         cargo = self.root_path / "Cargo.toml"
@@ -217,8 +217,8 @@ class CodebaseScanner:
     def _detect_go(
         self,
         manifest: ProjectManifest,
-        stack_set: Set[str],
-        manifest_files: List[str],
+        stack_set: set[str],
+        manifest_files: list[str],
     ) -> None:
         """Check for Go manifests (go.mod)."""
         gomod = self.root_path / "go.mod"
@@ -232,7 +232,7 @@ class CodebaseScanner:
     def _detect_generic_build(
         self,
         manifest: ProjectManifest,
-        manifest_files: List[str],
+        manifest_files: list[str],
     ) -> None:
         """Check for Makefile or Dockerfile."""
         makefile = self.root_path / "Makefile"

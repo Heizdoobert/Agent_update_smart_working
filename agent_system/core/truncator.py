@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Union
+from typing import Any
 
 
 def _json_bytes(obj: Any) -> int:
@@ -74,15 +74,15 @@ class StructuralTruncator:
     @classmethod
     def truncate_json(
         cls,
-        data: Union[Dict[str, Any], List[Any], Any],
+        data: dict[str, Any] | list[Any] | Any,
         max_bytes: int = DEFAULT_MAX_BYTES,
-    ) -> Union[Dict[str, Any], List[Any], Any]:
+    ) -> dict[str, Any] | list[Any] | Any:
         """Truncate JSON data structurally so the output remains valid, parseable JSON within max_bytes."""
         if _json_bytes(data) <= max_bytes:
             return data
 
         if isinstance(data, list):
-            trimmed_list: List[Any] = []
+            trimmed_list: list[Any] = []
             for item in data:
                 candidate = trimmed_list + [item, {"_truncated": f"{len(data) - len(trimmed_list)} omitted"}]
                 if _json_bytes(candidate) > max_bytes:
@@ -99,7 +99,7 @@ class StructuralTruncator:
             return trimmed_list
 
         if isinstance(data, dict):
-            trimmed_dict: Dict[str, Any] = {}
+            trimmed_dict: dict[str, Any] = {}
             keys = list(data.keys())
             for k in keys:
                 v = data[k]

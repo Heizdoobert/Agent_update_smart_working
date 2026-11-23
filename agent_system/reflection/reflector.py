@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from agent_system.core.contracts import CriticReport, DiagnosticItem
 from agent_system.reflection.critic import CriticEngine
@@ -17,7 +18,7 @@ class ReflectionResult:
     success: bool
     final_artifact: str
     iterations: int
-    history: List[CriticReport] = field(default_factory=list)
+    history: list[CriticReport] = field(default_factory=list)
     patched: bool = False
     message: str = ""
 
@@ -28,7 +29,7 @@ class SelfReflector:
     def __init__(
         self,
         critic: CriticEngine,
-        custom_patcher: Optional[Callable[[str, List[DiagnosticItem]], str]] = None,
+        custom_patcher: Callable[[str, list[DiagnosticItem]], str] | None = None,
         max_iterations: int = 3,
     ) -> None:
         self.critic = critic
@@ -38,12 +39,12 @@ class SelfReflector:
     def reflect_and_patch(
         self,
         initial_artifact: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> ReflectionResult:
         """Run self-reflection loop with hard iteration bound and cycle detection."""
         current_artifact = initial_artifact
-        history: List[CriticReport] = []
-        seen_signatures: List[str] = []
+        history: list[CriticReport] = []
+        seen_signatures: list[str] = []
         patched_any = False
 
         for iteration in range(1, self.max_iterations + 1):
@@ -106,7 +107,7 @@ class SelfReflector:
             message=f"Max iteration limit ({self.max_iterations}) reached without achieving pass score.",
         )
 
-    def _apply_fixes(self, artifact: str, diagnostics: List[DiagnosticItem]) -> str:
+    def _apply_fixes(self, artifact: str, diagnostics: list[DiagnosticItem]) -> str:
         """Apply deterministic fix recipes for common static rule violations."""
         if self.custom_patcher:
             try:

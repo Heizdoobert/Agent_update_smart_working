@@ -6,12 +6,12 @@ import json
 import os
 import re
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List, Optional
 
 from agent_system.core.contracts import DiagnosticItem
 
-Patcher = Callable[[str, List[DiagnosticItem]], str]
+Patcher = Callable[[str, list[DiagnosticItem]], str]
 RULE_FIXABLE = {"FORBIDDEN_IMPORT", "FORBIDDEN_CALL", "MISSING_RETURN_TYPE"}  # fixed by SelfReflector rules
 
 
@@ -20,7 +20,7 @@ def claude_patcher(model: str = "haiku", max_usd: float = 0.20, timeout: int = 1
     real = Path.home() / ".local/bin/claude.real"  # NO_SANDBOX host binary; plain `claude` is a Docker wrapper
     exe = os.environ.get("AGENT_SYSTEM_CLAUDE") or (str(real) if real.exists() else "claude")
 
-    def patch(artifact: str, diagnostics: List[DiagnosticItem]) -> str:
+    def patch(artifact: str, diagnostics: list[DiagnosticItem]) -> str:
         diagnostics = [d for d in diagnostics if d.code not in RULE_FIXABLE]
         if not diagnostics:  # the reflector's rule patcher handles these for free
             return artifact
@@ -45,6 +45,6 @@ def claude_patcher(model: str = "haiku", max_usd: float = 0.20, timeout: int = 1
     return patch
 
 
-def default_patcher() -> Optional[Patcher]:
+def default_patcher() -> Patcher | None:
     """LLM patcher only when AGENT_SYSTEM_LLM_PATCH=1 (costs tokens, so never implicit)."""
     return claude_patcher() if os.environ.get("AGENT_SYSTEM_LLM_PATCH") == "1" else None

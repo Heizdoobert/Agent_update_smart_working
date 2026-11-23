@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from agent_system.core.truncator import StructuralTruncator
 
@@ -17,12 +17,12 @@ class SkillDefinition:
     instructions: str
     path: str
     sha256: str
-    tags: List[str] = field(default_factory=list)
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    parameters: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
-def parse_markdown_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
+def parse_markdown_frontmatter(content: str) -> tuple[dict[str, Any], str]:
     """Parse YAML-like frontmatter delimited by --- lines at start of file."""
     lines = content.splitlines()
     if not lines or lines[0].strip() != "---":
@@ -39,8 +39,8 @@ def parse_markdown_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
     if body_start_idx == -1:
         return {}, content
 
-    metadata: Dict[str, Any] = {}
-    current_key: Optional[str] = None
+    metadata: dict[str, Any] = {}
+    current_key: str | None = None
 
     for line in frontmatter_lines:
         raw = line.strip()
@@ -70,11 +70,11 @@ def parse_markdown_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
 class SkillRegistry:
     """Safe dynamic skill repository preventing unauthorized file access and injection."""
 
-    def __init__(self, allowed_roots: Optional[List[Union[str, Path]]] = None):
+    def __init__(self, allowed_roots: list[str | Path] | None = None):
         self.allowed_roots = [
             Path(r).resolve() for r in (allowed_roots or [Path.cwd()])
         ]
-        self._skills: Dict[str, SkillDefinition] = {}
+        self._skills: dict[str, SkillDefinition] = {}
 
     def _is_path_whitelisted(self, path: Path) -> bool:
         resolved = path.resolve()
@@ -86,7 +86,7 @@ class SkillRegistry:
                 continue
         return False
 
-    def register_skill_file(self, skill_path: Union[str, Path]) -> SkillDefinition:
+    def register_skill_file(self, skill_path: str | Path) -> SkillDefinition:
         p = Path(skill_path).resolve()
         if not self._is_path_whitelisted(p):
             raise PermissionError(
@@ -120,7 +120,7 @@ class SkillRegistry:
         self._skills[name] = skill
         return skill
 
-    def scan_directory(self, dir_path: Union[str, Path]) -> int:
+    def scan_directory(self, dir_path: str | Path) -> int:
         p = Path(dir_path).resolve()
         if not self._is_path_whitelisted(p):
             raise PermissionError(f"Directory '{p}' is not within whitelisted roots.")
@@ -131,17 +131,17 @@ class SkillRegistry:
             count += 1
         return count
 
-    def get_skill(self, name: str) -> Optional[SkillDefinition]:
+    def get_skill(self, name: str) -> SkillDefinition | None:
         return self._skills.get(name)
 
-    def list_skills(self) -> List[str]:
+    def list_skills(self) -> list[str]:
         return sorted(self._skills.keys())
 
     def build_skill_context(
-        self, skill_names: List[str], max_bytes: int = StructuralTruncator.DEFAULT_MAX_BYTES
+        self, skill_names: list[str], max_bytes: int = StructuralTruncator.DEFAULT_MAX_BYTES
     ) -> str:
         """Construct a compact markdown context block for prompt injection, strictly bounded <3KB."""
-        sections: List[str] = []
+        sections: list[str] = []
         for name in skill_names:
             skill = self.get_skill(name)
             if not skill:

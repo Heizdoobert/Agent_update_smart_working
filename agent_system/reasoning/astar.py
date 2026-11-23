@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import heapq
 import time
-from typing import Callable, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 from agent_system.core.contracts import ActionStep, Plan
 from agent_system.reasoning.transition import (
@@ -24,7 +24,7 @@ class AStarPlanner:
     def __init__(
         self,
         transition_model: StateMachineTransitionModel,
-        heuristic_fn: Optional[Callable[[StateNode], float]] = None,
+        heuristic_fn: Callable[[StateNode], float] | None = None,
         max_expansions: int = 2000,
     ):
         self.model = transition_model
@@ -36,16 +36,16 @@ class AStarPlanner:
         initial_state: StateNode,
         is_goal: Callable[[StateNode], bool],
         goal_id: str = "goal",
-    ) -> Optional[Plan]:
+    ) -> Plan | None:
         """Execute A* search to synthesize an optimal plan reaching the goal."""
         start_time = time.time()
         # Priority queue item: (f_score, tie_breaker, g_score, state, path_of_actions)
         counter = 0
         h_start = self.heuristic(initial_state)
-        frontier: List[Tuple[float, int, float, StateNode, List[ActionDefinition]]] = []
+        frontier: list[tuple[float, int, float, StateNode, list[ActionDefinition]]] = []
         heapq.heappush(frontier, (h_start, counter, 0.0, initial_state, []))
 
-        best_cost: Dict[str, float] = {initial_state.state_id: 0.0}
+        best_cost: dict[str, float] = {initial_state.state_id: 0.0}
         expansions = 0
 
         while frontier and expansions < self.max_expansions:

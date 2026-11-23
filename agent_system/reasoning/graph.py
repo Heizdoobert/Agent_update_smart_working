@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Set
+from typing import Any
 
 from agent_system.core.contracts import ThoughtNode
 
@@ -11,9 +11,9 @@ class ThoughtGraph:
     """Manages Tree and Graph of Thoughts (ToT/GoT) enforcing DAG invariants."""
 
     def __init__(self) -> None:
-        self.nodes: Dict[str, ThoughtNode] = {}
-        self._adj: Dict[str, Set[str]] = {}  # parent -> set of children
-        self._rev_adj: Dict[str, Set[str]] = {}  # child -> set of parents
+        self.nodes: dict[str, ThoughtNode] = {}
+        self._adj: dict[str, set[str]] = {}  # parent -> set of children
+        self._rev_adj: dict[str, set[str]] = {}  # child -> set of parents
 
     def add_node(self, node: ThoughtNode) -> None:
         """Add a thought node to the graph."""
@@ -62,7 +62,7 @@ class ThoughtGraph:
 
     def _is_reachable(self, source: str, target: str) -> bool:
         """DFS check if target is reachable from source."""
-        visited: Set[str] = set()
+        visited: set[str] = set()
         stack = [source]
 
         while stack:
@@ -75,11 +75,11 @@ class ThoughtGraph:
 
         return False
 
-    def get_roots(self) -> List[ThoughtNode]:
+    def get_roots(self) -> list[ThoughtNode]:
         """Return nodes that have no parents."""
         return [self.nodes[nid] for nid, parents in self._rev_adj.items() if not parents]
 
-    def get_terminals(self) -> List[ThoughtNode]:
+    def get_terminals(self) -> list[ThoughtNode]:
         """Return nodes marked as terminal or having no children."""
         return [
             self.nodes[nid]
@@ -87,19 +87,19 @@ class ThoughtGraph:
             if not children or self.nodes[nid].is_terminal
         ]
 
-    def get_children(self, node_id: str) -> List[ThoughtNode]:
+    def get_children(self, node_id: str) -> list[ThoughtNode]:
         """Return direct child nodes."""
         return [self.nodes[cid] for cid in self._adj.get(node_id, set())]
 
-    def get_parents(self, node_id: str) -> List[ThoughtNode]:
+    def get_parents(self, node_id: str) -> list[ThoughtNode]:
         """Return direct parent nodes."""
         return [self.nodes[pid] for pid in self._rev_adj.get(node_id, set())]
 
-    def topological_sort(self) -> List[ThoughtNode]:
+    def topological_sort(self) -> list[ThoughtNode]:
         """Return nodes in topological order."""
         in_degree = {nid: len(parents) for nid, parents in self._rev_adj.items()}
         queue = [nid for nid, deg in in_degree.items() if deg == 0]
-        sorted_nodes: List[ThoughtNode] = []
+        sorted_nodes: list[ThoughtNode] = []
 
         while queue:
             curr = queue.pop(0)
@@ -116,7 +116,7 @@ class ThoughtGraph:
 
     def prune_subgraph(self, node_id: str) -> None:
         """Remove a node and all of its descendants."""
-        to_remove: Set[str] = set()
+        to_remove: set[str] = set()
         stack = [node_id]
 
         while stack:
@@ -143,7 +143,7 @@ class ThoughtGraph:
             self._adj.pop(nid, None)
             self._rev_adj.pop(nid, None)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize graph to dictionary."""
         return {
             "nodes": [
@@ -163,7 +163,7 @@ class ThoughtGraph:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> ThoughtGraph:
+    def from_dict(cls, data: dict[str, Any]) -> ThoughtGraph:
         """Reconstruct ThoughtGraph from dictionary."""
         graph = cls()
         nodes_data = data.get("nodes", [])

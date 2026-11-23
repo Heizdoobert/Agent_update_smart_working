@@ -11,7 +11,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 UNIVERSAL_SYSTEM_INSTRUCTION = """# Universal Agent Cognitive Operating Protocol
 
@@ -44,7 +44,7 @@ All AI Agents working in this environment MUST strictly follow this Operating Pr
 """
 
 
-def get_claude_desktop_config_path() -> Optional[Path]:
+def get_claude_desktop_config_path() -> Path | None:
     """Resolve OS-specific path for Claude Desktop configuration file."""
     if sys.platform == "win32":
         appdata = os.environ.get("APPDATA")
@@ -79,7 +79,7 @@ def resolve_command() -> str:
     return "agent-system"
 
 
-def get_mcp_server_entry(command: Optional[str] = None) -> Dict[str, Any]:
+def get_mcp_server_entry(command: str | None = None) -> dict[str, Any]:
     """Return standard MCP server configuration dictionary."""
     return {
         "command": command or resolve_command(),
@@ -107,7 +107,7 @@ def write_managed_block(path: Path, text: str) -> None:
 def inject_mcp_config(config_path: Path, server_name: str = "agent-system") -> bool:
     """Safely inject or update MCP server entry in a client JSON config file."""
     config_path.parent.mkdir(parents=True, exist_ok=True)
-    data: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
 
     if config_path.is_file():
         try:
@@ -128,11 +128,11 @@ def inject_mcp_config(config_path: Path, server_name: str = "agent-system") -> b
 def install_agent_environment(
     target: str = "all",
     dry_run: bool = False,
-    override_instruction: Optional[str] = None,
-) -> Dict[str, Any]:
+    override_instruction: str | None = None,
+) -> dict[str, Any]:
     """Install System Instructions and MCP configurations for agent clients."""
     instruction = (override_instruction or UNIVERSAL_SYSTEM_INSTRUCTION).strip() + "\n"
-    results: Dict[str, Any] = {
+    results: dict[str, Any] = {
         "mcp_installed": [],
         "rules_installed": [],
         "dry_run": dry_run,

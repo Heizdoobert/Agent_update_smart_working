@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from agent_system.core.contracts import (
     CriticProtocol,
@@ -17,13 +17,13 @@ from agent_system.core.contracts import (
 class SchemaCritic:
     """Validates structural JSON or dictionary schema invariants."""
 
-    def __init__(self, required_keys: Optional[List[str]] = None):
+    def __init__(self, required_keys: list[str] | None = None):
         self.required_keys = required_keys or []
 
     def validate(
-        self, artifact: Any, context: Optional[Dict[str, Any]] = None
+        self, artifact: Any, context: dict[str, Any] | None = None
     ) -> CriticReport:
-        diagnostics: List[DiagnosticItem] = []
+        diagnostics: list[DiagnosticItem] = []
         parsed = artifact
 
         if isinstance(artifact, str):
@@ -87,14 +87,14 @@ class SchemaCritic:
 class CriticEngine:
     """Coordinates multiple critics and computes aggregated compliance verdict."""
 
-    def __init__(self, critics: Optional[List[CriticProtocol]] = None):
-        self.critics: List[CriticProtocol] = critics or []
+    def __init__(self, critics: list[CriticProtocol] | None = None):
+        self.critics: list[CriticProtocol] = critics or []
 
     def register_critic(self, critic: CriticProtocol) -> None:
         self.critics.append(critic)
 
     def evaluate(
-        self, artifact: Any, context: Optional[Dict[str, Any]] = None
+        self, artifact: Any, context: dict[str, Any] | None = None
     ) -> CriticReport:
         if not self.critics:
             return CriticReport(
@@ -106,8 +106,8 @@ class CriticEngine:
                 raw_artifact=str(artifact),
             )
 
-        all_diagnostics: List[DiagnosticItem] = []
-        scores: List[float] = []
+        all_diagnostics: list[DiagnosticItem] = []
+        scores: list[float] = []
 
         for critic in self.critics:
             report = critic.validate(artifact, context=context)

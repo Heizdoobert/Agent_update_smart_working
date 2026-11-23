@@ -5,8 +5,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any
 
 from agent_system.core.contracts import CriticProtocol, CriticReport
 from agent_system.core.truncator import StructuralTruncator
@@ -25,12 +26,12 @@ class PluginRegistry:
 
     def __init__(
         self,
-        allowed_roots: Optional[List[Union[str, Path]]] = None,
+        allowed_roots: list[str | Path] | None = None,
     ) -> None:
         self.allowed_roots = [
             Path(r).resolve() for r in (allowed_roots or [Path.cwd()])
         ]
-        self._active_plugins: Dict[str, BasePlugin] = {}
+        self._active_plugins: dict[str, BasePlugin] = {}
 
     def _is_path_whitelisted(self, path: Path) -> bool:
         """Verify that resolved path resides within one of the allowed roots."""
@@ -44,8 +45,8 @@ class PluginRegistry:
         return False
 
     def discover_manifest(
-        self, directory: Optional[Union[str, Path]] = None
-    ) -> Optional[PluginManifest]:
+        self, directory: str | Path | None = None
+    ) -> PluginManifest | None:
         """Discover and parse plugin manifest in given directory."""
         dir_path = Path(directory or Path.cwd()).resolve()
         if not self._is_path_whitelisted(dir_path):
@@ -68,8 +69,8 @@ class PluginRegistry:
         return None
 
     def load_plugin(
-        self, path_or_dir: Optional[Union[str, Path]] = None
-    ) -> Optional[BasePlugin]:
+        self, path_or_dir: str | Path | None = None
+    ) -> BasePlugin | None:
         """Load and instantiate a project plugin from directory or manifest file.
 
         Loads code safely using module specs without mutating sys.path.
@@ -175,11 +176,11 @@ class PluginRegistry:
                     f"Warning: Error during plugin '{name}' on_unload(): {e}\n"
                 )
 
-    def get_plugin(self, name: str) -> Optional[BasePlugin]:
+    def get_plugin(self, name: str) -> BasePlugin | None:
         """Get loaded plugin instance by name."""
         return self._active_plugins.get(name)
 
-    def get_all_actions(self) -> List[ActionDefinition]:
+    def get_all_actions(self) -> list[ActionDefinition]:
         """Aggregate and deduplicate domain actions across all active plugins.
 
         Plugins with higher manifest priority take precedence on name collisions.
@@ -189,7 +190,7 @@ class PluginRegistry:
             key=lambda p: p.manifest.priority,
             reverse=True,
         )
-        action_map: Dict[str, ActionDefinition] = {}
+        action_map: dict[str, ActionDefinition] = {}
         for plugin in sorted_plugins:
             for act in plugin.get_actions():
                 if act.name not in action_map:
@@ -197,8 +198,8 @@ class PluginRegistry:
         return list(action_map.values())
 
     def discover_and_load_all(
-        self, directory: Optional[Union[str, Path]] = None
-    ) -> List[BasePlugin]:
+        self, directory: str | Path | None = None
+    ) -> list[BasePlugin]:
         """Discover and load all plugins in a root directory and its immediate subdirectories."""
         target = Path(directory or Path.cwd()).resolve()
         if not self._is_path_whitelisted(target):
@@ -206,7 +207,7 @@ class PluginRegistry:
                 f"Security violation: path '{target}' is outside whitelisted directories: {self.allowed_roots}"
             )
 
-        loaded: List[BasePlugin] = []
+        loaded: list[BasePlugin] = []
 
         # Check target directory itself
         self_manifest = self.discover_manifest(target)
@@ -227,9 +228,9 @@ class PluginRegistry:
 
         return loaded
 
-    def get_all_critics(self) -> List[CriticProtocol]:
+    def get_all_critics(self) -> list[CriticProtocol]:
         """Aggregate domain critics across all active plugins."""
-        critics: List[CriticProtocol] = []
+        critics: list[CriticProtocol] = []
         for plugin in self._active_plugins.values():
             critics.extend(plugin.get_critics())
         return critics
@@ -267,7 +268,7 @@ class PluginRegistry:
             lambda p, _: p.on_before_plan(initial_state, goal),
         )
 
-    def trigger_after_plan(self, plan: Optional[Any]) -> Optional[Any]:
+    def trigger_after_plan(self, plan: Any | None) -> Any | None:
         """Pipe generated plan through active plugins for observation or decoration."""
         return self._dispatch_pipe(
             "on_after_plan",

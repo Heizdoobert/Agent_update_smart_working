@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from agent_system.core.contracts import CriticProtocol, CriticReport
 from agent_system.reasoning.transition import ActionDefinition
@@ -18,18 +18,18 @@ class PluginManifest:
     version: str = "0.1.0"
     description: str = ""
     priority: int = 100
-    entrypoint: Optional[str] = None  # e.g. "plugin:MyProjectPlugin"
-    rules_path: Optional[str] = None  # e.g. ".agent/rules.md"
-    actions: List[str] = field(default_factory=list)
-    critics: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    entrypoint: str | None = None  # e.g. "plugin:MyProjectPlugin"
+    rules_path: str | None = None  # e.g. ".agent/rules.md"
+    actions: list[str] = field(default_factory=list)
+    critics: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert manifest to JSON-serializable dictionary."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> PluginManifest:
+    def from_dict(cls, data: dict[str, Any]) -> PluginManifest:
         """Create PluginManifest instance from dictionary."""
         valid_fields = {
             "name",
@@ -52,7 +52,7 @@ class ProjectContext:
 
     project_root: Path
     rules_content: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class BasePlugin:
@@ -65,7 +65,7 @@ class BasePlugin:
     def __init__(
         self,
         manifest: PluginManifest,
-        context: Optional[ProjectContext] = None,
+        context: ProjectContext | None = None,
     ) -> None:
         self.manifest = manifest
         self.context = context
@@ -79,7 +79,7 @@ class BasePlugin:
     def on_before_plan(self, initial_state: Any, goal: Any) -> None:
         """Lifecycle hook called before planner begins state exploration."""
 
-    def on_after_plan(self, plan: Optional[Any]) -> Optional[Any]:
+    def on_after_plan(self, plan: Any | None) -> Any | None:
         """Lifecycle hook called after planner returns a plan.
 
         Can observe, validate, or decorate the generated plan.
@@ -93,11 +93,11 @@ class BasePlugin:
         """
         return report
 
-    def get_actions(self) -> List[ActionDefinition]:
+    def get_actions(self) -> list[ActionDefinition]:
         """Return domain-specific actions to register with reasoning/planning."""
         return []
 
-    def get_critics(self) -> List[CriticProtocol]:
+    def get_critics(self) -> list[CriticProtocol]:
         """Return domain-specific critic protocols to register with CriticEngine."""
         return []
 

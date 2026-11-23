@@ -20,10 +20,9 @@ The module loads the flags on import so they are available globally via
 
 import json
 import os
-from typing import Dict
 
 # Internal storage for flags
-_FEATURE_FLAGS: Dict[str, bool] = {}
+_FEATURE_FLAGS: dict[str, bool] = {}
 
 
 def _load_feature_flags() -> None:
@@ -40,7 +39,7 @@ def _load_feature_flags() -> None:
         os.path.expanduser("~/.gemini/config/feature_flags.json"),
     )
     try:
-        with open(path, "r", encoding="utf-8") as fp:
+        with open(path, encoding="utf-8") as fp:
             data = json.load(fp)
         if isinstance(data, dict):
             for key, value in data.items():
@@ -59,6 +58,6 @@ def is_enabled(flag: str) -> bool:
     return _FEATURE_FLAGS.get(flag, False)
 
 
-def get_feature_flags() -> Dict[str, bool]:
+def get_feature_flags() -> dict[str, bool]:
     """Return a copy of the current flag dictionary."""
     return dict(_FEATURE_FLAGS)

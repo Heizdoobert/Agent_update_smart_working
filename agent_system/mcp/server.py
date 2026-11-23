@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, TextIO
+from typing import Any, TextIO
 
 from agent_system import __version__
 from agent_system.mcp.tools import CognitiveToolsDispatcher
@@ -29,9 +29,9 @@ class MCPServer:
     def __init__(
         self,
         root_path: str | Path = ".",
-        stdin: Optional[TextIO] = None,
-        stdout: Optional[TextIO] = None,
-        stderr: Optional[TextIO] = None,
+        stdin: TextIO | None = None,
+        stdout: TextIO | None = None,
+        stderr: TextIO | None = None,
     ) -> None:
         self.root_path = Path(root_path).resolve()
         self.stdin = stdin or sys.stdin
@@ -39,13 +39,13 @@ class MCPServer:
         self.stderr = stderr or sys.stderr
         self.tools = CognitiveToolsDispatcher(root_path=self.root_path)
 
-    def handle_message(self, message_str: str) -> Optional[str]:
+    def handle_message(self, message_str: str) -> str | None:
         """Process incoming JSON-RPC 2.0 message and return JSON-RPC response or None."""
         if not message_str or not message_str.strip():
             return None
 
         try:
-            req: Dict[str, Any] = json.loads(message_str)
+            req: dict[str, Any] = json.loads(message_str)
         except (json.JSONDecodeError, ValueError) as err:
             return _json_error(None, -32700, f"Parse error: {err!s}")
 

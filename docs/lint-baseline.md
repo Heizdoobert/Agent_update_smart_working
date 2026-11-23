@@ -1,11 +1,11 @@
-# Lint & Type Baseline (module `ci-quality`, 2026-11-20)
+# Lint & Type Baseline (module `ci-quality` + `mypy-fix` + `python-floor-314`, 2026-11-20)
 
 ## Ruff (CI GATE — `ruff check` phải 0 errors)
 
-- Ruleset: **E, F, W, I** (safe cho `requires-python>=3.9`)
-- `line-length = 140`
+- Ruleset: **E, F, W, I, UP** (UP bật sau khi nâng floor `requires-python >= 3.14`, F-009)
+- `target-version = "py314"`, `line-length = 140`
 - Per-file-ignore `E501` cho 4 file chứa long natural-language strings (MCP tool schemas, wizard prose) + `tests/*`
-- **Trạng thái: ✅ All checks passed**
+- **Trạng thái: ✅ All checks passed (0 UP errors)**
 
 Đã fix trong module này:
 - 146 lỗi auto-fix an-tàng (unused imports, isort, whitespace)
@@ -43,6 +43,20 @@
 
 **Quyết định:** KHÔNG fix 7 lỗi này trong module `ci-quality` (chúng cần đổi type annotation + có thể đổi runtime behavior — nằm ngoài "gate tin cậy"). Ghi lại đây để module sau / anh quyết. 4/7 là **polymorphism đúng cách** (dùng protocol), 3/7 cần xem union type.
 
-## Pyupgrade (UP006/UP035/UP045 = 357 lỗi)
+## Pyupgrade — ĐÃ XỬ LÝ (2026-11-20, module `python-floor-314` / F-009)
 
-Không chạy vì cần **đổi `requires-python` từ 3.9 → 3.10+** (đổ bớt floor). Để riêng làm follow-up khi anh sẵn sàng nâng Python tối thiểu.
+Nâng `requires-python` 3.9 → **3.14** + ruff `target-version` py39 → py314 + bật rule `UP` vào gate. **397 lỗi UP → 0:**
+
+| Mã | Count | Fix |
+|---|---|---|
+| UP006 `List[X]`→`list[X]` | 215 | ruff auto-fix (usage) + F401 (xóa import typing) |
+| UP045 `Dict[X]`→`dict[X]` | 104 | ruff auto-fix + F401 |
+| UP035 `typing.X` deprecated | 63 | usage→lowercase + F401 xóa import (30 file) |
+| UP007 `Union`→`\|` | 11 | ruff auto-fix |
+| UP043 `list()` unnecessary | 2 | ruff auto-fix |
+| UP042 `(str, Enum)`→`StrEnum` | 1 | `CriticStatus` → `enum.StrEnum` (chỉ dùng `.value`/`==`, an-tàng) |
+| UP015 `open` mode `"r"` | 1 | ruff auto-fix (xóa mode, mặc định "r") |
+
+**Test guard mới:** `tests/test_python_floor.py` (3 tests) — `sys.version_info >= (3,14)` + PEP 604 runtime + built-in generics. Suite **167 passed trên 3.14**.
+
+**CI:** matrix test 3.9+3.12 → **3.14** (đúng bản dev); lint + mypy job 3.11 → 3.14.

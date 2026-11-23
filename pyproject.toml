@@ -2,7 +2,7 @@
 name = "agent-system"
 version = "0.4.4"
 description = "Cognitive architecture & deterministic agent engine (domain-agnostic)"
-requires-python = ">=3.9"
+requires-python = ">=3.14"
 dependencies = []
 
 [project.optional-dependencies]
@@ -26,16 +26,15 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 
-# ── Lint & format gate (module ci-quality, 2026-11-20) ──────────────────
-# Core ruleset E,F,W,I is the CI gate (safe for py>=3.9).
-# pyupgrade (UP*) is tracked separately in docs/lint-baseline.md as a follow-up
-# because it requires dropping the py3.9 floor.
+# ── Lint & format gate (module ci-quality + python-floor-314, 2026-11-20) ──
+# Core ruleset E,F,W,I + UP (pyupgrade) is the CI gate.
+# UP is now enabled because requires-python >= 3.14 (floor raised, F-009).
 [tool.ruff]
 line-length = 140
-target-version = "py39"
+target-version = "py314"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
+select = ["E", "F", "W", "I", "UP"]
 ignore = [
     "E731",  # lambda assignment in tests (intentional style)
     "W293",  # blank line with whitespace (ruff format normalizes; keep lenient)

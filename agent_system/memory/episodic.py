@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from agent_system.core.contracts import TraceRecord
 from agent_system.storage.sqlite_store import SQLiteStore
@@ -13,7 +13,7 @@ from agent_system.storage.sqlite_store import SQLiteStore
 class EpisodicMemory:
     """Manages sequential execution traces and successful recovery formulas."""
 
-    def __init__(self, store: Optional[SQLiteStore] = None):
+    def __init__(self, store: SQLiteStore | None = None):
         self.store = store or SQLiteStore()
         self._init_recipes_table()
 
@@ -57,7 +57,7 @@ class EpisodicMemory:
 
         self.store.execute_with_retry(_insert)
 
-    def get_traces(self, task_id: str) -> List[TraceRecord]:
+    def get_traces(self, task_id: str) -> list[TraceRecord]:
         """Retrieve all recorded trace steps for a given task ID."""
         def _fetch(cur):
             cur.execute(
@@ -85,7 +85,7 @@ class EpisodicMemory:
         return self.store.execute_with_retry(_fetch)
 
     def record_recipe(
-        self, issue_key: str, recipe: str, tags: Optional[List[str]] = None
+        self, issue_key: str, recipe: str, tags: list[str] | None = None
     ) -> None:
         """Record or reinforce a successful recovery formula / recipe."""
         tags_json = json.dumps(tags or [], ensure_ascii=False)
@@ -107,7 +107,7 @@ class EpisodicMemory:
 
         self.store.execute_with_retry(_upsert)
 
-    def lookup_recipe(self, issue_key: str) -> Optional[Dict[str, Any]]:
+    def lookup_recipe(self, issue_key: str) -> dict[str, Any] | None:
         """Find a recovery recipe by its issue key or error signature."""
         def _get(cur):
             cur.execute(

@@ -8,7 +8,7 @@ import os
 import sqlite3
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from agent_system import __version__, flow
 from agent_system.sdk import installer
@@ -22,8 +22,8 @@ def _registered(path: Path) -> bool:
         return False
 
 
-def run() -> Dict[str, Any]:
-    checks: List[Dict[str, Any]] = []
+def run() -> dict[str, Any]:
+    checks: list[dict[str, Any]] = []
 
     def add(name: str, ok: bool, detail: str, required: bool = True) -> None:
         checks.append({"name": name, "ok": ok, "detail": detail, "required": required})
@@ -55,6 +55,6 @@ def run() -> Dict[str, Any]:
     return {"ok": all(c["ok"] for c in checks if c["required"]), "checks": checks}
 
 
-def render(report: Dict[str, Any]) -> str:
+def render(report: dict[str, Any]) -> str:
     lines = [f"{'OK ' if c['ok'] else ('FAIL' if c['required'] else 'warn')}  {c['name']:<12} {c['detail']}" for c in report["checks"]]
     return "\n".join(lines) + "\n"

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from agent_system import flow
 from agent_system.core.contracts import CriticProtocol
@@ -32,7 +32,7 @@ from agent_system.sdk.registry import PluginRegistry
 from agent_system.sdk.scanner import CodebaseScanner
 from agent_system.storage.sqlite_store import SQLiteStore
 
-TOOLS_SCHEMA: List[Dict[str, Any]] = [
+TOOLS_SCHEMA: list[dict[str, Any]] = [
     {
         "name": "agent_plan",
         "description": "Synthesize optimal action plan using A* Search or MCTS rollout reasoning.",
@@ -247,7 +247,7 @@ class CognitiveToolsDispatcher:
 
     def __init__(self, root_path: str | Path = ".") -> None:
         self.root_path = Path(root_path).resolve()
-        self._store: Optional[SQLiteStore] = None
+        self._store: SQLiteStore | None = None
 
     @property
     def store(self) -> SQLiteStore:
@@ -256,11 +256,11 @@ class CognitiveToolsDispatcher:
             self._store = SQLiteStore()
         return self._store
 
-    def get_tool_definitions(self) -> List[Dict[str, Any]]:
+    def get_tool_definitions(self) -> list[dict[str, Any]]:
         """Return MCP compliant tools specification list."""
         return TOOLS_SCHEMA
 
-    def dispatch(self, tool_name: str, arguments: Dict[str, Any]) -> str:
+    def dispatch(self, tool_name: str, arguments: dict[str, Any]) -> str:
         """Execute tool and return string result bounded by context limit."""
         handler = getattr(self, f"_tool_{tool_name}", None)
         if not handler:
@@ -268,7 +268,7 @@ class CognitiveToolsDispatcher:
         raw_output = handler(arguments)
         return StructuralTruncator.truncate_text(str(raw_output), max_bytes=3072)
 
-    def _tool_agent_plan(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_plan(self, args: dict[str, Any]) -> str:
         initial_dict = args.get("initial", {})
         goal_key = args.get("goal_key", "")
         goal_val = args.get("goal_value", True)
@@ -276,7 +276,7 @@ class CognitiveToolsDispatcher:
 
         initial_state = StateNode("init", initial_dict)
         actions_raw = args.get("actions")
-        action_defs: List[ActionDefinition] = []
+        action_defs: list[ActionDefinition] = []
 
         if actions_raw:
             action_defs = [
@@ -327,7 +327,7 @@ class CognitiveToolsDispatcher:
             indent=2,
         )
 
-    def _tool_agent_critic(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_critic(self, args: dict[str, Any]) -> str:
         code = args.get("code", "")
         language = args.get("language", "auto")
         strict = args.get("strict", False)
@@ -343,7 +343,7 @@ class CognitiveToolsDispatcher:
             else:
                 language = "python"
 
-        critics: List[CriticProtocol] = []
+        critics: list[CriticProtocol] = []
         if language == "python":
             critics.append(PythonAstCritic(require_type_annotations=strict))
         elif language == "markdown":
@@ -372,7 +372,7 @@ class CognitiveToolsDispatcher:
             indent=2,
         )
 
-    def _tool_agent_reflect(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_reflect(self, args: dict[str, Any]) -> str:
         code = args.get("code", "")
         max_iter = min(args.get("max_iterations", 3), 5)
 
@@ -381,7 +381,7 @@ class CognitiveToolsDispatcher:
         result = reflector.reflect_and_patch(code)
         return result.final_artifact
 
-    def _tool_agent_memory_search(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_memory_search(self, args: dict[str, Any]) -> str:
         query = args.get("query", "")
         category = args.get("category")
         top_k = max(1, min(int(args.get("top_k", 3)), 5))  # output tokens are the cost
@@ -392,7 +392,7 @@ class CognitiveToolsDispatcher:
         items = [{"content": r.content[:200], "task_id": r.metadata.get("task_id")} for r in results]
         return json.dumps(items, ensure_ascii=False, separators=(",", ":"))
 
-    def _tool_agent_memory_index(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_memory_index(self, args: dict[str, Any]) -> str:
         text = str(args.get("text", ""))[:512]
         if not text:
             return "error: empty text"
@@ -405,47 +405,47 @@ class CognitiveToolsDispatcher:
         )
         return "indexed 1"
 
-    def _tool_agent_memory_recipe_record(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_memory_recipe_record(self, args: dict[str, Any]) -> str:
         key = args.get("key", "")
         recipe = args.get("recipe", "")
         memory = EpisodicMemory(store=self.store)
         memory.record_recipe(key, recipe)
         return f"Successfully recorded recovery recipe for key '{key}'."
 
-    def _tool_agent_memory_recipe_get(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_memory_recipe_get(self, args: dict[str, Any]) -> str:
         key = args.get("key", "")
         memory = EpisodicMemory(store=self.store)
         found = memory.lookup_recipe(key)
         return found["recipe"] if found else f"No recipe found for key '{key}'."
 
-    def _tool_flow_task_submit(self, args: Dict[str, Any]) -> str:
+    def _tool_flow_task_submit(self, args: dict[str, Any]) -> str:
         message = str(args.get("message", "")).strip()
         model = str(args.get("model", "")).strip()
         return flow.run("enqueue", message, *(["--model", model] if model else [])) if message else "error: empty message"
 
-    def _tool_flow_task_status(self, args: Dict[str, Any]) -> str:
+    def _tool_flow_task_status(self, args: dict[str, Any]) -> str:
         return flow.run("status", str(args.get("task_id", "")))
 
-    def _tool_flow_plan_create(self, args: Dict[str, Any]) -> str:
+    def _tool_flow_plan_create(self, args: dict[str, Any]) -> str:
         goal = str(args.get("goal", "")).strip()
         if not goal:
             return "error: empty goal"
         model = str(args.get("model", "")).strip()
         return flow.run("plan", goal, *(["--model", model] if model else []), timeout=400)
 
-    def _tool_flow_plan_approve(self, args: Dict[str, Any]) -> str:
+    def _tool_flow_plan_approve(self, args: dict[str, Any]) -> str:
         return flow.run("approve", str(args.get("plan_id", "")))
 
-    def _tool_flow_plan_status(self, args: Dict[str, Any]) -> str:
+    def _tool_flow_plan_status(self, args: dict[str, Any]) -> str:
         return flow.run("status", str(args.get("plan_id", "")))
 
-    def _tool_agent_scan(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_scan(self, args: dict[str, Any]) -> str:
         root = args.get("root") or str(self.root_path)
         scanner = CodebaseScanner(root_path=root)
         manifest = scanner.scan()
         return json.dumps(manifest.to_dict(), indent=2)
 
-    def _tool_agent_init_auto(self, args: Dict[str, Any]) -> str:
+    def _tool_agent_init_auto(self, args: dict[str, Any]) -> str:
         root = args.get("root") or str(self.root_path)
         scanner = CodebaseScanner(root_path=root)
         manifest = scanner.scan()

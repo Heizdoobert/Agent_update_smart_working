@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from agent_system.core.contracts import (
     CriticReport,
@@ -17,7 +17,7 @@ from agent_system.core.contracts import (
 def _build_rule_critic_report(
     critic_name: str,
     score: float,
-    diagnostics: List[DiagnosticItem],
+    diagnostics: list[DiagnosticItem],
     raw_artifact: str,
     pass_threshold: float = 60.0,
 ) -> CriticReport:
@@ -60,10 +60,10 @@ class MarkdownRulesCritic:
         self.max_bytes = max_bytes
 
     def validate(
-        self, artifact: Any, context: Optional[Dict[str, Any]] = None
+        self, artifact: Any, context: dict[str, Any] | None = None
     ) -> CriticReport:
         text = str(artifact or "")
-        diagnostics: List[DiagnosticItem] = []
+        diagnostics: list[DiagnosticItem] = []
         score = 100.0
 
         # Check 1: Top-level heading (# ...)
@@ -117,9 +117,9 @@ class PluginManifestCritic:
     SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 
     def validate(
-        self, artifact: Any, context: Optional[Dict[str, Any]] = None
+        self, artifact: Any, context: dict[str, Any] | None = None
     ) -> CriticReport:
-        diagnostics: List[DiagnosticItem] = []
+        diagnostics: list[DiagnosticItem] = []
         score = 100.0
 
         data = artifact
