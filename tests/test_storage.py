@@ -1,7 +1,9 @@
 """Tests for SQLiteStore (WAL mode, concurrency) and SessionManager."""
 
 import concurrent.futures
+import sqlite3
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -15,6 +17,27 @@ def temp_db():
     with tempfile.TemporaryDirectory() as tmpdir:
         db_path = Path(tmpdir) / "test.db"
         yield db_path
+        # Windows locks the SQLite file after concurrent WAL access (Defender/AV
+        # scan + checkpoint race). Linux/macOS don't, so this is a no-op there.
+        # Explicitly checkpoint + unlink the db files *before* rmtree so the
+        # temp-dir teardown never hits a locked handle (WinError 32).
+        _release_sqlite_files(db_path)
+
+
+def _release_sqlite_files(db_path: Path) -> None:
+    """Best-effort close of lingering handles + remove db files (WAL/SHM)."""
+    for attempt in range(5):
+        try:
+            conn = sqlite3.connect(str(db_path), timeout=1.0)
+            conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+            conn.close()
+            for suffix in ("", "-wal", "-shm", "-journal"):
+                f = Path(str(db_path) + suffix)
+                if f.exists():
+                    f.unlink(missing_ok=True)
+            return
+        except OSError:
+            time.sleep(0.05 * (attempt + 1))
 
 
 def test_sqlite_store_wal_mode(temp_db):

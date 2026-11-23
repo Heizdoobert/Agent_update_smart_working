@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MCP recipe tools called methods that do not exist.
 - `.venv/` was tracked in git; now ignored.
 - **CI flake (Windows runner):** `tests/test_e2e.py` asserted the whole cognitive pipeline finishes in <1000ms of wall-clock — non-deterministic on shared, loaded runners (measured 1607ms on a healthy run; failed CI 2026-11-23 while macOS/ubuntu passed). Replaced with a generous 10s regression ceiling; sub-second remains a soft reference metric.
+- **CI flake (Windows runner, storage):** `tests/test_storage.py::test_concurrent_store_init` left a SQLite WAL handle on the temp DB; Windows then refused the `shutil.rmtree` teardown with `WinError 32` (file in use). The `temp_db` fixture now runs `PRAGMA wal_checkpoint(TRUNCATE)` and unlinks the db/wal/shm files with retries before teardown, so the temp dir always cleans up. No-op on Linux/macOS.
 
 ### Removed
 - `requirements.txt` — **archived** to `Archive/requirements.txt.stale-20261120` (stale: listed fastapi/celery/redis/pydantic that the package does not import; `pyproject.toml` declares zero runtime dependencies and CI installs from it — a stale pin list is a supply-chain + audit surface).
