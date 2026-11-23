@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Python floor: 3.9 → 3.14** (`requires-python >=3.14`, F-009). Codebase modernized: 397 pyupgrade fixes (`list[X]`/`dict[X]`/`X | None`, `enum.StrEnum` for `CriticStatus`). CI now runs lint + mypy + tests on Python 3.14.
+  - ⚠️ **Breaking:** Python 3.9–3.13 can no longer install/run this package.
+
 ### Added
+- **`mypy` CI gate (blocking)** — `mypy agent_system/` with baseline flags, 0 errors across 46 source files (F-008). Pipeline: lint → mypy → test.
+- Ruff gate extended with **pyupgrade (UP) ruleset** at `target-version = "py314"`.
+- **`tests/test_python_floor.py`** — guard: fails with a clear message if the package is imported on Python < 3.14.
+- `docs/specs/SPEC-mypy-fix.md`, `PLAN-mypy-fix.md`, `SPEC-python-floor-314.md`, `PLAN-python-floor-314.md`; `features.json` F-008/F-009.
 - `agent-system doctor [--json]`: health report (DB, embeddings, MCP clients, flow-task bridge).
 - MCP tools `flow_task_submit` / `flow_task_status` / `flow_plan_create` / `flow_plan_approve` / `flow_plan_status` and the `agent_system.flow` bridge to the FLOW_SKILL task engine (plan -> approval -> parallel sub-agents -> evidence report).
 - Universal protocol tells agents to pass their own model id and wait for the user's OK before `flow_plan_approve`.
@@ -17,10 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Opt-in LLM patcher for `reflect` (`AGENT_SYSTEM_LLM_PATCH=1`); MCP tool `agent_memory_index`.
 
 ### Fixed
+- **Python 3.9 import crash (latent):** `sdk/scanner.py` + `sdk/ingestion.py` used `str | Path` in runtime-evaluated positions without `from __future__ import annotations` — would fail on import for any Python < 3.10. Now annotated via `Union` + future import.
+- `core/truncator.py` — variable shadowing in dict-branch truncated (`candidate` → `candidate_dict`); behavior unchanged, mypy-narrowing fixed.
+- `cli/main.py` `metrics` dashboard — all entries normalized to `Metric` (no ad-hoc dicts).
 - Installer wrote rules files with `write_text`, overwriting the user's own `~/.claude/CLAUDE.md`; it now maintains a marked block only.
 - Installer registered the bare command `agent-system`, which GUI clients cannot resolve; it now writes the absolute launcher path.
 - MCP recipe tools called methods that do not exist.
 - `.venv/` was tracked in git; now ignored.
+
+### Removed
+- `requirements.txt` — **archived** to `Archive/requirements.txt.stale-20261120` (stale: listed fastapi/celery/redis/pydantic that the package does not import; `pyproject.toml` declares zero runtime dependencies and CI installs from it — a stale pin list is a supply-chain + audit surface).
 
 ## [0.4.2] - 2026-10-29
 
