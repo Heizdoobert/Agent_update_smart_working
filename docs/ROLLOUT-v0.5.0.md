@@ -2,6 +2,9 @@
 
 > Áp skill `shipping-and-launch`. Launch = **push `main` (10 commits) → GitHub CI (lint → mypy → test @3.14)** → merge-ready.
 > Repo: `Heizdoobert/Agent_update_smart_working` (remote origin, reachable — đã verify `git ls-remote`).
+>
+> ✅ **ĐÃ PUSH (2026-11-23):** `96a464c..dc9711f` → CI run `45102609286` = **success** (lint ✅ · mypy ✅ · test ubuntu/macos/windows @3.14 ✅). Remote SHA verify: `dc9711fe...` = local HEAD.
+> Rollback reference: state trước push = `96a464c` (revert/checkout về SHA này nếu cần).
 
 ## Scope lần launch
 - 9/9 features done (F-001…F-009), commit HEAD `c235c72`
