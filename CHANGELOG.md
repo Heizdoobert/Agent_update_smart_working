@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Installer registered the bare command `agent-system`, which GUI clients cannot resolve; it now writes the absolute launcher path.
 - MCP recipe tools called methods that do not exist.
 - `.venv/` was tracked in git; now ignored.
+- **CI flake (Windows runner):** `tests/test_e2e.py` asserted the whole cognitive pipeline finishes in <1000ms of wall-clock — non-deterministic on shared, loaded runners (measured 1607ms on a healthy run; failed CI 2026-11-23 while macOS/ubuntu passed). Replaced with a generous 10s regression ceiling; sub-second remains a soft reference metric.
 
 ### Removed
 - `requirements.txt` — **archived** to `Archive/requirements.txt.stale-20261120` (stale: listed fastapi/celery/redis/pydantic that the package does not import; `pyproject.toml` declares zero runtime dependencies and CI installs from it — a stale pin list is a supply-chain + audit surface).

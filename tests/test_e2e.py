@@ -124,5 +124,11 @@ def process_batch(items: list):
         assert "pipe_summary" == search_results[0].item_id
 
         total_elapsed_ms = (time.time() - total_start) * 1000
-        # Entire cognitive pipeline completes in sub-second time!
-        assert total_elapsed_ms < 1000.0
+        # Sub-second (<1000ms) is a dev-machine *target*; asserting it in CI is
+        # non-deterministic — shared runners under load measured 1607ms on a
+        # healthy run (flaked 2026-11-23, Windows). Enforce a generous ceiling
+        # that only fails on a real regression (e.g. O(n^2) blowup), not on
+        # runner load. The sub-second figure remains a soft reference metric.
+        assert total_elapsed_ms < 10_000.0, (
+            f"cognitive pipeline too slow: {total_elapsed_ms:.0f}ms (ceiling 10000ms)"
+        )
