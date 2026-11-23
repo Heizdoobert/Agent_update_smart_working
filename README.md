@@ -48,6 +48,7 @@ pytest tests/    # 167 passed, Python 3.14 (2026-11-23)
 
 ## Docs
 
+- `QUICKSTART.md` — install + usage (verified commands)
 - `docs/PROJECT_MAP.md` · `docs/specs/` · `docs/failure-taxonomy.md`
 - `CAPABILITY_MAP.md` — 7-module map + specs
 - `Archive/bigdata-v04/` — archived, not part of runtime
